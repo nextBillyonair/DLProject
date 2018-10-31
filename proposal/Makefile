@@ -11,7 +11,7 @@ ${TEX_SRC:.tex=.pdf}:%.pdf: %.tex %.bib
 	$(PDFLATEX) $<
 
 clean:
-	rm -f ${TEX_SRC:.tex=.pdf} *.out *.aux *.log *.pdf *.bbl *.blg
+	rm -f *.out *.aux *.log *.bbl *.blg
 
 
 .PHONY: clean

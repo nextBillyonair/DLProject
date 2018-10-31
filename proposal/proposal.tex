@@ -117,20 +117,20 @@ Add abstract to be fancy
 \cite{sutskever2014sequence}
 \cite{papineni2002bleu}
 Abstract
-\\\\
+
 Inspiration
-\\\\
+
 Data
 	web scrap
 	label via aligner
-\\\\
+
 Preprocessing
 	Tokenize!!!!!
 		NUM
 		PROPER NOUNS
 		PUNCTUATION
 		USE SPACY FOR POS TAGS
-\\\\
+
 Models
 	Baseline
 		Seq2Seq Baseline
@@ -140,18 +140,16 @@ Models
 		bidirectional GRU -> Bidirectional GRU
 		With Attentions
 		Teacher Forcing
-\\
+
 	Use Aligner to measure quality of data, and learnability.
 		Not learnable -> still train, but when report, do backwards, suggest data is difficult
 		Learnable -> do aligner do well, then models
 
-
-\\\\
 Final Tricks:
 	Num -> Num
 	PN -> PN
 	Punct -> Punct
-\\\\
+
 Expectation:
 	Hopefully provides good translations
 	Hopefully can do a pseudo style transfer on English
