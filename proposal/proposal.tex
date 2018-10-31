@@ -110,12 +110,6 @@ Add abstract to be fancy
 \end{abstract}
 
 \section{Introduction}
-\cite{bahdanau2014neural}
-\cite{luong2015effective}
-\cite{liu2016neural}
-\cite{cho2014learning}
-\cite{sutskever2014sequence}
-\cite{papineni2002bleu}
 Abstract
 
 Inspiration
@@ -158,19 +152,42 @@ Expectation:
 \footnote{\url{https://github.com/cocoxu/Shakespeare}}
 \section{Preprocessing}
 \footnote{\url{https://spacy.io}}
-\section{Archectectures}
+\section{Architectures}
+We seek to develop several models to improve our translations, incorporating context, attention, and novel training methods.
 
 \subsection{Baseline RNN Sequence to Sequence}
-
+Our baseline model will be a simple RNN sequence to sequence model. It will accept a source sentence $s$ and will decode it to an output sequence $t$. A simple RNN will only incorporate previous states, i.e. source words, during prediction, and might be prone to the vanishing gradient problem. It will incorporate an encoder-decoder style model \cite{cho2014learning} \cite{sutskever2014sequence}.
 \subsection{GRU Sequence to Sequence}
-
+We will improve our baseline thorugh the use of the GRU layer, to hopefully offset any vanishing gradients. In addition, we use a GRU over an LSTM to help bound the number of parameters used in the model for training purposes, as the GRU and LSTM fix issues regarding long term dependencies within sequences.
 \subsection{Bidirectional Model}
-
+In order to consider the context of words before an after, we will alter the model to use a bidirectional GRU \cite{bahdanau2014neural}, and hopefully see better translations.
 \subsection{Attention Mechanisms}
-
+Attention mechanisms have been shown to improve sequence to sequence translations from Bahdanau et al \cite{bahdanau2014neural}, and further work from Luong et al \cite{luong2015effective} examines global vs local approached to attention-based encoder-decoders.
 \subsection{Teacher Forcing}
+In terms of training, an encoder-decoder system can either accept the target token or the model's prediction as input during the decoding step. When we use the target token, this is known as teacher forcing, and is shown to be favored during initial trainging iterations, but should be backed off to use the model's own predicitons, as it will exhibit instability in the translations otherwise \cite{lamb2016professor}.
 
 \section{Roles and Responsibilities}
+We intend to split the project into the following subsections according to Figure \ref{fig:roles}.
+
+\begin{figure}
+  \centering
+  \begin{tabular}{ |l|r| }
+      \hline
+      \textbf{Roles} & \textbf{Members} \\
+      \hline
+      Data Procurement & Morris, Riley, Bill \\ \hline
+      Preprocessing Scripts & Riley, Bill \\ \hline
+      Baseline Model & Riley \\ \hline
+      GRU Extension & Morris \\ \hline
+      Bidirectional Extension & Morris \\ \hline
+      Attention Mechanisms & Bill \\ \hline
+      Train and support code & Bill \\ \hline
+      Training experiments & Morris, Riley \\ \hline
+      Writeup and analysis & Morris, Riley, Bill \\ \hline
+  \end{tabular}
+  \caption{Role Distribution}
+  \label{fig:roles}
+\end{figure}
 
 \section{Expectations}
 
