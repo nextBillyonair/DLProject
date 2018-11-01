@@ -83,9 +83,6 @@
 % }
 
 %------------------------------------------------------------------------------
-\DeclareMathOperator*{\argmax}{arg\,max}
-\newcommand{\qdist}[1]{\ifmmode\langle#1\rangle\else\textlangle#1\textrangle\fi}
-\renewcommand{\vec}[1]{\mathbf{#1}}
 
 \begin{document}
 
@@ -144,21 +141,18 @@
 \begin{abstract}
 % NN and NMT + attention + LSTM
 \noindent
-We present a sequence-to-sequence neural translation model with attention. More specifically, we describe the network layers used; our implementation of a Bidirectional Long Short-Term Memory (LSTM) layer; and an Encoder and Decoder with attention. We additionally present visualizations of the attention layer as well as a discussion on training results from the given data.
+We present a sequence-to-sequence neural translation model with attention. More specifically, we describe the different encoder-decoder models used; our implementation of a Bidirectional Gated Recurrent Unit (GRU) encoder; and an Encoder and Decoder with attention. We will incrementally build up our models to examine training performance on Shakespeare-English aligned data, and attempt to perform a pseudo style-transfer on text.
 \end{abstract}
 
 \section{Introduction}
-For our final project we would like to develop several models to translate modern English to Shakespearean English and also Shakespearean to modern English. Our data will be a dataset of all of shakespeares plays aligned with their modern English translations. We will train several different architecures and compare how well they each perform this task. 
+For our final project we would like to develop several models to translate modern English to Shakespearean English and also Shakespearean English to modern English. Our data will be a dataset of shakespeares plays aligned with their modern English translations. We will train several different architectures and compare how well they each perform this task. A unique challenge poised in the problem is Shakespeare's usage of meter and word order, and it will be interesting to see if this influences our results.
 
 \section{Data Procurement}
-Most of our data will come from the cited github. This includes all of Shakespeares plays translated line by line into modern English. If needed, we may also use Sonnets, which we may need to align ourselves. 
-\footnote{\url{https://github.com/cocoxu/Shakespeare}}
+Most of our data will come from the cited github \cite{xu2012paraphrasing}. This includes all of Shakespeares plays translated line by line into modern English . If needed, we may also use Sonnets, which we may need to align ourselves through either the Berkley or Giza aligner. \footnote{\url{https://github.com/cocoxu/Shakespeare}}
 
-%\cite{xu2012paraphrasing}
 \section{Preprocessing}
-We will use spacy.io to tokenize our dataset to replace proper nouns with pronouns. 
+We will use spacy.io to tokenize our dataset to replace proper nouns with pronouns.\footnote{\url{https://spacy.io}} In addition, we will tokenize numbers and punctuation to reduce our vocabulary size. Finally, we will lowercase the data. We will randomly sample a 70/20/10 split for train/dev/test on the full merged dataset.
 
-\footnote{\url{https://spacy.io}}
 \section{Architectures}
 We seek to develop several models to improve our translations, incorporating context, attention, and novel training methods.
 
