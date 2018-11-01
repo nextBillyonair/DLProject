@@ -159,9 +159,9 @@ We seek to develop several models to improve our translations, incorporating con
 \subsection{Baseline RNN Sequence to Sequence}
 Our baseline model will be a simple RNN sequence to sequence model. It will accept a source sentence $s$ and will decode it to an output sequence $t$. A simple RNN will only incorporate previous states, i.e. source words, during prediction, and might be prone to the vanishing gradient problem. It will incorporate an encoder-decoder style model \cite{cho2014learning} \cite{sutskever2014sequence}.
 \subsection{GRU Sequence to Sequence}
-We will improve our baseline thorugh the use of the GRU layer, to hopefully offset any vanishing gradients. In addition, we use a GRU over an LSTM to help bound the number of parameters used in the model for training purposes, as the GRU and LSTM fix issues regarding long term dependencies within sequences.
+We will improve our baseline through the use of the GRU layer, to hopefully offset any vanishing gradients. In addition, we use a GRU over an LSTM to help bound the number of parameters used in the model for training purposes, as the GRU and LSTM fix issues regarding long term dependencies within sequences.
 \subsection{Bidirectional Model}
-In order to consider the context of words before an after, we will alter the model to use a bidirectional GRU \cite{bahdanau2014neural}, and hopefully see better translations.
+In order to consider the context of words before and after, we will alter the model to use a bidirectional GRU \cite{bahdanau2014neural}, and hopefully see better translations.
 \subsection{Attention Mechanisms}
 Attention mechanisms have been shown to improve sequence to sequence translations from Bahdanau et al \cite{bahdanau2014neural}, and further work from Luong et al \cite{luong2015effective} examines global vs local approached to attention-based encoder-decoders.
 \subsection{Teacher Forcing}
