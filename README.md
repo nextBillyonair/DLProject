@@ -2,15 +2,18 @@
 Repo for ML: Deep Learning Final Project
 
 # Hierarchy:
-+--data\
-|  -Directory for raw, merged, and preprocessed data
-|
-|
-+--src\
-|  -Source code for project
-|
-+--proposal\
-   -Proposal files
+data\\
+
+ -Directory for raw, merged, and preprocessed data
+
+
+src\\
+
+ -Source code for project
+
+proposal\\
+
+ -Proposal files
    
 # Data
   TODO
