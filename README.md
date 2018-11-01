@@ -16,7 +16,7 @@ proposal\\
  -Proposal files
    
 # Data
-  TODO
+  Split into modern & original. A preprocess folder will exist with a processed train/dev/test split (70/20/10?), merged.
   
 # Code
   TODO
