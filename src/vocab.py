@@ -6,9 +6,11 @@ from glob import glob
 # Tokens
 SOS_TOKEN = "<SOS>"
 EOS_TOKEN = "<EOS>"
+UNK_TOKEN = "<UNK>"
 
 SOS_INDEX = 0
 EOS_INDEX = 1
+UNK_INDEX = 2
 
 # Path to processed aligned data
 TRAIN_PATH='../data/split/train.snt.aligned'
@@ -20,10 +22,14 @@ class Vocab:
     """This class handles the mapping between the words and their indices."""
     def __init__(self, lang_code):
         self.lang_code = lang_code
-        self.word2index = {SOS_TOKEN: SOS_INDEX, EOS_TOKEN: EOS_INDEX}
-        self.word2count = {SOS_TOKEN: 0, EOS_TOKEN: 0}
-        self.index2word = {SOS_INDEX: SOS_TOKEN, EOS_INDEX: EOS_TOKEN}
-        self.n_words = 2  # Count SOS and EOS
+        self.word2index = {SOS_TOKEN: SOS_INDEX,
+                           EOS_TOKEN: EOS_INDEX,
+                           UNK_TOKEN: UNK_INDEX}
+        self.word2count = {SOS_TOKEN: 0, EOS_TOKEN: 0, UNK_TOKEN: 0}
+        self.index2word = {SOS_INDEX: SOS_TOKEN,
+                           EOS_INDEX: EOS_TOKEN,
+                           UNK_INDEX: UNK_TOKEN}
+        self.n_words = 3  # Count SOS, EOS, UNK
 
     def add_sentence(self, sentence):
         for word in sentence.split(' '):
