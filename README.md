@@ -3,8 +3,12 @@ Repo for ML: Deep Learning Final Project
 
 # Hierarchy:
 data\\
-
- -Directory for raw, merged, and preprocessed data
+ -modern\\
+  -raw modern plays
+ -original\\
+  -raw original plays
+ -processed\\
+  -processed data + merged files
 
 
 src\\
