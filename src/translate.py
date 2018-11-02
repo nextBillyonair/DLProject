@@ -1,5 +1,4 @@
 import torch
-from config import MAX_LENGTH
 from vocab import SOS_INDEX, EOS_INDEX
 
 """File for handling translations"""
@@ -22,7 +21,7 @@ def tensor_from_sentence(vocab, sentence, device):
 def tensors_from_pair(source_vocab, target_vocab, pair, device):
     """Returns tensors for a raw sentence pair."""
     # Vocab(), Vocab(), (str, str), device
-    
+
     input, target = pair
 
     input_tensor = tensor_from_sentence(source_vocab, input, device)
