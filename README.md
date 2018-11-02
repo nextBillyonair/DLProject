@@ -8,11 +8,11 @@ data\\
 
 src\\
 
- -Source code for project
+ - Source code for project
 
 proposal\\
 
- -Proposal files
+ - Proposal files
    
 # Data
   Split into modern & original. A preprocess folder will exist with a processed train/dev/test split (70/20/10?), merged.
