@@ -3,23 +3,26 @@ Repo for ML: Deep Learning Final Project
 
 # Hierarchy:
 data\\
- 
- - modern, orginal, and processed data
+
+ - modern, orginal, processed, split data
+ - original|||modern
 
 src\\
 
  - Source code for project
+ - preprocessing\\ -> scripts to process & split data
+ - models\\ -> files to handle different models
 
 proposal\\
 
- - Proposal files
-   
+ - Proposal files, including bibtex, tex, & pdf
+
 # Data
   Split into modern & original. A preprocess folder will exist with a processed train/dev/test split (70/20/10?), merged.
-  
+
 # Code
   TODO
-  
+
 # Proposal
 Found under proposal/, along with tex src, makefile, bibtex
 
