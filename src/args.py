@@ -44,6 +44,8 @@ def get_args():
                         choices=[None,'original','general', 'dot',
                                  'concat', 'location'],
                         help='type of attention used')
+    parser.add_argument('--teacher-forcing', default=False, type=bool,
+                        help='to use teacher forcing in train')
 
     # Language identifiers
     parser.add_argument('--source-lang', default='original',

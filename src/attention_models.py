@@ -12,10 +12,25 @@ dot
 concat
 """
 
-def build_attention_model():
+def build_attention_model(mode):
     """Builds the attention model to params."""
     pass
-
+    choices=[None,'original','general', 'dot',
+             'concat', 'location']
+    if mode is None:
+        return None
+    elif mode is 'original':
+        return None
+    elif mode is 'general':
+        return None
+    elif mode is 'dot':
+        return None
+    elif mode is 'concat':
+        return None
+    elif mode is 'location':
+        return None
+    else:
+        raise ValueError('Invalid attention mode: %s' % (mode))
 
 
 class Attention(Module):

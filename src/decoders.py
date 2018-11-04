@@ -34,7 +34,7 @@ def build_decoder(hidden_size, output_size,
                               num_layers=num_layers,
                               attention=attention)
         else:
-            raise ValueError('Invalid mode: %s' % (mode))
+            raise ValueError('Invalid decoder mode: %s' % (mode))
 
 
 # TEMPLATE CLASS
@@ -55,7 +55,7 @@ class DecoderRNN(Module):
         self.attention = attention
         # Define layers below, aka embedding + RNN
 
-    def forward(self, input, hidden, encoder_outputs):
+    def forward(self, encoder_outputs, input=None, hidden=None):
         """
         Runs the forward pass of the decoder.
         Returns the log_softmax, hidden state, and attn_weights.
@@ -84,7 +84,7 @@ class DecoderGRU(Module):
         self.attention = attention
         # Define layers below, aka embedding + RNN
 
-    def forward(self, input, hidden, encoder_outputs):
+    def forward(self, encoder_outputs, input=None, hidden=None):
         """
         Runs the forward pass of the decoder.
         Returns the log_softmax, hidden state, and attn_weights.
@@ -93,6 +93,7 @@ class DecoderGRU(Module):
         # hidden -> depends on RNN, see docs
         # use asserts to make sure correct sizes!
         # check if attention is NONE, if not do mode, else bypass
+        # NOTE: handle when input is none ot generate from itself
         return input, hidden
 
 

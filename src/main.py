@@ -86,7 +86,7 @@ def main():
 
         # train
         loss = train(input_tensor, target_tensor, encoder, decoder, optimizer,
-                     criterion, args.device)
+                     criterion, args)
         print_loss_total += loss
 
         if iteration % args.checkpoint_every == 0:

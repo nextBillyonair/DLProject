@@ -30,7 +30,7 @@ def build_encoder(input_size, hidden_size, mode='baseline',
                                         dropout=dropout,
                                         num_layers=num_layers)
         else:
-            raise ValueError('Invalid mode: %s' % (mode))
+            raise ValueError('Invalid encoder mode: %s' % (mode))
 
 # ENCODER TEMPLATE, FOLLOW METHODS
 # NAME CONVENTION: Encoder{ExtentionName}
@@ -48,7 +48,7 @@ class EncoderRNN(Module):
         self.num_layers = num_layers
         # Define layers below, aka embedding + RNN
 
-    def forward(self, input, hidden):
+    def forward(self, input, hidden=None):
         """
         Runs the forward pass of the encoder returning the output and the
         hidden state.
@@ -73,7 +73,7 @@ class EncoderGRU(Module):
         self.num_layers = num_layers
         # Define layers below, aka embedding + GRU
 
-    def forward(self, input, hidden):
+    def forward(self, input, hidden=None):
         """
         Runs the forward pass of the encoder returning the output and the
         hidden state.
@@ -98,7 +98,7 @@ class EncoderBidirectional(Module):
         self.num_layers = num_layers
         # Define layers below, aka embedding + BiGRU
 
-    def forward(self, input, hidden):
+    def forward(self, input, hidden=None):
         """
         Runs the forward pass of the encoder returning the output and the
         hidden state.
