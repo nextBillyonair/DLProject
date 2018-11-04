@@ -15,7 +15,7 @@ def tensor_from_sentence(vocab, sentence, device):
             # pass
             indexes.append(UNK_INDEX)
 
-    # indexes.append(EOS_INDEX) # uncomment if no unk token
+    # indexes.append(EOS_INDEX) # uncomment if no eos token
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     from vocab import make_vocabs
     src_vocab, tgt_vocab = make_vocabs('Original', 'Modern')
 
-    # Random set from test + fake owrd to test unk
+    # Random set from test + fake word to test unk
     src = "<SOS> sit down and feed , and welcome to our table bbbbbbb . <EOS>"
     tgt = "<SOS> sit down and eat , and welcome to our table bbbbbbb . <EOS>"
 

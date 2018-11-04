@@ -72,7 +72,8 @@ def make_vocabs(src_code='Original', tgt_code='Modern'):
     tgt_vocab = Vocab(tgt_code)
 
     # to add all files + split_lines(FILE_PATH)
-    train_pairs = split_lines(TRAIN_PATH)
+    train_pairs = split_lines(TRAIN_PATH) + split_lines(DEV_PATH) \
+                  + split_lines(TEST_PATH)
 
     for pair in train_pairs:
         src_vocab.add_sentence(pair[0])
