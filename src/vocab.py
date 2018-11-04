@@ -44,13 +44,14 @@ class Vocab:
         else:
             self.word2count[word] += 1
 
-def split_lines(input_file):
+def split_lines(input_file, reverse=False):
     """split a file like:
     first src sentence|||first tgt sentence
     second src sentence|||second tgt sentence
     into a list of things like
     [("first src sentence", "first tgt sentence"),
      ("second src sentence", "second tgt sentence")]
+    if reverse == True, reverses tgt and src
     """
     logging.info("Reading lines of %s...", input_file)
 
@@ -58,9 +59,10 @@ def split_lines(input_file):
     lines = open(input_file).read().strip().split('\n')
 
     # Split every line into pairs
-    pairs = [l.split('|||') for l in lines]
+    if reverse:
+        return [l.split('|||')[::-1] for l in lines]
 
-    return pairs
+    return [l.split('|||') for l in lines]
 
 
 def make_vocabs(src_code='Original', tgt_code='Modern'):
@@ -72,7 +74,8 @@ def make_vocabs(src_code='Original', tgt_code='Modern'):
     tgt_vocab = Vocab(tgt_code)
 
     # to add all files + split_lines(FILE_PATH)
-    train_pairs = split_lines(TRAIN_PATH) + split_lines(DEV_PATH) \
+    train_pairs = split_lines(TRAIN_PATH) \
+                  + split_lines(DEV_PATH) \
                   + split_lines(TEST_PATH)
 
     for pair in train_pairs:
@@ -83,6 +86,15 @@ def make_vocabs(src_code='Original', tgt_code='Modern'):
     logging.info(f'{tgt_vocab.lang_code} tgt vocab size: {tgt_vocab.n_words}')
 
     return src_vocab, tgt_vocab
+
+
+def clean(strx):
+    """
+    Input: SOS string EOS
+    Output: list without SOS, EOS
+    """
+    no_sos_eos = strx.replace(SOS_TOKEN, '').replace(EOS_TOKEN, '')
+    return ' '.join(no_sos_eos.strip().split())
 
 
 if __name__ == '__main__':
@@ -96,3 +108,6 @@ if __name__ == '__main__':
     print(src_vocab.word2index[SOS_TOKEN], src_vocab.word2count[SOS_TOKEN])
     # 1 : 21079
     print(src_vocab.word2index[EOS_TOKEN], src_vocab.word2count[EOS_TOKEN])
+
+    print(split_lines(TRAIN_PATH)[0])
+    print(split_lines(TRAIN_PATH, True)[0])

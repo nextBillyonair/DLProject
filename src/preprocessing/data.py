@@ -65,7 +65,7 @@ def split_data(data, train_p=0.875, dev_p=0.1):
 
 
 if __name__ == '__main__':
-    
+
     # Modern Process
     modern_files = get_files(MODERN_PATH)
     for play in modern_files:
@@ -114,6 +114,7 @@ if __name__ == '__main__':
     original = read_file(PROCESSED_PATH + 'original.snt.aligned')
     modern = read_file(PROCESSED_PATH + 'modern.snt.aligned')
     pairs = zip(original, modern)
+    # do a better split via looking at vocab
     train, dev, test = split_data(list(pairs))
 
     print(len(original), len(modern))
