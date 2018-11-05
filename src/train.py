@@ -28,7 +28,6 @@ def train(input_tensor, target_tensor, encoder, decoder, optimizer,
 
     loss += criterion(decoder_output, target_tensor)
 
-
     loss.backward()
     optimizer.step()
 
