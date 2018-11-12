@@ -1,0 +1,246 @@
+%------------------------------------------------------------------------------
+%   PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%------------------------------------------------------------------------------
+
+\documentclass[twoside,twocolumn]{article}
+
+%\usepackage[sc]{mathpazo} % Use the Palatino font
+%\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\linespread{1.05} % Line spacing - Palatino needs more space between lines
+%\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+
+\usepackage[english]{babel} % Language hyphenation and typographical rules
+
+% Document margins
+\usepackage[hmarginratio=1:1,top=32mm,left=20mm,right=20mm,columnsep=20pt]{geometry}
+% Custom captions under/above floats in tables or figures
+\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption}
+\usepackage{booktabs} % Horizontal rules in tables
+
+\usepackage{enumitem} % Customized lists
+\setlist[itemize]{noitemsep} % Make itemize lists more compact
+\usepackage{textcomp}
+
+% Allows abstract customization
+\usepackage{abstract}
+% Set the "Abstract" text to bold
+\renewcommand{\abstractnamefont}{\normalfont\bfseries}
+% Set the abstract itself to small italic text
+\renewcommand{\abstracttextfont}{\normalfont\small\itshape}
+
+\usepackage{fancyhdr} % Headers and footers
+\pagestyle{fancy} % All pages have headers and footers
+\fancyhead{} % Blank out the default header
+\fancyfoot{} % Blank out the default footer
+\fancyhead[C]{\thetitle}
+\fancyfoot[RO,LE]{\thepage} % Custom footer text
+
+\usepackage{titling} % Customizing the title section
+
+\usepackage{hyperref} % For hyperlinks in the PDF
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{tikz}
+\usetikzlibrary{bayesnet, arrows, positioning, fit, arrows.meta, shapes}
+
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{graphicx}
+
+
+\captionsetup[figure]{labelfont={bf},textfont=normalfont}
+
+%------------------------------------------------------------------------------
+%   TITLE SECTION
+%------------------------------------------------------------------------------
+
+\setlength{\droptitle}{-4\baselineskip} % Move the title up
+
+\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
+\posttitle{\end{center}} % Article title closing formatting
+
+\title{DL Project Interim Report:\\
+       Shakespeare - English Sequence to Sequence Modeling}
+\author{%
+\textsc{Morris Kraicer} \\[1ex]
+\normalsize Johns Hopkins University \\
+\normalsize \href{mailto:mkraice1@jhu.edu}{mkraice1@jhu.edu}
+ \and
+ \textsc{Riley Scott} \\[1ex]
+\normalsize Johns Hopkins University \\
+\normalsize \href{mailto:rscott39@jhu.edu}{rscott39@jhu.edu}
+ \and
+  \textsc{William Watson} \\[1ex]
+\normalsize Johns Hopkins University \\
+\normalsize \href{mailto:billwatson@jhu.edu}{billwatson@jhu.edu}
+}
+
+\date{}%\today} % Leave empty to omit a date
+% \renewcommand{\maketitlehookd}{%
+
+% }
+
+%------------------------------------------------------------------------------
+
+\begin{document}
+
+% Print the title
+\maketitle
+
+%------------------------------------------------------------------------------
+%   ARTICLE CONTENTS
+%------------------------------------------------------------------------------
+
+% \section{Introduction}
+
+% TODO
+
+% Abstract
+
+% Inspiration
+
+% Data
+% 	web scrap
+% 	label via aligner
+
+% Preprocessing
+% 	Tokenize!!!!!
+% 		NUM
+% 		PROPER NOUNS
+% 		PUNCTUATION
+% 		USE SPACY FOR POS TAGS
+
+% Models
+% 	Baseline
+% 		Seq2Seq Baseline
+% 			No attention, no Bidirectional
+% 			encoder RNN-> RNN
+% 		GRU->GRU
+% 		bidirectional GRU -> Bidirectional GRU
+% 		With Attentions
+% 		Teacher Forcing
+
+% 	Use Aligner to measure quality of data, and learnability.
+% 		Not learnable -> still train, but when report, do backwards,
+%     suggest data is difficult
+% 		Learnable -> do aligner do well, then models
+
+% Final Tricks:
+% 	Num -> Num
+% 	PN -> PN
+% 	Punct -> Punct
+
+% Expectation:
+% 	Hopefully provides good translations
+% 	Hopefully can do a pseudo style transfer on English
+% 	Funny translations? 50 Shades of Grey
+
+%------------------------------------------------
+
+\begin{abstract}
+% NN and NMT + attention + LSTM
+\noindent
+We present a interim report on our efforts to contruct a sequence-to-sequence
+neural translation model with attention. We present the inital work done on
+data procurement and processing, and provide statitics on our datasets.
+Additionally, we describe in detail our models that we are experimenting with.
+Finally, we describe the overall strucutre of our code to support sequence
+to sequence modeling.
+\end{abstract}
+
+\section{Introduction}
+
+
+
+\section{Data Procurement}
+Most of our data was procured from \cite{xu2012paraphrasing}.
+This includes all of Shakespeares plays translated line by line into modern
+English. However, since the data was aligned, not all of the original lines
+from the plays are included (the sentences could not be aligned properly).
+\footnote{\url{https://github.com/cocoxu/Shakespeare}}
+
+% Add more about data structure
+
+\section{Preprocessing}
+% intro
+\subsection{SOS and EOS}
+% talk about use
+
+\subsection{Propernouns}
+% spacy -> propn
+
+\subsection{Train, Validation, Test Split}
+% look at code, provide stats (Vocab size, # sent, etc.)
+
+We will use spacy.io to tokenize our dataset to replace proper nouns with
+pronouns.\footnote{\url{https://spacy.io}} In addition, we will tokenize
+numbers and punctuation to reduce our vocabulary size. Finally, we will
+lowercase the data. We will randomly sample a 70/20/10 split for train/dev/test
+on the full merged dataset. % wrong
+
+\section{Architectures}
+% go more detailed? or can they not handle the math lol
+% these descriptions are good starters, but we can be mroe detailed.
+We seek to develop several models to improve our translations, incorporating
+context, attention, and novel training methods.
+
+\subsection{Baseline RNN Sequence to Sequence}
+Our baseline model will be a simple RNN sequence to sequence model. It will
+accept a source sentence $s$ and will decode it to an output sequence $t$.
+A simple RNN will only incorporate previous states, i.e. source words, during
+prediction, and might be prone to the vanishing gradient problem. It will
+incorporate an encoder-decoder style model \cite{cho2014learning}
+\cite{sutskever2014sequence}.
+\subsection{GRU Sequence to Sequence}
+We will improve our baseline through the use of the GRU layer, to hopefully
+offset any vanishing gradients. In addition, we use a GRU over an LSTM to help
+bound the number of parameters used in the model for training purposes, as the
+GRU and LSTM fix issues regarding long term dependencies within sequences.
+\subsection{Bidirectional Model}
+In order to consider the context of words before and after, we will alter the
+model to use a bidirectional GRU \cite{bahdanau2014neural}, and hopefully see
+better translations.
+\subsection{Attention Mechanisms}
+Attention mechanisms have been shown to improve sequence to sequence
+translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
+from Luong et al \cite{luong2015effective} examines global vs local approached
+to attention-based encoder-decoders.
+% we will probably use dot & concat attention
+\subsection{Teacher Forcing}
+In terms of training, an encoder-decoder system can either accept the target
+token or the model's prediction as input during the decoding step. When we use
+the target token, this is known as teacher forcing, and is shown to be favored
+during initial trainging iterations, but should be backed off to use the
+model's own predicitons, as it will exhibit instability in the translations
+otherwise \cite{lamb2016professor}.
+
+% IDEA on subsectioning:
+\subsection{Encoders}
+% describe purpouse
+\subsubsection{Baseline RNN Encoder}
+\subsubsection{GRU Encoder}
+\subsubsection{Bidirectional GRU Encoder}
+
+\subsection{Decoders}
+\subsubsection{Baseline RNN}
+\subsubsection{GRU Decoder}
+
+\subsection{Attention Mechanisms}
+\subsubsection{Dot Attention}
+\subsubsection{Concat Attention}
+
+\subsection{Teacher Forcing}
+
+\section{Inital Results?}
+
+\section{Current Status and\\Expectation}
+%Where are we at now + what are we going to do.
+
+% References
+\bibliographystyle{abbrv}
+\bibliography{interim}
+
+\end{document}
