@@ -12,34 +12,42 @@ dot
 concat
 """
 
-def build_attention_model(mode):
+# FIX ARGS
+def build_attention_model(args):
     """Builds the attention model to params."""
     pass
     choices=[None,'original','general', 'dot',
              'concat', 'location']
     if mode is None:
         return None
-    elif mode is 'original':
-        return None
-    elif mode is 'general':
-        return None
     elif mode is 'dot':
         return None
     elif mode is 'concat':
-        return None
-    elif mode is 'location':
-        return None
+        return ConcatAttention(args.hidden_size, args.max_length)
     else:
         raise ValueError('Invalid attention mode: %s' % (mode))
 
-
-class Attention(Module):
+class ConcatAttention(Module):
     def __init__(self, hidden_size, max_length):
         super().__init__()
-        self.hidden_size = hidden_size
-        self.max_length = max_length
 
+        self.get_weights = Linear(hidden_size, max_length)
+        self.pay_attention = Linear(hidden_size * 3 // 2, hidden_size)
 
     def forward(self, input, hidden, attendable):
-        # Run forward of attention model
-        return output, weights
+        # Weights are learned from input and hidden state
+        hidden = hidden[0].view(*input.size())
+        input_with_hidden = torch.cat((input, hidden), 2)
+
+        sentence_length = attendable.size(1)
+        weights = log_softmax(self.get_weights(input_with_hidden),
+                              dim=2)[:, :, :sentence_length]
+
+        # Apply weights
+        with_attention = torch.bmm(weights, attendable)
+
+        # Apply attention to input
+        input_with_attention = torch.cat((input, with_attention), 2)
+        attended = self.pay_attention(input_with_attention)
+
+        return relu(attended), weights

@@ -1,113 +1,75 @@
-import logging
-from glob import glob
+from itertools import takewhile
 
 """File for handling vocabulary building"""
 
 # Tokens
-SOS_TOKEN = "<SOS>"
-EOS_TOKEN = "<EOS>"
-UNK_TOKEN = "<UNK>"
+START_OF_SENTENCE = '<SOS>'
+START_OF_SENTENCE_INDEX = 0
+END_OF_SENTENCE = '<EOS>'
+END_OF_SENTENCE_INDEX = 1
 
-SOS_INDEX = 0
-EOS_INDEX = 1
-UNK_INDEX = 2
+class Bivocabulary:
+    @classmethod
+    def create(cls, source_language, target_language):
+        source = Vocabulary(source_language)
+        target = Vocabulary(target_language)
 
-# Path to processed aligned data
-TRAIN_PATH='../data/split/train.snt.aligned'
-DEV_PATH='../data/split/dev.snt.aligned'
-TEST_PATH='../data/split/test.snt.aligned'
+        return cls(source, target)
+
+    def __init__(self, source, target):
+        self.source = source
+        self.target = target
+
+    def add_sentence_pair(self, pair):
+        source, target = pair.split('|||', 1)
+
+        source_indices = self.source.add_sentence(source)
+        target_indices = \
+            self.target.add_sentence(f'{target} {END_OF_SENTENCE}')
+
+        return source_indices, target_indices
 
 
-class Vocab:
-    """This class handles the mapping between the words and their indices."""
-    def __init__(self, lang_code):
-        self.lang_code = lang_code
-        self.word2index = {SOS_TOKEN: SOS_INDEX,
-                           EOS_TOKEN: EOS_INDEX,
-                           UNK_TOKEN: UNK_INDEX}
-        self.word2count = {SOS_TOKEN: 0, EOS_TOKEN: 0, UNK_TOKEN: 0}
-        self.index2word = {SOS_INDEX: SOS_TOKEN,
-                           EOS_INDEX: EOS_TOKEN,
-                           UNK_INDEX: UNK_TOKEN}
-        self.n_words = 3  # Count SOS, EOS, UNK
+class Vocabulary:
+    def __init__(self, language):
+        self._language = language
+        self._word_indices = {}
+        self._index_words = {}
+        self._next_index = 0
+
+        self._add_word(START_OF_SENTENCE)
+        self._add_word(END_OF_SENTENCE)
+
+        assert self._word_indices[START_OF_SENTENCE] == START_OF_SENTENCE_INDEX
+        assert self._word_indices[END_OF_SENTENCE] == END_OF_SENTENCE_INDEX
 
     def add_sentence(self, sentence):
-        for word in sentence.split(' '):
-            self._add_word(word)
+        indices = tuple(self._add_word(word) for word in sentence.split())
+        assert len(indices) > 0, 'empty sentence'
+        return indices
 
     def _add_word(self, word):
-        if word not in self.word2index:
-            self.word2index[word] = self.n_words
-            self.word2count[word] = 1
-            self.index2word[self.n_words] = word
-            self.n_words += 1
-        else:
-            self.word2count[word] += 1
+        if word not in self._word_indices:
+            self._word_indices[word] = self._next_index
+            self._index_words[self._next_index] = word
+            self._next_index += 1
 
-def split_lines(input_file, reverse=False):
-    """split a file like:
-    first src sentence|||first tgt sentence
-    second src sentence|||second tgt sentence
-    into a list of things like
-    [("first src sentence", "first tgt sentence"),
-     ("second src sentence", "second tgt sentence")]
-    if reverse == True, reverses tgt and src
-    """
-    logging.info("Reading lines of %s...", input_file)
+        return self._word_indices[word]
 
-    # Read the file and split into lines
-    lines = open(input_file).read().strip().split('\n')
+    def sentence_from(self, tensor):
+        assert len(tensor.size()) == 1
 
-    # Split every line into pairs
-    if reverse:
-        return [l.split('|||')[::-1] for l in lines]
+        trimmed_sentence = takewhile(lambda i: i != END_OF_SENTENCE_INDEX,
+                                     (t.item() for t in tensor))
+        sentence = ' '.join(self._index_words[i] for i in trimmed_sentence)
 
-    return [l.split('|||') for l in lines]
+        return sentence
 
+    def sentences_from(self, tensor):
+        assert len(tensor.size()) == 2
 
-def make_vocabs(src_code='Original', tgt_code='Modern'):
-    """
-    Creates the vocabs for each of the languages based on the training
-    corpus.
-    """
-    src_vocab = Vocab(src_code)
-    tgt_vocab = Vocab(tgt_code)
+        for sentence_tensor in tensor:
+            yield self.sentence_from(sentence_tensor)
 
-    # to add all files + split_lines(FILE_PATH)
-    train_pairs = split_lines(TRAIN_PATH) \
-                  + split_lines(DEV_PATH) \
-                  + split_lines(TEST_PATH)
-
-    for pair in train_pairs:
-        src_vocab.add_sentence(pair[0])
-        tgt_vocab.add_sentence(pair[1])
-
-    logging.info(f'{src_vocab.lang_code} src vocab size: {src_vocab.n_words}')
-    logging.info(f'{tgt_vocab.lang_code} tgt vocab size: {tgt_vocab.n_words}')
-
-    return src_vocab, tgt_vocab
-
-
-def clean(strx):
-    """
-    Input: SOS string EOS
-    Output: list without SOS, EOS
-    """
-    no_sos_eos = strx.replace(SOS_TOKEN, '').replace(EOS_TOKEN, '')
-    return ' '.join(no_sos_eos.strip().split())
-
-
-if __name__ == '__main__':
-    # USEAGE
-    src_vocab, tgt_vocab = make_vocabs('Original', 'Modern')
-
-    print(src_vocab.lang_code, src_vocab.n_words)
-    print(tgt_vocab.lang_code, tgt_vocab.n_words)
-
-    # 0 : 21079
-    print(src_vocab.word2index[SOS_TOKEN], src_vocab.word2count[SOS_TOKEN])
-    # 1 : 21079
-    print(src_vocab.word2index[EOS_TOKEN], src_vocab.word2count[EOS_TOKEN])
-
-    print(split_lines(TRAIN_PATH)[0])
-    print(split_lines(TRAIN_PATH, True)[0])
+    def __len__(self):
+        return len(self._word_indices)
