@@ -15,7 +15,7 @@ concat
 # FIX ARGS
 def build_attention_model(args):
     """Builds the attention model to params."""
-    
+
     if args.attention_mode is None:
         return Attention()
     elif args.attention_mode is 'dot':
