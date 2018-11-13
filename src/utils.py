@@ -1,6 +1,13 @@
 from itertools import islice
 from nltk.translate.bleu_score import corpus_bleu as nltk_corpus_bleu
+from time import time
 
+class Timer:
+    def __init__(self):
+        self._start = time()
+
+    def elapsed(self):
+        return time() - self._start
 
 def chunk(iterable, n):
     if n is None:
