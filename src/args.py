@@ -14,8 +14,6 @@ def get_args():
                              'size)')
 
     # Hyperparams
-    parser.add_argument('--initial-learning-rate', default=0.001, type=int,
-                        help='initial learning rate')
     parser.add_argument('--embedding-dropout', default=0.1, type=float,
                         help='training embedding dropout rate')
     parser.add_argument('--lstm-dropout', default=0.1, type=float,
@@ -48,11 +46,9 @@ def get_args():
                        default=TEST_PATH, help='test sentences')
     parser.add_argument('--train-batch-size', type=int, default=128)
 
-
-
-    # DEVICE: CPU or GPU
-    parser.add_argument('--device', type=torch.device, default='cpu',
-                        help='use CPU/CUDA for training/evaluation')
+    # MAX LEN
+    parser.add_argument('--max-length', type=int, default=15,
+                        help='max length of a decoded output sentence')
 
     # TRAINING ARGS
     parser.add_argument('--epochs', default=500, type=int,

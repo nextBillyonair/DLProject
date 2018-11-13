@@ -20,8 +20,7 @@ def build_decoder(args, vocab):
 
         # HANDLE ATTENTION HERE
 
-        if device is None:
-            device = torch.device('cpu')
+        device = torch.device('cpu')
 
         if args.decoder_mode is 'baseline':
             return DecoderRNN(args.hidden_size, output_size, device,

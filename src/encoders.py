@@ -16,8 +16,7 @@ def build_encoder(args, vocab):
         device = args.device
         input_size = len(vocab.source)
 
-        if device is None:
-            device = torch.device('cpu')
+        device = torch.device('cpu')
 
         if args.encoder_mode is 'baseline':
             return EncoderRNN(input_size, args.hidden_size, device,
