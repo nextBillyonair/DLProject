@@ -21,12 +21,15 @@ def build_encoder(args, vocab):
 
         if args.encoder_mode is 'baseline':
             return EncoderRNN(input_size, args.hidden_size, device,
+                              dropout=args.lstm_dropout,
                               num_layers=args.num_layers)
         elif args.encoder_mode is 'gru':
             return EncoderGRU(input_size, args.hidden_size, device,
+                              dropout=args.lstm_dropout,
                               num_layers=args.num_layers)
         elif args.encoder_mode is 'bidirectional':
             return EncoderBidirectional(input_size, args.hidden_size, device,
+                                        dropout=args.lstm_dropout,
                                         num_layers=args.num_layers)
         else:
             raise ValueError('Invalid encoder mode: %s' % (mode))
@@ -36,7 +39,8 @@ def build_encoder(args, vocab):
 class EncoderRNN(Module):
     """A word embedding, simple RNN encoder."""
 
-    def __init__(self, input_size, hidden_size, device, num_layers=1):
+    def __init__(self, input_size, hidden_size, device,
+                 dropout=0.1, num_layers=1):
         """Initialize a word embedding and simple RNN encoder."""
         super().__init__()
         self.input_size = input_size
@@ -60,7 +64,8 @@ class EncoderRNN(Module):
 class EncoderGRU(Module):
     """A word embedding, GRU encoder."""
 
-    def __init__(self, input_size, hidden_size, device, num_layers=1):
+    def __init__(self, input_size, hidden_size, device,
+                 dropout=0.1, num_layers=1):
         """Initialize a word embedding and GRU encoder."""
         super().__init__()
         self.input_size = input_size
@@ -84,7 +89,8 @@ class EncoderGRU(Module):
 class EncoderBidirectional(Module):
     """A word embedding and bi-directional GRU encoder."""
 
-    def __init__(self, input_size, hidden_size, device, num_layers=1):
+    def __init__(self, input_size, hidden_size, device,
+                 dropout=0.1, num_layers=1):
         """Initialize a word embedding and bi-directional GRU encoder."""
         super().__init__()
         self.input_size = input_size
