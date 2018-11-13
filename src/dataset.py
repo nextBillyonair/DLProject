@@ -15,8 +15,6 @@ TEST_PATH='../data/split/test.snt.aligned'
 class Dataset:
     @classmethod
     def load_from_args(cls, args):
-        # bpe = not args.use_spacy_embeddings
-
         vocab = Bivocabulary.create(args.source_language, args.target_language)
 
         train_sentences = args.train_file
