@@ -143,7 +143,8 @@ Proper nouns are unique in both corpus, and have direct translations. In order
 to reduce vocabulary size and aggregating the learning of all proper nouns,
 we replace all proper nouns with the following token: propn. Thus our model
 should learn to map propn to propn, and can utilize the encoding to learn the
-most likely token following its usage. We use SpaCy's nlp models to identiy
+most likely token following its usage. We use
+SpaCy's\footnote{\url{https://spacy.io}} nlp models to identiy
 proper nouns in each sentence, and replace the tokens.
 
 \subsection{Miscellaneous}
@@ -222,12 +223,6 @@ of unkown tokens (UNK). We provide statistics for the data.
       (Without SOS/EOS Tokens)}
     \label{fig:sample-pairs}
 \end{figure*}
-
-We will use spacy.io to tokenize our dataset to replace proper nouns with
-pronouns.\footnote{\url{https://spacy.io}} In addition, we will tokenize
-numbers and punctuation to reduce our vocabulary size. Finally, we will
-lowercase the data. We will randomly sample a 70/20/10 split for train/dev/test
-on the full merged dataset. % wrong
 
 %------------------------------------------------
 
