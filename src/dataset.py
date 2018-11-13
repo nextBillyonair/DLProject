@@ -100,19 +100,6 @@ def _make_minibatch_pair(pairs):
     return source_minibatch, target_minibatch, target_lens
 
 
-def add_argument_group(parser):
-    group = parser.add_argument_group('dataset', 'arguments related to the '
-                                                 'source/target pairs')
 
-    group.add_argument('--source-language', default='original',
-                       help='source sentence language')
-    group.add_argument('--target-language', default='modern',
-                       help='target sentence language')
-    group.add_argument('--train-file', type=FileType('r'),
-                       default=TRAIN_PATH, help='train sentences')
-    group.add_argument('--dev-file', type=FileType('r'),
-                       default=DEV_PATH, help='dev sentences')
-    group.add_argument('--test-file', type=FileType('r'),
-                       default=TEST_PATH, help='test sentences')
 
-    group.add_argument('--train-batch-size', type=int, default=128)
+# EOF
