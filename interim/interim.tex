@@ -121,20 +121,42 @@ English. However, since the data was aligned, not all of the original lines
 from the plays are included (the sentences could not be aligned properly).
 \footnote{\url{https://github.com/cocoxu/Shakespeare}}
 
-% Add more about data structure
-
 %------------------------------------------------
 
 \section{Preprocessing}
-% intro
+We describe our data processing algorithms to create test, development,
+and training samples in a simple and easy format.
 \subsection{SOS and EOS}
 % talk about use
+We encapsulate every sentence with two special tokens: SOS and EOS.
+The Start of Sentence token (SOS) signals the start of a sequence, and allows
+us to map our first real word to one that most likely starts a sentence.
 
-\subsection{Propernouns}
-% spacy -> propn
+We use the End of Sentence (EOS) token to signal the end of the sequence, and
+always comes after punctuation.
+
+By incorporating these special tokens, we can signal to the model the start and
+end of a sequence, and helps training overall.
+
+\subsection{Proper Nouns}
+Proper nouns are unique in both corpus, and have direct translations. In order
+to reduce vocabulary size and aggregating the learning of all proper nouns,
+we replace all proper nouns with the following token: propn. Thus our model
+should learn to map propn to propn, and can utilize the encoding to learn the
+most likely token following its usage. We use SpaCy's nlp models to identiy
+proper nouns in each sentence, and replace the tokens.
+
+\subsection{Miscellaneous}
+% lower, nltk tokenizing, spliting punct etc
+Additionally, we lower case all input. We use nltk's tokenization algorithm
+to split punctation, contrations, etc for each word.
 
 \subsection{Train, Validation, Test Split}
 % look at code, provide stats (Vocab size, # sent, etc.)
+We randomly shuffle and split the combined preprocessed dataset into three sets:
+Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearnce
+of unkown tokens (UNK). We provide statistics for the data.
+% TODO: Provide Data Stats
 
 \begin{figure*}[ht]
     \centering
@@ -236,6 +258,29 @@ Howver, this is the simplest model, prone to the vanishing gradient problem
 on large sequences. In addition, this model has the lowest capacity to learn.
 Nonetheless, we will present results for our baseline.
 
+\begin{figure*}[ht]
+    \centering
+    \begin{tabular}{ |c|c|c|c|c| }
+        \hline
+        $\#$
+          & \textbf{Encoder}
+          & \textbf{Decoder}
+          & \textbf{Attention}
+          & \textbf{Teacher Forcing} \\
+        \hline
+        1 & RNN & RNN & None & False \\ \hline
+        2 & GRU & GRU & None & False \\ \hline
+        3 & Bidirectional GRU & GRU & None & False \\ \hline
+        4 & Bidirectional GRU & GRU & Concat & False \\ \hline
+        5 & Bidirectional GRU & GRU & General & False \\ \hline
+        6 & Bidirectional GRU & GRU & Concat & True \\ \hline
+        7 & Bidirectional GRU & GRU & General & True \\ \hline
+    \end{tabular}
+
+    \caption{Planned Model Experiments}
+    \label{fig:model-experiments}
+\end{figure*}
+
 \subsubsection{GRU Encoder}
 An obvious improvement to our encoding scheme would be to replace the RNN layer
 with a GRU. A GRU encodes a forward sequence using more complex equations to
@@ -267,7 +312,6 @@ bidirectional GRU as laid forth in \cite{bahdanau2014neural}.
       \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
       \\
       h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
-      \\
     \end{array}
   \end{split}
 \end{equation}
@@ -283,7 +327,7 @@ and summing. We use PyTorch's implementation of a bidirectional GRU.
 Attention mechanisms have been shown to improve sequence to sequence
 translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
 from Luong et al \cite{luong2015effective} examines global vs local approached
-to attention-based encoder-decoders.
+to attention-based encoder-decoders. Common attention mechanisms are:
 % we will probably use dot & concat attention
 \begin{equation}
     a(s_{i-1}, h_j) =
@@ -294,6 +338,8 @@ to attention-based encoder-decoders.
         W_a \cdot s_{i-1} & \text{\emph{location}}
     \end{cases}
 \end{equation}
+However, we will focus on dot attention and concat attention in our
+experiments.
 \subsubsection{Dot Attention}
 \subsubsection{Concat Attention}
 
@@ -308,34 +354,39 @@ otherwise \cite{lamb2016professor}.
 %------------------------------------------------
 
 \section{Planned Experiments}
-\begin{figure*}[ht]
-    \centering
-    \begin{tabular}{ |c|c|c|c|c| }
-        \hline
-        $\#$
-          & \textbf{Encoder}
-          & \textbf{Decoder}
-          & \textbf{Attention}
-          & \textbf{Teacher Forcing} \\
-        \hline
-        1 & RNN & RNN & None & False \\ \hline
-        2 & GRU & GRU & None & False \\ \hline
-        3 & Bidirectional GRU & GRU & None & False \\ \hline
-        4 & Bidirectional GRU & GRU & Concat & False \\ \hline
-        5 & Bidirectional GRU & GRU & General & False \\ \hline
-        6 & Bidirectional GRU & GRU & Concat & True \\ \hline
-        7 & Bidirectional GRU & GRU & General & True \\ \hline
-    \end{tabular}
 
-    \caption{Planned Model Experiments}
-    \label{fig:model-experiments}
-\end{figure*}
 
 %------------------------------------------------
 
 \section{Current Status and\\Expectation}
 %Where are we at now + what are we going to do.
+\section{Planned Experiments}
+\begin{figure*}[ht]
+    \centering
+    \begin{tabular}{ |c|c|c|c| }
+        \hline
+        $\#$
+          & \textbf{Task}
+          & \textbf{Status}
+          & \textbf{Team Member}\\
+        \hline
+        1 & Data Procurement & DONE & All \\ \hline
+        2 & Preprocessing & DONE & Riley, Bill \\ \hline
+        3 & Baseline RNN & IN PROGRESS & Riley \\ \hline
+        4 & GRU Encoder & IN PROGRESS & Morris \\ \hline
+        5 & Bidirectional GRU & IN PROGRESS & Morris \\ \hline
+        6 & RNN Decoder & IN PROGRESS & Bill \\ \hline
+        7 & GRU Decoder & IN PROGRESS & Bill \\ \hline
+        8 & Attention Models & TODO & Bill \\ \hline
+        9 & Teacher Forcing & TODO & Bill \\ \hline
+        10 & Vocabulary Building & DONE & Bill \\ \hline
+        11 & Train/Eval & IN PROGRESS & Bill \\ \hline
+        12 & Experinments & TODO & All \\ \hline
+    \end{tabular}
 
+    \caption{Current Progress}
+    \label{fig:model-experiments}
+\end{figure*}
 %------------------------------------------------
 
 % References
