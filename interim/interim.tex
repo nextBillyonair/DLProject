@@ -147,15 +147,19 @@ from the plays are included (the sentences could not be aligned properly).
         \hline
         1
             & there ’ s beggary in the love that can be reckoned .
-            & it would be a pretty stingy love if it could be counted and calculated . \\
+            & it would be a pretty stingy love if it \\
+         &
+         & could be counted and calculated . \\
         \hline
         2
             & poor souls , they perished .
             & the poor people died . \\
         \hline
         3
-            & the propn ’ s abused by some most villainous knave , some base notorious knave , some scurvy fellow .
-            & the propn is being tricked by some crook , some terrible villain , some rotten bastard . \\
+            & the propn ’ s abused by some most villainous knave ,
+            & the propn is being tricked by some crook ,  \\
+         & some base notorious knave , some scurvy fellow .
+         & some terrible villain , some rotten bastard . \\
         \hline
         4
             & my best way is to creep under his gaberdine .
@@ -174,19 +178,26 @@ from the plays are included (the sentences could not be aligned properly).
             & go hang yourselves , all of you ! \\
         \hline
         8
-            & then , if ever thou propn acknowledge it , i will make it my quarrel .
-            & then , if you dare to acknowledge it , i ’ ll take up my quarrel with you . \\
+            & then , if ever thou propn acknowledge it ,
+            & then , if you dare to acknowledge it , \\
+         & i will make it my quarrel .
+         & i ’ ll take up my quarrel with you . \\
         \hline
         9
-            & and lovers ' absent hours more tedious than the dial eightscore times !
-            & and lovers ' hours are a hundred and sixty times longer than normal ones ! \\
+            & and lovers ' absent hours more tedious
+            & and lovers ' hours are a hundred and  \\
+         & than the dial eightscore times !
+         & sixty times longer than normal ones ! \\
         \hline
         10
-            & i have no great devotion to the deed and yet he hath given me satisfying reasons .
-            & i do n ’ t really want to do this , but he ’ s given me good reasons . \\
+            & i have no great devotion to the deed and
+            & i do n ’ t really want to do this , \\
+         & yet he hath given me satisfying reasons .
+         & but he ’ s given me good reasons . \\
         \hline
         \end{tabular}}
-    \caption{Sample Original-Modern Sentence Pairs, Processed (Without SOS/EOS Tokens)}
+    \caption{Sample Original-Modern Sentence Pairs, Processed
+      (Without SOS/EOS Tokens)}
     \label{fig:sample-pairs}
 \end{figure*}
 
@@ -202,49 +213,35 @@ on the full merged dataset. % wrong
 % go more detailed? or can they not handle the math lol
 % these descriptions are good starters, but we can be mroe detailed.
 We seek to develop several models to improve our translations, incorporating
-context, attention, and novel training methods.
-
-\subsection{Baseline RNN Sequence to Sequence}
-Our baseline model will be a simple RNN sequence to sequence model. It will
-accept a source sentence $s$ and will decode it to an output sequence $t$.
-A simple RNN will only incorporate previous states, i.e. source words, during
-prediction, and might be prone to the vanishing gradient problem. It will
+context, attention, and novel training methods. It will
 incorporate an encoder-decoder style model \cite{cho2014learning}
 \cite{sutskever2014sequence}.
-\subsection{GRU Sequence to Sequence}
-We will improve our baseline through the use of the GRU layer, to hopefully
-offset any vanishing gradients. In addition, we use a GRU over an LSTM to help
-bound the number of parameters used in the model for training purposes, as the
-GRU and LSTM fix issues regarding long term dependencies within sequences.
-\subsection{Bidirectional Model}
-In order to consider the context of words before and after, we will alter the
-model to use a bidirectional GRU \cite{bahdanau2014neural}, and hopefully see
-better translations.
-\subsection{Attention Mechanisms}
-Attention mechanisms have been shown to improve sequence to sequence
-translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
-from Luong et al \cite{luong2015effective} examines global vs local approached
-to attention-based encoder-decoders.
-% we will probably use dot & concat attention
-\subsection{Teacher Forcing}
-In terms of training, an encoder-decoder system can either accept the target
-token or the model's prediction as input during the decoding step. When we use
-the target token, this is known as teacher forcing, and is shown to be favored
-during initial trainging iterations, but should be backed off to use the
-model's own predicitons, as it will exhibit instability in the translations
-otherwise \cite{lamb2016professor}.
 
 % IDEA on subsectioning:
 \subsection{Encoders}
-% describe purpouse
+The encoder (or \emph{inference network}) receives an input token sequence
+$\vec{x} = \left[{x_1,\hdots, x_n}\right]$ of length $n$ and processes
+this to create an output encoding. The result is a sequence
+$\vec{h} = \left[{h_1, \cdots, h_{T_x}}\right]$ that
+maps to the input sequence $\vec{x}$.
 \subsubsection{Baseline RNN Encoder}
+For the baseline encoder, we implemented a simple Embedding + RNN encoder.
+This accepts an input sequence $\vec{x}$ and encoders the sequence using the lookup
+embeddings and forward context.
 \begin{equation}
   \label{eq:rnn}
   h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
 \end{equation}
+Howver, this is the simplest model, prone to the vanishing gradient problem
+on large sequences. In addition, this model has the lowest capacity to learn.
+Nonetheless, we will present results for our baseline.
 
 \subsubsection{GRU Encoder}
+An obvious improvement to our encoding scheme would be to replace the RNN layer
+with a GRU. A GRU encodes a forward sequence using more complex equations to
+improve capacity and learning.
 \begin{equation}
+  \label{eq:gru}
   \begin{split}\begin{array}{ll}
     r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
     z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
@@ -252,7 +249,15 @@ otherwise \cite{lamb2016professor}.
     h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
   \end{array}\end{split}
 \end{equation}
+GRUs help with vanishing gradients, increases our models capacity to learn,
+and uses less parameters than the LSTM layer. Hence, for our purposes, we
+used a GRU over the LSTM.
+
 \subsubsection{Bidirectional GRU Encoder}
+An extension to our encoding scheme will consider the full context of words
+immediately before an after it. This is doen by running a GRU layer on the
+forward and backward sequence and combining each tensor. Hence we use a
+bidirectional GRU as laid forth in \cite{bahdanau2014neural}.
 \begin{equation}
   \label{eq:bidirectional}
   \begin{split}
@@ -266,12 +271,20 @@ otherwise \cite{lamb2016professor}.
     \end{array}
   \end{split}
 \end{equation}
+PyTorch concatenates the resulting tensors, doubling the hidden output size
+of a normal GRU. Other libraries allow for concatenatation, averaging,
+and summing. We use PyTorch's implementation of a bidirectional GRU.
 
 \subsection{Decoders}
 \subsubsection{Baseline RNN}
 \subsubsection{GRU Decoder}
 
 \subsection{Attention Mechanisms}
+Attention mechanisms have been shown to improve sequence to sequence
+translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
+from Luong et al \cite{luong2015effective} examines global vs local approached
+to attention-based encoder-decoders.
+% we will probably use dot & concat attention
 \begin{equation}
     a(s_{i-1}, h_j) =
     \begin{cases}
@@ -285,6 +298,12 @@ otherwise \cite{lamb2016professor}.
 \subsubsection{Concat Attention}
 
 \subsection{Teacher Forcing}
+In terms of training, an encoder-decoder system can either accept the target
+token or the model's prediction as input during the decoding step. When we use
+the target token, this is known as teacher forcing, and is shown to be favored
+during initial trainging iterations, but should be backed off to use the
+model's own predicitons, as it will exhibit instability in the translations
+otherwise \cite{lamb2016professor}.
 
 %------------------------------------------------
 
@@ -297,7 +316,7 @@ otherwise \cite{lamb2016professor}.
           & \textbf{Encoder}
           & \textbf{Decoder}
           & \textbf{Attention}
-          & \textbf{Teacher Forcing}\\
+          & \textbf{Teacher Forcing} \\
         \hline
         1 & RNN & RNN & None & False \\ \hline
         2 & GRU & GRU & None & False \\ \hline
