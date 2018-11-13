@@ -32,7 +32,7 @@ def build_encoder(args, vocab):
                                         dropout=args.lstm_dropout,
                                         num_layers=args.num_layers)
         else:
-            raise ValueError('Invalid encoder mode: %s' % (mode))
+            raise ValueError('Invalid encoder mode: %s' % (args.encoder_mode))
 
 # ENCODER TEMPLATE, FOLLOW METHODS
 # NAME CONVENTION: Encoder{ExtentionName}

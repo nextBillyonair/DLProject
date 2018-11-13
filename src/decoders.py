@@ -12,29 +12,31 @@ baseline -> simple RNN (or should this be RNN)
 gru -> GRU
 NOTE: Decoders do not do bidirectional
 """
-def build_decoder(hidden_size, output_size,
-        mode='baseline', attention=None,
-        embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
-        device=None):
+# change to args
+def build_decoder(args, vocab):
         """Builds the decoder to params."""
+
+        output_size = len(vocab.target)
+
+        # HANDLE ATTENTION HERE
 
         if device is None:
             device = torch.device('cpu')
 
-        if mode is 'baseline':
-            return DecoderRNN(hidden_size, hidden_size, device,
-                              embedding_dropout=embedding_dropout,
-                              lstm_dropout=lstm_dropout,
-                              num_layers=num_layers,
+        if args.decoder_mode is 'baseline':
+            return DecoderRNN(args.hidden_size, output_size, device,
+                              embedding_dropout=args.embedding_dropout,
+                              lstm_dropout=args.lstm_dropout,
+                              num_layers=args.num_layers,
                               attention=attention)
-        elif mode is 'gru':
-            return DecoderGRU(hidden_size, hidden_size, device,
-                              embedding_dropout=embedding_dropout,
-                              lstm_dropout=lstm_dropout,
-                              num_layers=num_layers,
+        elif args.decoder_mode is 'gru':
+            return DecoderGRU(args.hidden_size, output_size, device,
+                              embedding_dropout=args.embedding_dropout,
+                              lstm_dropout=args.lstm_dropout,
+                              num_layers=args.num_layers,
                               attention=attention)
         else:
-            raise ValueError('Invalid decoder mode: %s' % (mode))
+            raise ValueError('Invalid decoder mode: %s' % (args.decoder_mode))
 
 
 # TEMPLATE CLASS

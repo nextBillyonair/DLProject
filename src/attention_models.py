@@ -18,14 +18,23 @@ def build_attention_model(args):
     pass
     choices=[None,'original','general', 'dot',
              'concat', 'location']
-    if mode is None:
+    if args.attention_mode is None:
+        return Attention()
+    elif args.attention_mode is 'dot':
         return None
-    elif mode is 'dot':
-        return None
-    elif mode is 'concat':
+    elif args.attention_mode is 'concat':
         return ConcatAttention(args.hidden_size, args.max_length)
     else:
-        raise ValueError('Invalid attention mode: %s' % (mode))
+        raise ValueError('Invalid attention mode: %s' % (args.attention_mode))
+
+
+class Attention(Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, input):
+        return input
+
 
 class ConcatAttention(Module):
     def __init__(self, hidden_size, max_length):
