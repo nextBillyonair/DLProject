@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import torch
 
-from vocab import TRAIN_PATH, DEV_PATH, TEST_PATH
+from dataset import TRAIN_PATH, DEV_PATH, TEST_PATH
 
 def get_args():
     """Defines All CMD Line Arguments"""
