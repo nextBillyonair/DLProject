@@ -41,38 +41,30 @@ def get_args():
                         choices=['baseline','gru'],
                         help='type of decoder used')
     parser.add_argument('--attention-mode', default=None,
-                        choices=[None,'original','general', 'dot',
-                                 'concat', 'location'],
+                        choices=[None,'dot','concat'],
                         help='type of attention used')
     parser.add_argument('--teacher-forcing', default=False, type=bool,
                         help='to use teacher forcing in train')
 
-    # Language identifiers
-    parser.add_argument('--source-lang', default='original',
-                        help='source (input) language code')
-    parser.add_argument('--target-lang', default='modern',
-                        help='target (output) language code')
-    parser.add_argument('--reverse', default=False, type=bool,
-                        help='flip reading of data files')
 
+    # DATASET ARGS
+    parser.add_argument('--source-language', default='original',
+                       help='source sentence language')
+    parser.add_argument('--target-language', default='modern',
+                       help='target sentence language')
+    parser.add_argument('--train-file', type=FileType('r'),
+                       default=TRAIN_PATH, help='train sentences')
+    parser.add_argument('--dev-file', type=FileType('r'),
+                       default=DEV_PATH, help='dev sentences')
+    parser.add_argument('--test-file', type=FileType('r'),
+                       default=TEST_PATH, help='test sentences')
+    parser.add_argument('--train-batch-size', type=int, default=128)
 
-    # TRAIN/DEV/TEST FILE
-    parser.add_argument('--train-file', default=TRAIN_PATH,
-                        help='training file. each line should have a source '
-                             'sentence, followed by "|||", followed by a '
-                             'target sentence')
-    parser.add_argument('--dev-file', default=DEV_PATH,
-                        help='dev file. each line should have a source '
-                             'sentence, followed by "|||", followed by a '
-                             'target sentence')
-    parser.add_argument('--test-file', default=TEST_PATH,
-                        help='test file. each line should have a source '
-                             'sentence, followed by "|||", followed by a '
-                             'target sentence (for test, target is ignored)')
 
     # OUT FILE
     parser.add_argument('--out-file', default='out.txt',
                         help='output file for test translations')
+
 
     # CHECKPOINT
     parser.add_argument('--load-checkpoint', nargs=1,
