@@ -59,7 +59,7 @@ Notable CLI arguments for checkpointing/logging:
 
 ## Organization
 
-We provide the fiels + uses:
+We provide the fielsmdkvxnsngv.,xznbv .adfkb + uses:
 
 ```
 args.py - CLI arguments
