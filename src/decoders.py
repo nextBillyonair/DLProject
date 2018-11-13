@@ -2,6 +2,8 @@ import torch
 from torch.nn import Dropout, Embedding, Linear, Module, GRU
 from torch.nn.functional import relu, log_softmax, softmax
 
+from attention_models import build_attention_model
+
 
 """File for handiling Decoders and their construction/init"""
 
@@ -19,6 +21,7 @@ def build_decoder(args, vocab):
         output_size = len(vocab.target)
 
         # HANDLE ATTENTION HERE
+        attention = build_attention_model(args)
 
         device = torch.device('cpu')
 
@@ -26,13 +29,13 @@ def build_decoder(args, vocab):
             return DecoderRNN(args.hidden_size, output_size, device,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
-                              num_layers=args.num_layers,
+                              num_layers=args.decoder_layers,
                               attention=attention)
         elif args.decoder_mode is 'gru':
             return DecoderGRU(args.hidden_size, output_size, device,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
-                              num_layers=args.num_layers,
+                              num_layers=args.decoder_layers,
                               attention=attention)
         else:
             raise ValueError('Invalid decoder mode: %s' % (args.decoder_mode))

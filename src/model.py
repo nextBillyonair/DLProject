@@ -4,8 +4,8 @@ from torch.nn import Dropout, Embedding, Linear, LSTM, Module
 from torch.nn.functional import relu, log_softmax
 
 from vocab import START_OF_SENTENCE_INDEX, END_OF_SENTENCE_INDEX
-from encoder import build_encoder
-from decoder import build_decoder
+from encoders import build_encoder
+from decoders import build_decoder
 
 
 class Model:

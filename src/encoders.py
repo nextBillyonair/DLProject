@@ -13,7 +13,8 @@ bidirectional -> bidirectional GRU
 # change to args
 def build_encoder(args, vocab):
         """Builds the encoder to params."""
-        device = args.device
+
+        device = torch.device('cpu')
         input_size = len(vocab.source)
 
         device = torch.device('cpu')
@@ -21,15 +22,15 @@ def build_encoder(args, vocab):
         if args.encoder_mode is 'baseline':
             return EncoderRNN(input_size, args.hidden_size, device,
                               dropout=args.lstm_dropout,
-                              num_layers=args.num_layers)
+                              num_layers=args.encoder_layers)
         elif args.encoder_mode is 'gru':
             return EncoderGRU(input_size, args.hidden_size, device,
                               dropout=args.lstm_dropout,
-                              num_layers=args.num_layers)
+                              num_layers=args.encoder_layers)
         elif args.encoder_mode is 'bidirectional':
             return EncoderBidirectional(input_size, args.hidden_size, device,
                                         dropout=args.lstm_dropout,
-                                        num_layers=args.num_layers)
+                                        num_layers=args.encoder_layers)
         else:
             raise ValueError('Invalid encoder mode: %s' % (args.encoder_mode))
 

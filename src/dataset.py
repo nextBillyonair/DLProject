@@ -1,4 +1,3 @@
-from argparse import FileType
 from itertools import accumulate, chain, groupby
 import random
 import sys

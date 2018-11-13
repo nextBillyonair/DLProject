@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 import torch
 
 from dataset import TRAIN_PATH, DEV_PATH, TEST_PATH
