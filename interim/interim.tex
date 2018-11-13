@@ -94,50 +94,6 @@
 %   ARTICLE CONTENTS
 %------------------------------------------------------------------------------
 
-% \section{Introduction}
-
-% TODO
-
-% Abstract
-
-% Inspiration
-
-% Data
-% 	web scrap
-% 	label via aligner
-
-% Preprocessing
-% 	Tokenize!!!!!
-% 		NUM
-% 		PROPER NOUNS
-% 		PUNCTUATION
-% 		USE SPACY FOR POS TAGS
-
-% Models
-% 	Baseline
-% 		Seq2Seq Baseline
-% 			No attention, no Bidirectional
-% 			encoder RNN-> RNN
-% 		GRU->GRU
-% 		bidirectional GRU -> Bidirectional GRU
-% 		With Attentions
-% 		Teacher Forcing
-
-% 	Use Aligner to measure quality of data, and learnability.
-% 		Not learnable -> still train, but when report, do backwards,
-%     suggest data is difficult
-% 		Learnable -> do aligner do well, then models
-
-% Final Tricks:
-% 	Num -> Num
-% 	PN -> PN
-% 	Punct -> Punct
-
-% Expectation:
-% 	Hopefully provides good translations
-% 	Hopefully can do a pseudo style transfer on English
-% 	Funny translations? 50 Shades of Grey
-
 %------------------------------------------------
 
 \begin{abstract}
@@ -151,9 +107,12 @@ Finally, we describe the overall strucutre of our code to support sequence
 to sequence modeling.
 \end{abstract}
 
+%------------------------------------------------
+
 \section{Introduction}
 
 
+%------------------------------------------------
 
 \section{Data Procurement}
 Most of our data was procured from \cite{xu2012paraphrasing}.
@@ -163,6 +122,8 @@ from the plays are included (the sentences could not be aligned properly).
 \footnote{\url{https://github.com/cocoxu/Shakespeare}}
 
 % Add more about data structure
+
+%------------------------------------------------
 
 \section{Preprocessing}
 % intro
@@ -175,11 +136,67 @@ from the plays are included (the sentences could not be aligned properly).
 \subsection{Train, Validation, Test Split}
 % look at code, provide stats (Vocab size, # sent, etc.)
 
+\begin{figure*}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{ |c|l|l| }
+        \hline
+            $\#$
+            & \textbf{Original Sentence}
+            & \textbf{Modern Sentence}\\
+        \hline
+        1
+            & there ’ s beggary in the love that can be reckoned .
+            & it would be a pretty stingy love if it could be counted and calculated . \\
+        \hline
+        2
+            & poor souls , they perished .
+            & the poor people died . \\
+        \hline
+        3
+            & the propn ’ s abused by some most villainous knave , some base notorious knave , some scurvy fellow .
+            & the propn is being tricked by some crook , some terrible villain , some rotten bastard . \\
+        \hline
+        4
+            & my best way is to creep under his gaberdine .
+            & the best thing to do is crawl under his cloak . \\
+        \hline
+        5
+            & when they do choose , they have the wisdom by their wit to lose .
+            & when they choose , they only know how to lose . \\
+        \hline
+        6
+            & her blush is guiltiness , not modesty .
+            & she blushes from guilt , not modesty . \\
+        \hline
+        7
+            & go , hang yourselves all !
+            & go hang yourselves , all of you ! \\
+        \hline
+        8
+            & then , if ever thou propn acknowledge it , i will make it my quarrel .
+            & then , if you dare to acknowledge it , i ’ ll take up my quarrel with you . \\
+        \hline
+        9
+            & and lovers ' absent hours more tedious than the dial eightscore times !
+            & and lovers ' hours are a hundred and sixty times longer than normal ones ! \\
+        \hline
+        10
+            & i have no great devotion to the deed and yet he hath given me satisfying reasons .
+            & i do n ’ t really want to do this , but he ’ s given me good reasons . \\
+        \hline
+        \end{tabular}}
+    \caption{Sample Original-Modern Sentence Pairs, Processed (Without SOS/EOS Tokens)}
+    \label{fig:sample-pairs}
+\end{figure*}
+
 We will use spacy.io to tokenize our dataset to replace proper nouns with
 pronouns.\footnote{\url{https://spacy.io}} In addition, we will tokenize
 numbers and punctuation to reduce our vocabulary size. Finally, we will
 lowercase the data. We will randomly sample a 70/20/10 split for train/dev/test
 on the full merged dataset. % wrong
+
+%------------------------------------------------
 
 \section{Architectures}
 % go more detailed? or can they not handle the math lol
@@ -221,23 +238,86 @@ otherwise \cite{lamb2016professor}.
 \subsection{Encoders}
 % describe purpouse
 \subsubsection{Baseline RNN Encoder}
+\begin{equation}
+  \label{eq:rnn}
+  h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
+\end{equation}
+
 \subsubsection{GRU Encoder}
+\begin{equation}
+  \begin{split}\begin{array}{ll}
+    r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
+    z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
+    n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
+    h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
+  \end{array}\end{split}
+\end{equation}
 \subsubsection{Bidirectional GRU Encoder}
+\begin{equation}
+  \label{eq:bidirectional}
+  \begin{split}
+    \begin{array}{ll}
+      \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
+      \\
+      \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
+      \\
+      h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
+      \\
+    \end{array}
+  \end{split}
+\end{equation}
 
 \subsection{Decoders}
 \subsubsection{Baseline RNN}
 \subsubsection{GRU Decoder}
 
 \subsection{Attention Mechanisms}
+\begin{equation}
+    a(s_{i-1}, h_j) =
+    \begin{cases}
+        W_a (s_{i-1} \| h_j) & \text{\emph{concat}} \\
+        s_{i-1}^T \cdot W_a h_j & \text{\emph{general}} \\
+        s_{i-1}^T \cdot h_j & \text{\emph{dot}} \\
+        W_a \cdot s_{i-1} & \text{\emph{location}}
+    \end{cases}
+\end{equation}
 \subsubsection{Dot Attention}
 \subsubsection{Concat Attention}
 
 \subsection{Teacher Forcing}
 
-\section{Inital Results?}
+%------------------------------------------------
+
+\section{Planned Experiments}
+\begin{figure*}[ht]
+    \centering
+    \begin{tabular}{ |c|c|c|c|c| }
+        \hline
+        $\#$
+          & \textbf{Encoder}
+          & \textbf{Decoder}
+          & \textbf{Attention}
+          & \textbf{Teacher Forcing}\\
+        \hline
+        1 & RNN & RNN & None & False \\ \hline
+        2 & GRU & GRU & None & False \\ \hline
+        3 & Bidirectional GRU & GRU & None & False \\ \hline
+        4 & Bidirectional GRU & GRU & Concat & False \\ \hline
+        5 & Bidirectional GRU & GRU & General & False \\ \hline
+        6 & Bidirectional GRU & GRU & Concat & True \\ \hline
+        7 & Bidirectional GRU & GRU & General & True \\ \hline
+    \end{tabular}
+
+    \caption{Planned Model Experiments}
+    \label{fig:model-experiments}
+\end{figure*}
+
+%------------------------------------------------
 
 \section{Current Status and\\Expectation}
 %Where are we at now + what are we going to do.
+
+%------------------------------------------------
 
 % References
 \bibliographystyle{abbrv}
