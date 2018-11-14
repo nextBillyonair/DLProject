@@ -261,15 +261,17 @@ Nonetheless, we will present results for our baseline.
           & \textbf{Encoder}
           & \textbf{Decoder}
           & \textbf{Attention}
-          & \textbf{Teacher Forcing} \\
+          & \textbf{Teacher Forcing (Percent)} \\
         \hline
-        1 & RNN & RNN & None & False \\ \hline
-        2 & GRU & GRU & None & False \\ \hline
-        3 & Bidirectional GRU & GRU & None & False \\ \hline
-        4 & Bidirectional GRU & GRU & Concat & False \\ \hline
-        5 & Bidirectional GRU & GRU & General & False \\ \hline
-        6 & Bidirectional GRU & GRU & Concat & True \\ \hline
-        7 & Bidirectional GRU & GRU & General & True \\ \hline
+        1 & RNN & RNN & None & None \\ \hline
+        2 & GRU & GRU & None & None \\ \hline
+        3 & Bidirectional GRU & GRU & None & None \\ \hline
+        4 & Bidirectional GRU & GRU & Concat & None \\ \hline
+        5 & Bidirectional GRU & GRU & General & None \\ \hline
+        6 & Bidirectional GRU & GRU & Concat & 0.5 \\ \hline
+        7 & Bidirectional GRU & GRU & General & 0.5 \\ \hline
+        8 & Bidirectional GRU & GRU & Concat & 1.0 \\ \hline
+        9 & Bidirectional GRU & GRU & General & 1.0 \\ \hline
     \end{tabular}
 
     \caption{Planned Model Experiments}
@@ -372,7 +374,7 @@ otherwise \cite{lamb2016professor}.
         5 & Bidirectional GRU & IN PROGRESS & Morris \\ \hline
         6 & RNN Decoder & IN PROGRESS & Bill \\ \hline
         7 & GRU Decoder & IN PROGRESS & Bill \\ \hline
-        8 & Attention Models & TODO & Bill \\ \hline
+        8 & Attention Models & IN PROGRESS & Bill \\ \hline
         9 & Teacher Forcing & DONE & Bill \\ \hline
         10 & Vocabulary Building & DONE & Bill \\ \hline
         11 & Train/Eval & DONE & Bill \\ \hline
