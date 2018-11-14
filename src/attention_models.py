@@ -5,11 +5,9 @@ from torch.nn.functional import relu, log_softmax
 """
 # Spin off to separate class, maybe don't include in this file
 Attention Modes:
-None
-original?
-general
 dot
 concat
+None - identity
 """
 
 # FIX ARGS
@@ -26,6 +24,7 @@ def build_attention_model(args):
         raise ValueError('Invalid attention mode: %s' % (args.attention_mode))
 
 
+# IDENTITY
 class Attention(Module):
     def __init__(self):
         super().__init__()
@@ -34,6 +33,7 @@ class Attention(Module):
         return input
 
 
+# CONCAT
 class ConcatAttention(Module):
     def __init__(self, hidden_size, max_length):
         super().__init__()
@@ -58,3 +58,12 @@ class ConcatAttention(Module):
         attended = self.pay_attention(input_with_attention)
 
         return relu(attended), weights
+
+
+# DOT
+class DotAttention(Module):
+    def __init__(self, hidden_size, max_length):
+        super().__init__()
+
+    def forward(self, input, hidden, attendable):
+        return None
