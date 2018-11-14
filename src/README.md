@@ -28,11 +28,11 @@ Notable CLI arguments for model building:
                         number of same length source sentences to batch
   --teacher-forcing-chance TEACHER_FORCING_CHANCE
                         percent of batches on which to teacher force
-  --encoder-mode {baseline, gru, bidirectional}
+  --encoder-mode {rnn, gru, bigru}
                         Encoder type
-  --decoder-mode {baseline, gru}
+  --decoder-mode {rnn, gru}
                         decoder type   
-  --attention-mode {None, dot, concat}
+  --attention-mode {none, dot, concat}
                         attention type                   
 ```
 
