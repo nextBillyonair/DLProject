@@ -115,19 +115,23 @@ class EncoderBidirectional(Module):
 
 if __name__ == '__main__':
     # params, confgurable
-    input_size = 10
-    hidden_size = 1000
-    hidden = None
-    input_tensor = None
+    from args import get_args
+    from dataset import Dataset
 
-    encoder = build_encoder(input_size, hidden_size)
-    # test forward
-    encoder = build_encoder(input_size, hidden_size, mode='gru')
-    # test forward
-    encoder = build_encoder(input_size, hidden_size, mode='bidirectional')
-    # test forward
+    args = get_args()
 
+    dataset = Dataset.load_from_args(args)
+
+    encoder = build_encoder(args, dataset.vocab)
+
+    args.encoder_mode = 'gru'
+    encoder = build_encoder(args, dataset.vocab)
+
+    args.encoder_mode = 'bidirectional'
+    encoder = build_encoder(args, dataset.vocab)
+
+    args.encoder_mode = 'lol'
     try:
-        encoder = build_encoder(input_size, hidden_size, mode='lol')
+        encoder = build_encoder(args, dataset.vocab)
     except ValueError:
-        pass
+        print('Exception Thrown')

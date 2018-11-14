@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Dropout, Embedding, Linear, Module, GRU
+from torch.nn import Dropout, Embedding, Linear, Module, GRU, RNN
 from torch.nn.functional import relu, log_softmax, softmax
 
 from attention_models import build_attention_model
@@ -50,6 +50,8 @@ class DecoderRNN(Module):
                  attention=None):
         """Initialize a word embedding and simple RNN decoder."""
         super().__init__()
+        if num_layers == 1:
+            lstm_dropout = 0
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.device = device
@@ -58,6 +60,12 @@ class DecoderRNN(Module):
         self.num_layers = num_layers
         self.attention = attention
         # Define layers below, aka embedding + RNN
+        self.word_embedding = Embedding(output_size, hidden_size)
+        self.dropout = Dropout(embedding_dropout)
+        self.attention = attention
+        self.rnn = RNN(hidden_size, hidden_size, num_layers=num_layers,
+                       dropout=lstm_dropout, batch_first=True)
+        self.linear = Linear(hidden_size, output_size)
 
     def forward(self, encoder_outputs, input=None, hidden=None):
         """
@@ -68,7 +76,20 @@ class DecoderRNN(Module):
         # hidden -> depends on RNN, see docs
         # use asserts to make sure correct sizes!
         # check if attention is NONE, if not do mode, else bypass
-        return input, hidden
+        # Apply embedding with dropout
+        embedding = self.dropout(self.word_embedding(input))
+
+        # Compute attention weights and apply them
+        if self.attention is not None:
+            attended, _ = self.attention(embedding, hidden, encoder_output)
+
+        # Apply non-linear then RNN with hidden from encoder (later, decoder)
+        output, hidden = self.rnn(attended, hidden)
+
+        # Use softmax to pick most likely translation word embeddings
+        output = log_softmax(self.linear(output), dim=2)
+
+        return output, hidden
 
 
 class DecoderGRU(Module):
@@ -79,6 +100,8 @@ class DecoderGRU(Module):
                  attention=None):
         """Initialize a word embedding and simple GRU decoder."""
         super().__init__()
+        if num_layers == 1:
+            lstm_dropout = 0
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.device = device
@@ -86,7 +109,13 @@ class DecoderGRU(Module):
         self.lstm_dropout = lstm_dropout
         self.num_layers = num_layers
         self.attention = attention
-        # Define layers below, aka embedding + RNN
+        # Define layers below, aka embedding + GRU
+        self.word_embedding = Embedding(output_size, hidden_size)
+        self.dropout = Dropout(embedding_dropout)
+        self.attention = attention
+        self.gru = GRU(hidden_size, hidden_size, num_layers=num_layers,
+                       dropout=lstm_dropout, batch_first=True)
+        self.linear = Linear(hidden_size, output_size)
 
     def forward(self, encoder_outputs, input=None, hidden=None):
         """
@@ -98,21 +127,40 @@ class DecoderGRU(Module):
         # use asserts to make sure correct sizes!
         # check if attention is NONE, if not do mode, else bypass
         # NOTE: handle when input is none ot generate from itself
-        return input, hidden
+        # Apply embedding with dropout
+        embedding = self.dropout(self.word_embedding(input))
+
+        # Compute attention weights and apply them
+        if self.attention is not None:
+            attended, _ = self.attention(embedding, hidden, encoder_output)
+
+        # Apply non-linear then GRU with hidden from encoder (later, decoder)
+        output, hidden = self.gru(attended, hidden)
+
+        # Use softmax to pick most likely translation word embeddings
+        output = log_softmax(self.linear(output), dim=2)
+
+        return output, hidden
 
 
 
 if __name__ == '__main__':
     # params, confgurable
-    hidden_size = 10
-    output_size = 1000
 
-    decoder = build_decoder(hidden_size, output_size)
-    # test forward
-    decoder = build_decoder(hidden_size, output_size, mode='gru')
-    # test forward
+    from args import get_args
+    from dataset import Dataset
 
+    args = get_args()
+
+    dataset = Dataset.load_from_args(args)
+
+    decoder = build_decoder(args, dataset.vocab)
+
+    args.decoder_mode = 'gru'
+    decoder = build_decoder(args, dataset.vocab)
+
+    args.decoder_mode = 'lol'
     try:
-        de = build_decoder(hidden_size, output_size, mode='lol')
+        decoder = build_decoder(args, dataset.vocab)
     except ValueError:
-        pass
+        print('Exception Thrown')

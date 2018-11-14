@@ -15,7 +15,7 @@ def build_attention_model(args):
     """Builds the attention model to params."""
 
     if args.attention_mode is None:
-        return Attention()
+        return None
     elif args.attention_mode is 'dot':
         return None
     elif args.attention_mode is 'concat':
@@ -24,13 +24,13 @@ def build_attention_model(args):
         raise ValueError('Invalid attention mode: %s' % (args.attention_mode))
 
 
-# IDENTITY
-class Attention(Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, input):
-        return input
+# # IDENTITY
+# class Attention(Module):
+#     def __init__(self):
+#         super().__init__()
+#
+#     def forward(self, *args):
+#         return args
 
 
 # CONCAT
