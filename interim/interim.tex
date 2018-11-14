@@ -350,13 +350,12 @@ otherwise \cite{lamb2016professor}.
 
 %------------------------------------------------
 
-\section{Planned Experiments}
-
+\section{Current Status and\\Expectation}
+%Where are we at now + what are we going to do.
 
 %------------------------------------------------
 
-\section{Current Status and\\Expectation}
-%Where are we at now + what are we going to do.
+
 \section{Planned Experiments}
 \begin{figure*}[ht]
     \centering
@@ -385,6 +384,122 @@ otherwise \cite{lamb2016professor}.
     \label{fig:model-experiments}
 \end{figure*}
 %------------------------------------------------
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (encoder) {Encoder};
+    \node[rectangle, below=2cm of encoder] (decoder) {Decoder};
+    \node[rectangle, above=0.75cm of encoder, xshift=-1cm] (s) {$source$};
+    \node[rectangle, above=0.75cm of encoder, xshift=1cm] (hidden1) {$hidden$};
+    \node[rectangle, below=0.75cm of encoder, xshift=-1cm] (out1) {$output$};
+    \node[rectangle, below=0.75cm of encoder, xshift=1cm] (hidden2) {$hidden$};
+    \node[rectangle, right=0.75cm of hidden2] (t) {$target$};
+    \node[rectangle, below=0.75cm of decoder, xshift=-1cm] (out2) {$output$};
+    \node[rectangle, below=0.75cm of decoder, xshift=1cm] (hidden3) {$hidden$};
+
+    % Connect the nodes
+    \edge {s, hidden1} {encoder};
+    \edge {encoder} {out1, hidden2};
+    \edge {out1, hidden2, t} {decoder};
+    \edge {decoder} {out2, hidden3};
+
+  \end{tikzpicture}
+  \caption{Model Architecture Overview for Encoder-Decoder.}
+  \label{fig:encoder-decoder}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (rnn) {RNN/GRU};
+    \node[rectangle, below=0.75cm of rnn, xshift=-1cm] (out) {$output$};
+    \node[rectangle, below=0.75cm of rnn, xshift=1cm] (hidden2) {$hidden$};
+    \node[rectangle, above=0.75cm of rnn, xshift=-1cm] (embed) {Embed};
+    \node[rectangle, above=0.75cm of embed] (input) {$input$};
+    \node[rectangle, right=0.75cm of input] (hidden1) {$hidden$};
+
+    % Connect the nodes
+    \edge {input} {embed};
+    \edge {embed, hidden1} {rnn};
+    \edge {rnn} {out, hidden2};
+
+  \end{tikzpicture}
+  \caption{Model Architecture for Encoder.}
+  \label{fig:encoder}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (rnn) {RNN/GRU};
+    \node[rectangle, above=0.75cm of rnn] (attn) {Attn};
+    \node[rectangle, above=0.75cm of attn] (embed) {Embed};
+    \node[rectangle, above=0.75 of embed] (input) {$input$};
+    \node[rectangle, right=1cm of input] (hidden1) {$hidden$};
+    \node[rectangle, left=1cm of input] (encoder) {$encoding$};
+    \node[rectangle, below=0.75cm of rnn] (linear) {Linear};
+    \node[rectangle, below=0.75cm of linear] (logs) {Log Softmax};
+    \node[rectangle, below=0.75cm of logs] (out) {$output$};
+    \node[rectangle, right=1cm of out] (hidden2) {$hidden$};
+
+    % Connect the nodes
+    \edge {input} {embed};
+    \edge {encoder, embed, hidden1} {attn};
+    \edge {attn, hidden1} {rnn};
+    \edge {rnn} {linear, hidden2};
+    \edge {linear} {logs};
+    \edge {logs} {out};
+
+  \end{tikzpicture}
+  \caption{Model Architecture for Decoder.}
+  \label{fig:decoder}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (embed) {$embeddings$};
+    \node[rectangle, below=0.75cm of embed] (relu) {ReLU};
+    \node[rectangle, below=0.75cm of relu] (out) {$output$};
+
+    % Connect the nodes
+    \edge {embed} {relu};
+    \edge {relu} {out};
+
+  \end{tikzpicture}
+  \caption{Model Architecture for No Attention Layer.}
+  \label{fig:no-attn}
+\end{figure}
+
+
+% \begin{figure}
+%   \centering
+%   \begin{tikzpicture}
+%
+%     % Define nodes
+%     \node[rectangle] (embed) {$embeddings$};
+%     \node[rectangle, below=0.75cm of embed] (relu) {ReLU};
+%     \node[rectangle, below=0.75cm of relu] (out) {$output$};
+%
+%     % Connect the nodes
+%     \edge {embed} {relu};
+%     \edge {relu} {out};
+%
+%   \end{tikzpicture}
+%   \caption{Model Architecture for No Attention Layer.}
+%   \label{fig:concat-attn}
+% \end{figure}
 
 % References
 \bibliographystyle{abbrv}
