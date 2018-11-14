@@ -2,6 +2,7 @@ from nltk.tokenize import word_tokenize
 import spacy
 import logging
 from random import shuffle
+from glob import glob
 
 """File for preprocessing data, and merging"""
 
@@ -74,8 +75,7 @@ if __name__ == '__main__':
         file_name = PROCESSED_PATH + 'modern/' + get_file_name(play)
         with open(file_name, 'w') as outfile:
             for sentence in processed:
-                new_sentence = "<SOS> " + sentence + " <EOS>"
-                outfile.write("%s\n" % new_sentence)
+                outfile.write("%s\n" % entence)
 
     # Original Process
     original_files = get_files(ORIGINAL_PATH)
@@ -85,8 +85,7 @@ if __name__ == '__main__':
         file_name = PROCESSED_PATH + 'original/' + get_file_name(play)
         with open(file_name, 'w') as outfile:
             for sentence in processed:
-                new_sentence = "<SOS> " + sentence + " <EOS>"
-                outfile.write("%s\n" % new_sentence)
+                outfile.write("%s\n" % sentence)
 
     # Merge Modern
     modern_files = sorted(get_files(PROCESSED_PATH + 'modern/'))
