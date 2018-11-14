@@ -62,14 +62,12 @@ class Trainer:
         self._timer = Timer()
 
         for self._epoch in range(self._epoch + 1, self._num_epochs + 1):
-            # count = 0
             for batch in self._dataset.training_batches():
                 loss = \
                     self.model.train(*batch, self._optimizer, self._criterion,
                                      self._teacher_forcing_chance)
                 self._total_loss += loss
-                # print(count)
-                count += 1
+
             if self._epoch % self._log_every == 0:
                 self._log()
 

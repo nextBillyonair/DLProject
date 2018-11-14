@@ -44,7 +44,11 @@ def get_args():
                        default=DEV_PATH, help='dev sentences')
     parser.add_argument('--test-file', type=FileType('r'),
                        default=TEST_PATH, help='test sentences')
-    parser.add_argument('--train-batch-size', type=int, default=128)
+    parser.add_argument('--train-batch-size', type=int, default=128,
+                        help='sets the training batch size')
+    parser.add_argument('--reverse', default='False',
+                        choices=['True', 'False'],
+                        help='if True reverses source and target reading')
 
     # MAX LEN
     parser.add_argument('--max-length', type=int, default=500,
@@ -68,7 +72,9 @@ def get_args():
 
 
     # parse and return
-    return parser.parse_args()
+    args = parser.parse_args()
+    args.reverse = True if args.reverse == 'True' else False
+    return args
 
 
 if __name__ == '__main__':

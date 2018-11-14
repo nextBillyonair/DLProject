@@ -86,7 +86,7 @@ class DecoderRNN(Module):
         if self.attention is not None:
             attended, _ = self.attention(embedding, hidden, encoder_output)
         else:
-            pass
+            attended = relu(embedding)
             # ????????
 
         # Apply non-linear then RNN with hidden from encoder (later, decoder)
@@ -142,7 +142,7 @@ class DecoderGRU(Module):
             attended, _ = self.attention(embedding, hidden, encoder_output)
         else:
             # ???????
-            pass
+            attended = relu(embedding)
         # Apply non-linear then GRU with hidden from encoder (later, decoder)
         # print('DECODER')
         # print('A|H', attended.size(), hidden.size())

@@ -10,18 +10,26 @@ END_OF_SENTENCE_INDEX = 1
 
 class Bivocabulary:
     @classmethod
-    def create(cls, source_language, target_language):
+    def create(cls, source_language, target_language, reverse=False):
         source = Vocabulary(source_language)
         target = Vocabulary(target_language)
 
-        return cls(source, target)
+        if reverse:
+            cls(target, source, reverse)
 
-    def __init__(self, source, target):
+        return cls(source, target, reverse)
+
+    def __init__(self, source, target, reverse=False):
         self.source = source
         self.target = target
+        self.reverse = reverse
 
     def add_sentence_pair(self, pair):
-        source, target = pair.split('|||', 1)
+        target = source = None
+        if self.reverse:
+            target, source = pair.split('|||', 1)
+        else:
+            source, target = pair.split('|||', 1)
 
         source_indices = self.source.add_sentence(source)
         target_indices = \

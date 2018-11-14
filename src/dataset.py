@@ -14,7 +14,8 @@ TEST_PATH='../data/split/test.snt.aligned'
 class Dataset:
     @classmethod
     def load_from_args(cls, args):
-        vocab = Bivocabulary.create(args.source_language, args.target_language)
+        vocab = Bivocabulary.create(args.source_language, args.target_language,
+                                    args.reverse)
 
         train_sentences = args.train_file
 
@@ -23,7 +24,11 @@ class Dataset:
         dev_pairs = (vocab.add_sentence_pair(pair)
                      for pair in args.dev_file)
 
-        test_sources = (vocab.source.add_sentence(sentence.split('|||', 1)[0])
+        index = 0
+        if args.reverse:
+            index = 1
+
+        test_sources = (vocab.source.add_sentence(sentence.split('|||', 1)[index])
                         for sentence in args.test_file)
         test_tensors = tuple(torch.tensor(s, dtype=torch.long).unsqueeze(0)
                              for s in test_sources)
