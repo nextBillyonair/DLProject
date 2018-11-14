@@ -142,10 +142,10 @@ class DecoderGRU(Module):
             # ???????
             pass
         # Apply non-linear then GRU with hidden from encoder (later, decoder)
-        # print('DECODER')
-        # print('A|H', attended.size(), hidden)
+        print('DECODER')
+        print('A|H', attended.size(), hidden)
         output, hidden = self.gru(attended, hidden)
-        # print('\n')
+        print('\n')
         # Use softmax to pick most likely translation word embeddings
         output = log_softmax(self.linear(output), dim=2)
 

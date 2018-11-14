@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Dropout, Embedding, Linear, Module, GRU
+from torch.nn import Dropout, Embedding, Linear, Module, GRU, RNN
 from torch.nn.functional import relu, log_softmax, softmax
 
 """File for handiling Encoders and their construction/init"""

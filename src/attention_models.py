@@ -43,25 +43,25 @@ class ConcatAttention(Module):
 
     def forward(self, input, hidden, attendable):
         # Weights are learned from input and hidden state
-        # print('\n')
-        # print('ATTENTION DEBUG:')
-        # print('I|H|A', input.size(), hidden[0].size(), attendable.size())
+        print('\n')
+        print('ATTENTION DEBUG:')
+        print('I|H|A', input.size(), hidden[0].size(), attendable.size())
         hidden = hidden[0].view(*input.size())
         input_with_hidden = torch.cat((input, hidden), 2)
 
         sentence_length = attendable.size(1)
-        # print('IWH|SL', input_with_hidden.size(), sentence_length)
+        print('IWH|SL', input_with_hidden.size(), sentence_length)
         weights = log_softmax(self.get_weights(input_with_hidden),
                               dim=2)[:, :, :sentence_length]
-        # print('W|A', weights.size(), attendable.size())
+        print('W|A', weights.size(), attendable.size())
         # Apply weights
         with_attention = torch.bmm(weights, attendable)
 
         # Apply attention to input
         input_with_attention = torch.cat((input, with_attention), 2)
-        # print('IWA', input_with_attention.size())
+        print('IWA', input_with_attention.size())
         attended = self.pay_attention(input_with_attention)
-        # print('DONE\n')
+        print('DONE\n')
 
         return relu(attended), weights
 
