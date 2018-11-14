@@ -385,9 +385,21 @@ TODO=No current attempt made.
     \caption{Current Progress}
     \label{fig:current-status}
 \end{figure*}
+
 %------------------------------------------------
 
-\begin{figure}
+% References
+\bibliographystyle{abbrv}
+\bibliography{interim}
+
+%------------------------------------------------
+
+\clearpage
+\appendix
+\onecolumn
+\section{Model Architecture Diagrams}
+\subsection{Encoder-Decoder}
+\begin{figure}[ht]
   \centering
   \begin{tikzpicture}
 
@@ -412,9 +424,9 @@ TODO=No current attempt made.
   \caption{Model Architecture Overview for Encoder-Decoder.}
   \label{fig:encoder-decoder}
 \end{figure}
-
-
-\begin{figure}
+\newpage
+\subsection{Encoder}
+\begin{figure}[ht]
   \centering
   \begin{tikzpicture}
 
@@ -436,8 +448,8 @@ TODO=No current attempt made.
   \label{fig:encoder}
 \end{figure}
 
-
-\begin{figure}
+\subsection{Decoder}
+\begin{figure}[ht]
   \centering
   \begin{tikzpicture}
 
@@ -465,8 +477,9 @@ TODO=No current attempt made.
   \caption{Model Architecture for Decoder.}
   \label{fig:decoder}
 \end{figure}
-
-\begin{figure}
+\newpage
+\subsection{Attention Mechanisms}
+\begin{figure}[ht]
   \centering
   \begin{tikzpicture}
 
@@ -485,26 +498,36 @@ TODO=No current attempt made.
 \end{figure}
 
 
-% \begin{figure}
-%   \centering
-%   \begin{tikzpicture}
-%
-%     % Define nodes
-%     \node[rectangle] (embed) {$embeddings$};
-%     \node[rectangle, below=0.75cm of embed] (relu) {ReLU};
-%     \node[rectangle, below=0.75cm of relu] (out) {$output$};
-%
-%     % Connect the nodes
-%     \edge {embed} {relu};
-%     \edge {relu} {out};
-%
-%   \end{tikzpicture}
-%   \caption{Model Architecture for No Attention Layer.}
-%   \label{fig:concat-attn}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
 
-% References
-\bibliographystyle{abbrv}
-\bibliography{interim}
+    % Define nodes
+    \node[rectangle] (cat2) {Cat};
+    \node[rectangle, below=0.75cm of cat2] (linear2) {Linear};
+    \node[rectangle, below=0.75cm of linear2] (relu) {ReLU};
+    \node[rectangle, below=0.75cm of relu] (out) {$output$};
+    \node[rectangle, above=0.75cm of cat2, xshift=1cm] (bmm) {BMM};
+    \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (logs) {Log Softmax};
+    \node[rectangle, above=0.75cm of logs] (linear1) {Linear};
+    \node[rectangle, above=0.75cm of linear1] (cat1) {Cat};
+    \node[rectangle, above=0.75cm of cat1, xshift=-3.5cm] (embed) {$embeddings$};
+    \node[rectangle, above=0.75cm of cat1] (hidden) {$hidden$};
+    \node[rectangle, right=0.75cm of hidden] (encoding) {$encodings$};
+
+    % Connect the nodes
+    \edge {embed, hidden} {cat1};
+    \edge {cat1} {linear1};
+    \edge {linear1} {logs};
+    \edge {logs, encoding} {bmm};
+    \edge {bmm, embed} {cat2};
+    \edge {cat2} {linear2};
+    \edge {linear2} {relu};
+    \edge {relu} {out};
+
+  \end{tikzpicture}
+  \caption{Model Architecture for Concat Attention Layer.}
+  \label{fig:concat-attn}
+\end{figure}
 
 \end{document}
