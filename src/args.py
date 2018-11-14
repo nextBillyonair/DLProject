@@ -22,14 +22,14 @@ def get_args():
                         help='number of LSTM layers in the encoder')
     parser.add_argument('--decoder-layers', default=1, type=int,
                         help='number of LSTM layers in the decoder')
-    parser.add_argument('--encoder-mode', default='baseline',
+    parser.add_argument('--encoder-mode', default='bigru',
                         choices=['rnn','gru','bigru'],
                         help='type of encoder used')
-    parser.add_argument('--decoder-mode', default='baseline',
+    parser.add_argument('--decoder-mode', default='gru',
                         choices=['rnn','gru'],
                         help='type of decoder used')
-    parser.add_argument('--attention-mode', default=None,
-                        choices=[None,'dot','concat'],
+    parser.add_argument('--attention-mode', default='concat',
+                        choices=['none','dot','concat'],
                         help='type of attention used')
 
 

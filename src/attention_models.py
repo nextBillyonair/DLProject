@@ -14,7 +14,7 @@ None - identity
 def build_attention_model(args, hidden_size, bidirectional_encoder):
     """Builds the attention model to params."""
 
-    if args.attention_mode is None:
+    if args.attention_mode == 'none':
         return None
     elif args.attention_mode == 'dot':
         return None
