@@ -21,17 +21,17 @@ def build_decoder(args, vocab):
         output_size = len(vocab.target)
 
         # HANDLE ATTENTION HERE
-        attention = build_attention_model(args)
+        attention = build_attention_model(args, args.hidden_size)
 
         device = torch.device('cpu')
 
-        if args.decoder_mode is 'baseline':
+        if args.decoder_mode == 'rnn':
             return DecoderRNN(args.hidden_size, output_size, device,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
                               num_layers=args.decoder_layers,
                               attention=attention)
-        elif args.decoder_mode is 'gru':
+        elif args.decoder_mode == 'gru':
             return DecoderGRU(args.hidden_size, output_size, device,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
@@ -67,7 +67,7 @@ class DecoderRNN(Module):
                        dropout=lstm_dropout, batch_first=True)
         self.linear = Linear(hidden_size, output_size)
 
-    def forward(self, encoder_outputs, input=None, hidden=None):
+    def forward(self, input, hidden, encoder_output):
         """
         Runs the forward pass of the decoder.
         Returns the log_softmax, hidden state, and attn_weights.
@@ -80,8 +80,12 @@ class DecoderRNN(Module):
         embedding = self.dropout(self.word_embedding(input))
 
         # Compute attention weights and apply them
+        attended = None
         if self.attention is not None:
             attended, _ = self.attention(embedding, hidden, encoder_output)
+        else:
+            pass
+            # ????????
 
         # Apply non-linear then RNN with hidden from encoder (later, decoder)
         output, hidden = self.rnn(attended, hidden)
@@ -117,7 +121,7 @@ class DecoderGRU(Module):
                        dropout=lstm_dropout, batch_first=True)
         self.linear = Linear(hidden_size, output_size)
 
-    def forward(self, encoder_outputs, input=None, hidden=None):
+    def forward(self, input, hidden, encoder_output):
         """
         Runs the forward pass of the decoder.
         Returns the log_softmax, hidden state, and attn_weights.
@@ -131,12 +135,17 @@ class DecoderGRU(Module):
         embedding = self.dropout(self.word_embedding(input))
 
         # Compute attention weights and apply them
+        attended = None
         if self.attention is not None:
             attended, _ = self.attention(embedding, hidden, encoder_output)
-
+        else:
+            # ???????
+            pass
         # Apply non-linear then GRU with hidden from encoder (later, decoder)
+        # print('DECODER')
+        # print('A|H', attended.size(), hidden)
         output, hidden = self.gru(attended, hidden)
-
+        # print('\n')
         # Use softmax to pick most likely translation word embeddings
         output = log_softmax(self.linear(output), dim=2)
 

@@ -1,5 +1,5 @@
 import torch
-from torch.nn import NLLLoss
+from loss import MaskedNLLLoss
 from torch.optim import Adam
 import random
 import sys
@@ -22,7 +22,7 @@ class Trainer:
             return trainer
 
         optimizer = Adam(model.parameters(), lr=args.initial_learning_rate)
-        criterion = NLLLoss()
+        criterion = MaskedNLLLoss()
 
         return cls(model, dataset, optimizer, criterion,
                    num_epochs=args.epochs,

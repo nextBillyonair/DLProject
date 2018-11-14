@@ -11,6 +11,7 @@ def main():
 
     dataset = Dataset.load_from_args(args)
     print(f'Loaded dataset: {dataset.info()}', file=sys.stderr)
+
     model = Model.create_from_args(args, dataset.vocab, args.max_length)
     trainer = Trainer.create_from_args(args, model, dataset)
 

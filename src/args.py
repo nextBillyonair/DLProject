@@ -23,10 +23,10 @@ def get_args():
     parser.add_argument('--decoder-layers', default=1, type=int,
                         help='number of LSTM layers in the decoder')
     parser.add_argument('--encoder-mode', default='baseline',
-                        choices=['baseline','gru','bidirectional'],
+                        choices=['rnn','gru','bigru'],
                         help='type of encoder used')
     parser.add_argument('--decoder-mode', default='baseline',
-                        choices=['baseline','gru'],
+                        choices=['rnn','gru'],
                         help='type of decoder used')
     parser.add_argument('--attention-mode', default=None,
                         choices=[None,'dot','concat'],
@@ -47,13 +47,13 @@ def get_args():
     parser.add_argument('--train-batch-size', type=int, default=128)
 
     # MAX LEN
-    parser.add_argument('--max-length', type=int, default=15,
+    parser.add_argument('--max-length', type=int, default=500,
                         help='max length of a decoded output sentence')
 
     # TRAINING ARGS
     parser.add_argument('--epochs', default=500, type=int,
                        help='total number of epochs to train on')
-    parser.add_argument('--log-every', default=10, type=int,
+    parser.add_argument('--log-every', default=2, type=int,
                        help='log loss info every this many epochs')
     parser.add_argument('--checkpoint-every', default=100, type=int,
                        help='write out checkpoint every this many epochs')

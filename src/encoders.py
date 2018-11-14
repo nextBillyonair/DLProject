@@ -19,15 +19,15 @@ def build_encoder(args, vocab):
 
         device = torch.device('cpu')
 
-        if args.encoder_mode is 'baseline':
+        if args.encoder_mode == 'rnn':
             return EncoderRNN(input_size, args.hidden_size, device,
                               dropout=args.lstm_dropout,
                               num_layers=args.encoder_layers)
-        elif args.encoder_mode is 'gru':
+        elif args.encoder_mode == 'gru':
             return EncoderGRU(input_size, args.hidden_size, device,
                               dropout=args.lstm_dropout,
                               num_layers=args.encoder_layers)
-        elif args.encoder_mode is 'bidirectional':
+        elif args.encoder_mode == 'bigru':
             return EncoderBidirectional(input_size, args.hidden_size, device,
                                         dropout=args.lstm_dropout,
                                         num_layers=args.encoder_layers)
@@ -43,12 +43,17 @@ class EncoderRNN(Module):
                  dropout=0.1, num_layers=1):
         """Initialize a word embedding and simple RNN encoder."""
         super().__init__()
+        if num_layers == 1:
+            dropout = 0
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.device = device
         self.dropout = dropout
         self.num_layers = num_layers
         # Define layers below, aka embedding + RNN
+        self.word_embedding = Embedding(input_size, hidden_size)
+        self.rnn = RNN(hidden_size, hidden_size, num_layers=num_layers,
+                       dropout=dropout, batch_first=True)
 
     def forward(self, input, hidden=None):
         """
@@ -58,7 +63,9 @@ class EncoderRNN(Module):
         # input tensor -> size (N, B, input_size)
         # hidden -> depends on RNN, see docs
         # use asserts to make sure correct sizes!
-        return input, hidden
+        output, hidden = self.rnn(self.word_embedding(input), hidden)
+        # take first in bi
+        return output, hidden
 
 
 class EncoderGRU(Module):
@@ -68,12 +75,17 @@ class EncoderGRU(Module):
                  dropout=0.1, num_layers=1):
         """Initialize a word embedding and GRU encoder."""
         super().__init__()
+        if num_layers == 1:
+            dropout = 0
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.device = device
         self.dropout = dropout
         self.num_layers = num_layers
         # Define layers below, aka embedding + GRU
+        self.word_embedding = Embedding(input_size, hidden_size)
+        self.gru = GRU(hidden_size, hidden_size, num_layers=num_layers,
+                       dropout=dropout, batch_first=True)
 
     def forward(self, input, hidden=None):
         """
@@ -83,7 +95,9 @@ class EncoderGRU(Module):
         # input tensor -> size (N, B, input_size)
         # hidden -> depends on RNN, see docs
         # use asserts to make sure correct sizes!
-        return input, hidden
+        output, hidden = self.gru(self.word_embedding(input), hidden)
+        # take first in bi
+        return output, hidden
 
 
 class EncoderBidirectional(Module):
@@ -93,12 +107,17 @@ class EncoderBidirectional(Module):
                  dropout=0.1, num_layers=1):
         """Initialize a word embedding and bi-directional GRU encoder."""
         super().__init__()
+        if num_layers == 1:
+            dropout = 0
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.device = device
         self.dropout = dropout
         self.num_layers = num_layers
         # Define layers below, aka embedding + BiGRU
+        self.word_embedding = Embedding(input_size, hidden_size)
+        self.gru = GRU(hidden_size, hidden_size, num_layers=num_layers,
+                       dropout=dropout, bidirectional=True, batch_first=True)
 
     def forward(self, input, hidden=None):
         """
@@ -108,7 +127,9 @@ class EncoderBidirectional(Module):
         # input tensor -> size (N, B, input_size)
         # hidden -> depends on RNN, see docs
         # use asserts to make sure correct sizes!
-        return input, hidden
+        output, hidden = self.gru(self.word_embedding(input), hidden)
+        # take first in bi
+        return output, hidden[:len(hidden)//2]
 
 
 
