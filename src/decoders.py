@@ -21,25 +21,24 @@ def build_decoder(args, vocab):
         output_size = len(vocab.target)
 
         # HANDLE ATTENTION HERE
-        attention = build_attention_model(args, args.hidden_size)
+        bidirectional_encoder = True if args.encoder_mode == 'bigru' else False
+        attention = build_attention_model(args, args.hidden_size,
+                                          bidirectional_encoder)
 
         device = torch.device('cpu')
-        bidirectional_encoder = True if args.encoder_mode == 'bigru' else False
 
         if args.decoder_mode == 'rnn':
             return DecoderRNN(args.hidden_size, output_size, device,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
                               num_layers=args.decoder_layers,
-                              attention=attention,
-                              bidirectional_encoder=bidirectional_encoder)
+                              attention=attention)
         elif args.decoder_mode == 'gru':
             return DecoderGRU(args.hidden_size, output_size, device,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
                               num_layers=args.decoder_layers,
-                              attention=attention,
-                              bidirectional_encoder=bidirectional_encoder)
+                              attention=attention)
         else:
             raise ValueError('Invalid decoder mode: %s' % (args.decoder_mode))
 
@@ -50,7 +49,7 @@ class DecoderRNN(Module):
 
     def __init__(self, hidden_size, output_size, device,
                  embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
-                 attention=None, bidirectional_encoder=False):
+                 attention=None):
         """Initialize a word embedding and simple RNN decoder."""
         super().__init__()
         if num_layers == 1:
@@ -62,7 +61,6 @@ class DecoderRNN(Module):
         self.lstm_dropout = lstm_dropout
         self.num_layers = num_layers
         self.attention = attention
-        self.bidirectional_encoder = bidirectional_encoder
         # Define layers below, aka embedding + RNN
         self.word_embedding = Embedding(output_size, hidden_size)
         self.dropout = Dropout(embedding_dropout)
@@ -105,7 +103,7 @@ class DecoderGRU(Module):
 
     def __init__(self, hidden_size, output_size, device,
                  embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
-                 attention=None, bidirectional_encoder=False):
+                 attention=None):
         """Initialize a word embedding and simple GRU decoder."""
         super().__init__()
         if num_layers == 1:
@@ -117,7 +115,6 @@ class DecoderGRU(Module):
         self.lstm_dropout = lstm_dropout
         self.num_layers = num_layers
         self.attention = attention
-        self.bidirectional_encoder = bidirectional_encoder
         # Define layers below, aka embedding + GRU
         self.word_embedding = Embedding(output_size, hidden_size)
         self.dropout = Dropout(embedding_dropout)
@@ -147,10 +144,10 @@ class DecoderGRU(Module):
             # ???????
             pass
         # Apply non-linear then GRU with hidden from encoder (later, decoder)
-        print('DECODER')
-        print('A|H', attended.size(), hidden.size())
+        # print('DECODER')
+        # print('A|H', attended.size(), hidden.size())
         output, hidden = self.gru(attended, hidden)
-        print('\n')
+        # print('\n')
         # Use softmax to pick most likely translation word embeddings
         output = log_softmax(self.linear(output), dim=2)
 
