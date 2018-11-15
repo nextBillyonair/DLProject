@@ -6,15 +6,16 @@ from torch.nn.functional import relu, log_softmax
 from vocab import START_OF_SENTENCE_INDEX, END_OF_SENTENCE_INDEX
 from encoders import build_encoder
 from decoders import build_decoder
+from utils import get_default_device
 
 
 class Model:
     @classmethod
     def create_from_args(cls, args, vocab, max_length):
         # change
-        encoder = build_encoder(args, vocab)
+        encoder = build_encoder(args, vocab).to(args.device)
 
-        decoder = build_decoder(args, vocab)
+        decoder = build_decoder(args, vocab).to(args.device)
 
         return cls(encoder, decoder, max_length)
 
@@ -38,6 +39,7 @@ class Model:
         assert len(target_lens.size()) == 1
         assert source.size(0) == target.size(0) == target_lens.size(0)
 
+        device = get_default_device()
         optimizer.zero_grad()
 
         # Toggle training mode so dropout is enabled
@@ -48,7 +50,8 @@ class Model:
         encoder_output, hidden = self._encoder(source, None)
 
         # Run encoder output through decoder to build up target_tensor
-        last_translated_tokens = torch.zeros(len(source), 1, dtype=torch.long)
+        last_translated_tokens = torch.zeros(len(source), 1,
+                                             dtype=torch.long, device=device)
         last_translated_tokens[:, 0] = START_OF_SENTENCE_INDEX
 
         loss = 0.0
@@ -80,6 +83,8 @@ class Model:
     def translate(self, source):
         assert len(source.size()) == 2
 
+        device = get_default_device()
+
         # Toggle eval mode to disable dropout
         self._encoder.eval()
         self._decoder.eval()
@@ -88,7 +93,7 @@ class Model:
             encoder_output, hidden = self._encoder(source, None)
 
             translation = torch.zeros(len(source), self._max_length + 1, 1,
-                                      dtype=torch.long)
+                                      dtype=torch.long, device=device)
             translation[:, 0, 0] = START_OF_SENTENCE_INDEX
 
             for i in range(self._max_length):

@@ -1,6 +1,18 @@
 from itertools import islice
 from nltk.translate.bleu_score import corpus_bleu as nltk_corpus_bleu
 from time import time
+import torch
+
+default_device = None
+
+def set_default_device(device):
+    global default_device
+    default_device = torch.device(device)
+
+def get_default_device():
+    return default_device
+
+set_default_device('cpu')
 
 class Timer:
     def __init__(self):

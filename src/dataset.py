@@ -2,7 +2,7 @@ from itertools import accumulate, chain, groupby
 import random
 import sys
 import torch
-from utils import chunk
+from utils import chunk, get_default_device
 
 from vocab import Bivocabulary
 
@@ -28,9 +28,12 @@ class Dataset:
         if args.reverse:
             index = 1
 
+        device = get_default_device()
+
         test_sources = (vocab.source.add_sentence(sentence.split('|||', 1)[index])
                         for sentence in args.test_file)
-        test_tensors = tuple(torch.tensor(s, dtype=torch.long).unsqueeze(0)
+        test_tensors = tuple(torch.tensor(s, dtype=torch.long,
+                                          device=device).unsqueeze(0)
                              for s in test_sources)
 
         train_batches = _batch_by_source(train_pairs,
@@ -91,15 +94,19 @@ def _batch_by_source(pairs, *, batch_size=None):
 
 
 def _make_minibatch_pair(pairs):
+    device = get_default_device()
+
     sources, targets = map(tuple, zip(*pairs))
 
-    target_lens = torch.tensor([len(target) for target in targets])
+    target_lens = torch.tensor([len(target) for target in targets],
+                               device=device)
     pad_len = target_lens.max().item()
     targets_padded = tuple((target + (0,) * pad_len)[:pad_len]
                            for target in targets)
 
-    source_minibatch = torch.tensor(sources, dtype=torch.long)
-    target_minibatch = torch.tensor(targets_padded, dtype=torch.long)
+    source_minibatch = torch.tensor(sources, dtype=torch.long, device=device)
+    target_minibatch = torch.tensor(targets_padded, dtype=torch.long,
+                                    device=device)
 
     return source_minibatch, target_minibatch, target_lens
 

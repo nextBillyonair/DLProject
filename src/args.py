@@ -2,6 +2,7 @@ from argparse import ArgumentParser, FileType
 import torch
 
 from dataset import TRAIN_PATH, DEV_PATH, TEST_PATH
+from utils import set_default_device, get_default_device
 
 def get_args():
     """Defines All CMD Line Arguments"""
@@ -70,10 +71,17 @@ def get_args():
 
     parser.add_argument('--load-checkpoint', help='training checkpoint to load')
 
+    # GPU USAGE
+    parser.add_argument('--use-gpu', dest='device', action='store_const',
+                        default='cpu', const='cuda',
+                        help='use CPU/CUDA for training/evaluation')
 
     # parse and return
     args = parser.parse_args()
+
+    set_default_device(args.device)
     args.reverse = True if args.reverse == 'True' else False
+
     return args
 
 
