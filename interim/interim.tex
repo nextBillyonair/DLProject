@@ -355,6 +355,11 @@ otherwise \cite{lamb2016professor}.
 Notation: DONE=DONE; TESTING=Works but needs verfication that it does what we
 want it to do; IN PROGRESS=Not fully done but ground work has been laid;
 TODO=No current attempt made.
+
+Initial training is slow, with a Bidirectional GRU Encoder + GRU Decoder +
+Concat Attention estimated at 11-30 minutes per 2 epochs, varying on batch size
+(32 and 128 tested). We expect training to occur over several days and are
+working on making our code GPU compatible.
 %------------------------------------------------
 
 
