@@ -13,9 +13,11 @@ class Model:
     @classmethod
     def create_from_args(cls, args, vocab, max_length):
         # change
-        encoder = build_encoder(args, vocab).to(args.device)
+        device = get_default_device()
 
-        decoder = build_decoder(args, vocab).to(args.device)
+        encoder = build_encoder(args, vocab).to(device)
+
+        decoder = build_decoder(args, vocab).to(device)
 
         return cls(encoder, decoder, max_length)
 
