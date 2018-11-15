@@ -110,11 +110,22 @@ to sequence modeling.
 %------------------------------------------------
 
 \section{Introduction}
-
+We seek to apply a suite of Encoder-Decoder models with varying attention
+mechanisms and teacher forcing rates to a corpus of Modern English - Original
+Shakespeare data. Discussion on our procurement is in Section ~\ref{sec:data}
+and our processing methods in Section ~\ref{sec:preprocess}. We wanted to
+apply a style transfer between the two forms of writing,
+and more specifically test in models currently
+used in decoding languages (Section ~\ref{sec:architecture}) can be used in this
+capcity. We will experment with several model combinations mentioned in Figure
+~\ref{fig:model-experiments} and in the final report detail our sucesses
+and failures. Our current progress in detailed in Figure
+~\ref{fig:current-status}. Diagrams for our models can be found in the appendix.
 
 %------------------------------------------------
 
 \section{Data Procurement}
+\label{sec:data}
 Most of our data was procured from \cite{xu2012paraphrasing}.
 This includes all of Shakespeares plays translated line by line into modern
 English. However, since the data was aligned, not all of the original lines
@@ -142,6 +153,7 @@ The training vocabulary sizes are 11,538 source (original) words and
 %------------------------------------------------
 
 \section{Preprocessing}
+\label{sec:preprocess}
 We describe our data processing algorithms to create test, development,
 and training samples in a simple and easy format.
 \subsection{SOS and EOS}
@@ -162,12 +174,13 @@ to reduce vocabulary size and aggregating the learning of all proper nouns,
 we replace all proper nouns with the following token: propn. Thus our model
 should learn to map propn to propn, and can utilize the encoding to learn the
 most likely token following its usage. We use
-SpaCy's\footnote{\url{https://spacy.io}} nlp models to identiy
+SpaCy's\footnote{\url{https://spacy.io}} nlp models to identify
 proper nouns in each sentence, and replace the tokens.
 
 \subsection{Miscellaneous}
 % lower, nltk tokenizing, spliting punct etc
-Additionally, we lower case all input. We use nltk's tokenization algorithm
+Additionally, we lower case all input. We use the Natural Language ToolKit's
+(NLTK) tokenization algorithm
 to split punctation, contrations, etc for each word.
 
 \subsection{Train, Validation, Test Split}
@@ -245,6 +258,7 @@ of unkown tokens (UNK). We provide statistics for the data.
 %------------------------------------------------
 
 \section{Architectures}
+\label{sec:architecture}
 % go more detailed? or can they not handle the math lol
 % these descriptions are good starters, but we can be mroe detailed.
 We seek to develop several models to improve our translations, incorporating
@@ -292,7 +306,7 @@ Nonetheless, we will present results for our baseline.
         9 & Bidirectional GRU & GRU & Dot & 1.0 \\ \hline
     \end{tabular}
 
-    \caption{Planned Model Experiments}
+    \caption{Planned Model Experiments (Subject to change depending on results)}
     \label{fig:model-experiments}
 \end{figure*}
 
@@ -334,9 +348,21 @@ PyTorch concatenates the resulting tensors, doubling the hidden output size
 of a normal GRU. Other libraries allow for concatenatation, averaging,
 and summing. We use PyTorch's implementation of a bidirectional GRU.
 
+\subsubsection{Implementation}
+All encoders share the same model architecture, except for the recurrent layer.
+We use PyTorch's implementation for the RNN, GRU, and Bidirectional GRU.
+We also add embedding layers. PyTorch's recurrent layers naturally support
+multiple layers and dropout, and can be set through CLI args
+\texttt{--num-layers} and \texttt{--lstm-dropout}. The hidden size is set by
+\texttt{--hidden-size}. The defaults are 1, 0, and 256, respectively.
+
+
 \subsection{Decoders}
+% fill in
 \subsubsection{Baseline RNN}
+% fill in
 \subsubsection{GRU Decoder}
+% fill in
 
 \subsection{Attention Mechanisms}
 Attention mechanisms have been shown to improve sequence to sequence
@@ -410,7 +436,7 @@ on both directions and provide results.
         9 & Teacher Forcing & TESTING & Bill \\ \hline
         10 & Vocabulary Building & DONE & Bill \\ \hline
         11 & Train/Eval Support Code & DONE & Bill \\ \hline
-        12 & GPU Support & TESTING & Riley \\ \hline
+        12 & GPU Support & DONE & Riley \\ \hline
         13 & Experiments & TODO & Morris, Riley \\ \hline
     \end{tabular}
 
