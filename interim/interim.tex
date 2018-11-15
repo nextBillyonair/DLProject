@@ -348,6 +348,10 @@ during initial trainging iterations, but should be backed off to use the
 model's own predicitons, as it will exhibit instability in the translations
 otherwise \cite{lamb2016professor}.
 
+We hope to build in a system to decay the teacher forcing percentage over time,
+instead of our current implementation that checks a random number againist the
+hyperparameter.
+
 %------------------------------------------------
 
 \section{Current Status and\\Expectation}
@@ -356,10 +360,15 @@ Notation: DONE=DONE; TESTING=Works but needs verfication that it does what we
 want it to do; IN PROGRESS=Not fully done but ground work has been laid;
 TODO=No current attempt made.
 
-Initial training is slow, with a Bidirectional GRU Encoder + GRU Decoder +
-Concat Attention estimated at 11-30 minutes per 2 epochs, varying on batch size
-(32 and 128 tested). We expect training to occur over several days and are
-working on making our code GPU compatible.
+Initial training is slow on a cpu, with a Bidirectional GRU Encoder
++ GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
+varying on batch size (32 and 128 tested). In order to improve training time,
+we have allowed an optional parameter to use a gpu. Inital run on batch size 128
+yielded a training speed of 111 seconds per 2 epochs.
+
+We will automate all planned experiments, examine the results, and use the best
+model as our style-transfer. We will then begin our final training session
+on both directions and provide results.
 %------------------------------------------------
 
 
