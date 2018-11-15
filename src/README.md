@@ -7,8 +7,7 @@
 
 Training:
 ```
-$ python3 -O seq2seq.py --encoder-layers 4 --decoder-layers 4 \
-    --train-batch-size 2048
+$ python3 -O main.py [CLI ARGS]
 ```
 
 Notable CLI arguments for model building:
@@ -67,8 +66,9 @@ attention_models.py - Attention Layers
 dataset.py - Handles vocab building + batching, etc for data
 decoders.py - All Decoder Types
 encoders.py - All Encoder Types
-model.py - Encapsulates Encoder-Decoder model
-seq2seq.py - Main file
+loss.py - Extended loss function to handle masking
+model.py - Encapsulates Encoder-Decoder model (+ train)
+main.py - Main file
 trainer.py - File to handle interactions with model (train, eval, translate)
 utils.py - methods for timing, chunking, BLEU metrics
 vocab.py - Builds vocab, handles token indexing
