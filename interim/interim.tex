@@ -120,7 +120,25 @@ This includes all of Shakespeares plays translated line by line into modern
 English. However, since the data was aligned, not all of the original lines
 from the plays are included (the sentences could not be aligned properly).
 \footnote{\url{https://github.com/cocoxu/Shakespeare}}
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{File}
+          & \textbf{Line Count}\\
+        \hline
+        train.snt.aligned & 18,444 \\ \hline
+        dev.snt.aligned & 2,107 \\ \hline
+        test.snt.aligned & 528 \\ \hline
+        total & 21,079 \\ \hline
+    \end{tabular}
 
+    \caption{Data Pair Counts for Shakespeare--English Corpus}
+    \label{fig:data-lines}
+\end{figure}
+
+The training vocabulary sizes are 11,538 source (original) words and
+9,024 target (modern) words.
 %------------------------------------------------
 
 \section{Preprocessing}
@@ -370,7 +388,6 @@ We will automate all planned experiments, examine the results, and use the best
 model as our style-transfer. We will then begin our final training session
 on both directions and provide results.
 %------------------------------------------------
-
 
 \section{Planned Experiments}
 \begin{figure*}[ht]
