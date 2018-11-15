@@ -58,7 +58,7 @@ def get_args():
     # TRAINING ARGS
     parser.add_argument('--epochs', default=500, type=int,
                        help='total number of epochs to train on')
-    parser.add_argument('--log-every', default=2, type=int,
+    parser.add_argument('--log-every', default=10, type=int,
                        help='log loss info every this many epochs')
     parser.add_argument('--checkpoint-every', default=100, type=int,
                        help='write out checkpoint every this many epochs')
@@ -68,7 +68,6 @@ def get_args():
                        help='initial learning rate')
     parser.add_argument('--teacher-forcing-chance', default=0, type=float,
                        help='percent of batches on which to teacher force')
-
     parser.add_argument('--load-checkpoint', help='training checkpoint to load')
 
     # GPU USAGE
@@ -79,7 +78,9 @@ def get_args():
     # parse and return
     args = parser.parse_args()
 
+    # Set device for all tensors + models
     set_default_device(args.device)
+    # Convert to bool
     args.reverse = True if args.reverse == 'True' else False
 
     return args

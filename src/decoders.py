@@ -141,13 +141,11 @@ class DecoderGRU(Module):
         if self.attention is not None:
             attended, _ = self.attention(embedding, hidden, encoder_output)
         else:
-            # ???????
             attended = relu(embedding)
+
         # Apply non-linear then GRU with hidden from encoder (later, decoder)
-        # print('DECODER')
-        # print('A|H', attended.size(), hidden.size())
         output, hidden = self.gru(attended, hidden)
-        # print('\n')
+
         # Use softmax to pick most likely translation word embeddings
         output = log_softmax(self.linear(output), dim=2)
 
