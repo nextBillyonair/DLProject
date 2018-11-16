@@ -427,8 +427,49 @@ hyperparameter.
 \end{figure*}
 
 %------------------------------------------------
+
 \section{Roadblocks and Problems}
-% data reorder + GPU/CPU training
+We have hit two major roadblocks since our proposal, and discuss our apporaches
+to mediating the issues.
+
+\subsection{Data Learnability}
+
+
+\subsection{GPU/CPU Training Times}
+Systems like these take a long time to learn the data, and one of our major
+roadblocks is training time. For a normal CPU run, 2 epochs takes 11-30 minutes,
+depending on computer specs. This would put our experiments total running time
+at over 2-3 days per experiment (18-27 days total). This does not give us much
+leeway to verify our
+apporach. Hence, we describe in Section ~\ref{sec:gpu} our intial resutls
+in GPU compatability and speedups.
+
+%------------------------------------------------
+
+\section{Implementation Details}
+\subsection{Batching}
+In order to faciliate faster training, and less noisy gradients, we felt it
+imperative to introduce batching of sentences. We batched similiar sentences
+according to source sentence length (encoder input). This allows us to reduce
+the number of batches to loop through and take advantage of torch operations.
+
+\subsection{GPU Compatability}
+\label{sec:gpu}
+Initial training is slow on a cpu, with a Bidirectional GRU Encoder
++ GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
+varying on batch size (32 and 128 tested). In order to improve training time,
+we have allowed an optional parameter to use a gpu. Inital run on batch size 128
+yielded a training speed of 111 seconds per 2 epochs. Hence our experiments will
+take only 4-6 days, and can be distributed across multiple GPUs for even less
+time.
+
+Our group has an estimated 3 GPUs (Morris:1; Riley:2). This will help us
+distribute our experiments across several computers and allow us time to adjust
+experiments based upon our initial findings. If need be, we will us Google
+credits to fund more experiments.
+
+%------------------------------------------------
+
 
 %------------------------------------------------
 
@@ -438,11 +479,7 @@ Notation: DONE=DONE; TESTING=Works but needs verfication that it does what we
 want it to do; IN PROGRESS=Not fully done but ground work has been laid;
 TODO=No current attempt made.
 
-Initial training is slow on a cpu, with a Bidirectional GRU Encoder
-+ GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
-varying on batch size (32 and 128 tested). In order to improve training time,
-we have allowed an optional parameter to use a gpu. Inital run on batch size 128
-yielded a training speed of 111 seconds per 2 epochs.
+
 
 We will automate all planned experiments, examine the results, and use the best
 model as our style-transfer. We will then begin our final training session
