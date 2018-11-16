@@ -39,11 +39,11 @@ def get_args():
                        help='source sentence language')
     parser.add_argument('--target-language', default='modern',
                        help='target sentence language')
-    parser.add_argument('--train-file', type=FileType('r'),
+    parser.add_argument('--train-file', type=FileType('r', encoding='utf-8'),
                        default=TRAIN_PATH, help='train sentences')
-    parser.add_argument('--dev-file', type=FileType('r'),
+    parser.add_argument('--dev-file', type=FileType('r', encoding='utf-8'),
                        default=DEV_PATH, help='dev sentences')
-    parser.add_argument('--test-file', type=FileType('r'),
+    parser.add_argument('--test-file', type=FileType('r', encoding='utf-8'),
                        default=TEST_PATH, help='test sentences')
     parser.add_argument('--train-batch-size', type=int, default=128,
                         help='sets the training batch size')
