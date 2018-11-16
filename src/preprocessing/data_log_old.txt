@@ -1,0 +1,70 @@
+../../data/modern/shrew_modern.snt.aligned
+../../data/modern/juliuscaesar_modern.snt.aligned
+../../data/modern/tempest_modern.snt.aligned
+../../data/modern/msnd_modern.snt.aligned
+../../data/modern/romeojuliet_modern.snt.aligned
+../../data/modern/muchado_modern.snt.aligned
+../../data/modern/asyoulikeit_modern.snt.aligned
+../../data/modern/richardiii_modern.snt.aligned
+../../data/modern/othello_modern.snt.aligned
+../../data/modern/henryv_modern.snt.aligned
+../../data/modern/hamlet_modern.snt.aligned
+../../data/modern/antony-and-cleopatra_modern.snt.aligned
+../../data/modern/twelfthnight_modern.snt.aligned
+../../data/modern/merchant_modern.snt.aligned
+../../data/modern/errors_modern.snt.aligned
+../../data/modern/macbeth_modern.snt.aligned
+../../data/modern/lear_modern.snt.aligned
+../../data/original/shrew_original.snt.aligned
+../../data/original/othello_original.snt.aligned
+../../data/original/antony-and-cleopatra_original.snt.aligned
+../../data/original/errors_original.snt.aligned
+../../data/original/muchado_original.snt.aligned
+../../data/original/henryv_original.snt.aligned
+../../data/original/tempest_original.snt.aligned
+../../data/original/twelfthnight_original.snt.aligned
+../../data/original/lear_original.snt.aligned
+../../data/original/msnd_original.snt.aligned
+../../data/original/asyoulikeit_original.snt.aligned
+../../data/original/merchant_original.snt.aligned
+../../data/original/hamlet_original.snt.aligned
+../../data/original/romeojuliet_original.snt.aligned
+../../data/original/macbeth_original.snt.aligned
+../../data/original/juliuscaesar_original.snt.aligned
+../../data/original/richardiii_original.snt.aligned
+antony-and-cleopatra_modern.snt.aligned 1706
+asyoulikeit_modern.snt.aligned 1103
+errors_modern.snt.aligned 755
+hamlet_modern.snt.aligned 1267
+henryv_modern.snt.aligned 1066
+juliuscaesar_modern.snt.aligned 1396
+lear_modern.snt.aligned 1722
+macbeth_modern.snt.aligned 980
+merchant_modern.snt.aligned 1085
+msnd_modern.snt.aligned 856
+muchado_modern.snt.aligned 1144
+othello_modern.snt.aligned 1854
+richardiii_modern.snt.aligned 1427
+romeojuliet_modern.snt.aligned 1462
+shrew_modern.snt.aligned 1080
+tempest_modern.snt.aligned 958
+twelfthnight_modern.snt.aligned 1218
+antony-and-cleopatra_original.snt.aligned 1706
+asyoulikeit_original.snt.aligned 1103
+errors_original.snt.aligned 755
+hamlet_original.snt.aligned 1267
+henryv_original.snt.aligned 1066
+juliuscaesar_original.snt.aligned 1396
+lear_original.snt.aligned 1722
+macbeth_original.snt.aligned 980
+merchant_original.snt.aligned 1085
+msnd_original.snt.aligned 856
+muchado_original.snt.aligned 1144
+othello_original.snt.aligned 1854
+richardiii_original.snt.aligned 1427
+romeojuliet_original.snt.aligned 1462
+shrew_original.snt.aligned 1080
+tempest_original.snt.aligned 958
+twelfthnight_original.snt.aligned 1218
+21079 21079
+18444 2107 528

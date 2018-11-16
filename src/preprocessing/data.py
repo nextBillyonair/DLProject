@@ -75,7 +75,7 @@ if __name__ == '__main__':
         file_name = PROCESSED_PATH + 'modern/' + get_file_name(play)
         with open(file_name, 'w') as outfile:
             for sentence in processed:
-                outfile.write("%s\n" % entence)
+                outfile.write("%s\n" % sentence)
 
     # Original Process
     original_files = get_files(ORIGINAL_PATH)
