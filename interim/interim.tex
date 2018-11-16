@@ -397,24 +397,6 @@ instead of our current implementation that checks a random number againist the
 hyperparameter.
 
 %------------------------------------------------
-
-\section{Current Status and\\Expectation}
-%Where are we at now + what are we going to do.
-Notation: DONE=DONE; TESTING=Works but needs verfication that it does what we
-want it to do; IN PROGRESS=Not fully done but ground work has been laid;
-TODO=No current attempt made.
-
-Initial training is slow on a cpu, with a Bidirectional GRU Encoder
-+ GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
-varying on batch size (32 and 128 tested). In order to improve training time,
-we have allowed an optional parameter to use a gpu. Inital run on batch size 128
-yielded a training speed of 111 seconds per 2 epochs.
-
-We will automate all planned experiments, examine the results, and use the best
-model as our style-transfer. We will then begin our final training session
-on both directions and provide results.
-%------------------------------------------------
-
 \section{Planned Experiments}
 \begin{figure*}[ht]
     \centering
@@ -443,6 +425,32 @@ on both directions and provide results.
     \caption{Current Progress}
     \label{fig:current-status}
 \end{figure*}
+
+%------------------------------------------------
+\section{Roadblocks and Problems}
+% data reorder + GPU/CPU training
+
+%------------------------------------------------
+
+\section{Current Status and\\Expectation}
+%Where are we at now + what are we going to do.
+Notation: DONE=DONE; TESTING=Works but needs verfication that it does what we
+want it to do; IN PROGRESS=Not fully done but ground work has been laid;
+TODO=No current attempt made.
+
+Initial training is slow on a cpu, with a Bidirectional GRU Encoder
++ GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
+varying on batch size (32 and 128 tested). In order to improve training time,
+we have allowed an optional parameter to use a gpu. Inital run on batch size 128
+yielded a training speed of 111 seconds per 2 epochs.
+
+We will automate all planned experiments, examine the results, and use the best
+model as our style-transfer. We will then begin our final training session
+on both directions and provide results.
+
+%------------------------------------------------
+
+
 
 %------------------------------------------------
 
