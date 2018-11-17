@@ -184,12 +184,12 @@ We use the End of Sentence (EOS) token to signal the end of the sequence, and
 always comes after punctuation.
 
 By incorporating these special tokens, we can signal to the model the start and
-end of a sequence, and helps training overall. This is done during the run, and
+end of a sequence, and help training overall. This is done during the run, and
 is not present in our data files (inserted at run time).
 
 \subsection{Proper Nouns}
 Proper nouns are unique in both corpus, and have direct translations. In order
-to reduce vocabulary size and aggregating the learning of all proper nouns,
+to reduce vocabulary size and aggregate the learning of all proper nouns,
 we replace all proper nouns with the following token: propn. Thus our model
 should learn to map propn to propn, and can utilize the encoding to learn the
 most likely token following its usage. We use
@@ -205,7 +205,7 @@ to split punctation, contrations, etc for each word.
 \subsection{Train, Validation, Test Split}
 % look at code, provide stats (Vocab size, # sent, etc.)
 We randomly shuffle and split the combined preprocessed dataset into three sets:
-Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearnce
+Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearance
 of unkown tokens (UNK). We provide statistics for the data.
 % TODO: Provide Data Stats
 
@@ -348,7 +348,7 @@ used a GRU over the LSTM.
 
 \subsubsection{Bidirectional GRU Encoder}
 An extension to our encoding scheme will consider the full context of words
-immediately before an after it. This is doen by running a GRU layer on the
+immediately before an after it. This is done by running a GRU layer on the
 forward and backward sequence and combining each tensor. Hence we use a
 bidirectional GRU as laid forth in \cite{bahdanau2014neural}.
 \begin{equation}
@@ -407,7 +407,7 @@ experiments.
 In terms of training, an encoder-decoder system can either accept the target
 token or the model's prediction as input during the decoding step. When we use
 the target token, this is known as teacher forcing, and is shown to be favored
-during initial trainging iterations, but should be backed off to use the
+during initial training iterations, but should be backed off to use the
 model's own predicitons, as it will exhibit instability in the translations
 otherwise \cite{lamb2016professor}.
 
