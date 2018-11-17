@@ -30,7 +30,7 @@ def get_args():
                         choices=['rnn','gru'],
                         help='type of decoder used')
     parser.add_argument('--attention-mode', default='concat',
-                        choices=['none','dot','concat'],
+                        choices=['none','general','concat'],
                         help='type of attention used')
 
 

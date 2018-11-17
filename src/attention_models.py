@@ -1,6 +1,6 @@
 import torch
-from torch.nn import Dropout, Embedding, Linear, Module
-from torch.nn.functional import relu, log_softmax
+from torch.nn import Dropout, Embedding, Linear, Module, Bilinear
+from torch.nn.functional import relu, log_softmax, softmax
 
 """
 # Spin off to separate class, maybe don't include in this file
@@ -16,64 +16,75 @@ def build_attention_model(args, hidden_size, bidirectional_encoder):
 
     if args.attention_mode == 'none':
         return None
-    elif args.attention_mode == 'dot':
-        return None
+    elif args.attention_mode == 'general':
+        return GeneralAttention(hidden_size, bidirectional_encoder)
     elif args.attention_mode == 'concat':
-        return ConcatAttention(hidden_size, args.max_length,
-                               bidirectional_encoder)
+        return ConcatAttention(hidden_size, bidirectional_encoder)
     else:
         raise ValueError('Invalid attention mode: %s' % (args.attention_mode))
 
-
-# # IDENTITY
-# class Attention(Module):
-#     def __init__(self):
-#         super().__init__()
-#
-#     def forward(self, *args):
-#         return args
-
-
 # CONCAT
 class ConcatAttention(Module):
-    def __init__(self, hidden_size, max_length, bidirectional_encoder):
+    def __init__(self, hidden_size, bidirectional_encoder):
         super().__init__()
-        self.get_weights = Linear(hidden_size * 2, max_length)
+        self.hidden_size = hidden_size
+        self.v_a = Linear(hidden_size, 1)
 
         if bidirectional_encoder:
-            self.pay_attention = Linear(hidden_size * 3, hidden_size)
+            self.W_a = Linear(hidden_size * 3, hidden_size)
         else:
-            self.pay_attention = Linear(hidden_size * 2, hidden_size)
+            self.W_a = Linear(hidden_size * 2, hidden_size)
 
     def forward(self, input, hidden, attendable):
         # Weights are learned from input and hidden state
-        # print('\n')
-        # print('ATTENTION DEBUG:')
-        # print('I|H|A', input.size(), hidden[0].size(), attendable.size())
-        hidden = hidden[0].view(*input.size())
-        input_with_hidden = torch.cat((input, hidden), 2)
-
+        batch_size = attendable.size(0)
         sentence_length = attendable.size(1)
-        # print('IWH|SL', input_with_hidden.size(), sentence_length)
-        weights = log_softmax(self.get_weights(input_with_hidden),
-                              dim=2)[:, :, :sentence_length]
-        # print('W|A', weights.size(), attendable.size())
+
+        hidden = hidden.view(batch_size, 1, self.hidden_size)
+        hidden = hidden.expand(batch_size, sentence_length, self.hidden_size)
+
+        hidden_with_attendable = torch.cat((hidden, attendable), dim=2)
+
+        scores = torch.tanh(self.W_a(hidden_with_attendable))
+        scores = self.v_a(scores)
+
+        weights = softmax(scores, dim=1)
+        weights = weights.view(batch_size, 1, sentence_length)
+
         # Apply weights
-        with_attention = torch.bmm(weights, attendable)
+        attended = torch.bmm(weights, attendable)
 
-        # Apply attention to input
-        input_with_attention = torch.cat((input, with_attention), 2)
-        # print('IWA', input_with_attention.size())
-        attended = self.pay_attention(input_with_attention)
-        # print('DONE\n')
-
-        return relu(attended), weights
-
+        return attended, weights
 
 # DOT
-class DotAttention(Module):
-    def __init__(self, hidden_size, max_length, bidirectional_encoder):
+class GeneralAttention(Module):
+    def __init__(self, hidden_size, bidirectional_encoder):
         super().__init__()
+        self.hidden_size = hidden_size
+        self.multiplier = 1
+        if bidirectional_encoder:
+            self.multiplier = 2
+        self.W_a = Bilinear(self.hidden_size,
+                            self.multiplier * self.hidden_size,
+                            1)
 
     def forward(self, input, hidden, attendable):
-        return None
+        batch_size = attendable.size(0)
+        sentence_length = attendable.size(1)
+
+        hidden = hidden.view(batch_size, 1, self.hidden_size)
+        hidden = hidden.expand(batch_size, sentence_length, self.hidden_size)
+
+        hidden = hidden.contiguous()
+        attendable = attendable.contiguous()
+
+        scores = self.W_a(hidden, attendable)
+        # print(scores.size())
+
+        weights = softmax(scores, dim=1)
+        weights = weights.view(batch_size, 1, sentence_length)
+
+        # Apply weights
+        attended = torch.bmm(weights, attendable)
+
+        return attended, weights

@@ -38,7 +38,8 @@ def build_decoder(args, vocab):
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
                               num_layers=args.decoder_layers,
-                              attention=attention)
+                              attention=attention,
+                              bidirectional_encoder=bidirectional_encoder)
         else:
             raise ValueError('Invalid decoder mode: %s' % (args.decoder_mode))
 
@@ -49,7 +50,7 @@ class DecoderRNN(Module):
 
     def __init__(self, hidden_size, output_size, device,
                  embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
-                 attention=None):
+                 attention=None, bidirectional_encoder=True):
         """Initialize a word embedding and simple RNN decoder."""
         super().__init__()
         if num_layers == 1:
@@ -65,7 +66,14 @@ class DecoderRNN(Module):
         self.word_embedding = Embedding(output_size, hidden_size)
         self.dropout = Dropout(embedding_dropout)
         self.attention = attention
-        self.rnn = RNN(hidden_size, hidden_size, num_layers=num_layers,
+        self.multiplier = 1
+        if attention is not None and bidirectional_encoder:
+            self.multiplier = 3
+        elif attention is not None and not bidirectional_encoder:
+            self.multiplier = 2
+
+        self.rnn = RNN(self.multiplier * hidden_size, hidden_size,
+                       num_layers=num_layers,
                        dropout=lstm_dropout, batch_first=True)
         self.linear = Linear(hidden_size, output_size)
 
@@ -85,9 +93,9 @@ class DecoderRNN(Module):
         attended = None
         if self.attention is not None:
             attended, _ = self.attention(embedding, hidden, encoder_output)
+            attended = torch.cat((attended, embeeding), 1)
         else:
-            attended = relu(embedding)
-            # ????????
+            attended = embedding
 
         # Apply non-linear then RNN with hidden from encoder (later, decoder)
         output, hidden = self.rnn(attended, hidden)
@@ -103,7 +111,7 @@ class DecoderGRU(Module):
 
     def __init__(self, hidden_size, output_size, device,
                  embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
-                 attention=None):
+                 attention=None, bidirectional_encoder=True):
         """Initialize a word embedding and simple GRU decoder."""
         super().__init__()
         if num_layers == 1:
@@ -119,7 +127,13 @@ class DecoderGRU(Module):
         self.word_embedding = Embedding(output_size, hidden_size)
         self.dropout = Dropout(embedding_dropout)
         self.attention = attention
-        self.gru = GRU(hidden_size, hidden_size, num_layers=num_layers,
+        self.multiplier = 1
+        if attention is not None and bidirectional_encoder:
+            self.multiplier = 3
+        elif attention is not None and not bidirectional_encoder:
+            self.multiplier = 2
+
+        self.gru = GRU(self.multiplier*hidden_size, hidden_size, num_layers=num_layers,
                        dropout=lstm_dropout, batch_first=True)
         self.linear = Linear(hidden_size, output_size)
 
@@ -140,8 +154,9 @@ class DecoderGRU(Module):
         attended = None
         if self.attention is not None:
             attended, _ = self.attention(embedding, hidden, encoder_output)
+            attended = torch.cat((attended, embedding), 2)
         else:
-            attended = relu(embedding)
+            attended = embedding
 
         # Apply non-linear then GRU with hidden from encoder (later, decoder)
         output, hidden = self.gru(attended, hidden)
