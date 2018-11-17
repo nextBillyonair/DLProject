@@ -144,12 +144,30 @@ from the plays are included (the sentences could not be aligned properly).
         total & 21,079 \\ \hline
     \end{tabular}
 
-    \caption{Data Pair Counts for Shakespeare--English Corpus}
-    \label{fig:data-lines}
+    \caption{Data Pair Counts for Shakespeare--English Corpus (Sparknotes)}
+    \label{fig:data-lines-sparknotes}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{File}
+          & \textbf{Line Count}\\
+        \hline
+        train.snt.aligned & 9,069 \\ \hline
+        dev.snt.aligned & 1,036 \\ \hline
+        test.snt.aligned & 260 \\ \hline
+        total & 10,365 \\ \hline
+    \end{tabular}
+
+    \caption{Data Pair Counts for Shakespeare--English Corpus (Enotes)}
+    \label{fig:data-lines-enotes}
 \end{figure}
 
 The training vocabulary sizes are 11,538 source (original) words and
-9,024 target (modern) words.
+9,024 target (modern) words for the Sparknotes set. For enotes, there are
+9004 source words, 7497 target words.
 %------------------------------------------------
 
 \section{Preprocessing}
@@ -166,7 +184,8 @@ We use the End of Sentence (EOS) token to signal the end of the sequence, and
 always comes after punctuation.
 
 By incorporating these special tokens, we can signal to the model the start and
-end of a sequence, and helps training overall.
+end of a sequence, and helps training overall. This is done during the run, and
+is not present in our data files (inserted at run time).
 
 \subsection{Proper Nouns}
 Proper nouns are unique in both corpus, and have direct translations. In order
@@ -400,7 +419,8 @@ hyperparameter.
 \section{Planned Experiments}
 We plan to experiment with several model permutations, as outlined in Figure
 ~\ref{fig:model-experiments}. We do not test every permutation since that would
-take too much time.
+take too much time, and have selected several runs that would provide us enough
+results to determine the best model for this problem.
 
 \begin{figure*}[ht]
     \centering
