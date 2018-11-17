@@ -398,6 +398,10 @@ hyperparameter.
 
 %------------------------------------------------
 \section{Planned Experiments}
+We plan to experiment with several model permutations, as outlined in Figure
+~\ref{fig:model-experiments}. We do not test every permutation since that would
+take too much time.
+
 \begin{figure*}[ht]
     \centering
     \begin{tabular}{ |c|c|c|c| }
@@ -419,7 +423,7 @@ hyperparameter.
         10 & Vocabulary Building & DONE & Bill \\ \hline
         11 & Train/Eval Support Code & DONE & Bill \\ \hline
         12 & GPU Support & DONE & Riley \\ \hline
-        13 & Experiments & TODO & Morris, Riley \\ \hline
+        13 & Experiments & IN PROGRESS & Morris, Riley \\ \hline
     \end{tabular}
 
     \caption{Current Progress}
@@ -433,6 +437,15 @@ We have hit two major roadblocks since our proposal, and discuss our apporaches
 to mediating the issues.
 
 \subsection{Data Learnability}
+In our first tests, we used data procured from \cite{xu2012paraphrasing}.
+There were two parallel datasets, one from Sparknotes, the other from enotes. We
+originally planned to use the Sparknotes version, as the data set was larger
+(21079 sentence pairs). However, when training, the models had difficulty
+accounting for the reordering Sparknotes used in their translations. Hence, we
+decieded to switch to enotes, which is a smaller (10365 sentence pairs), but
+more aligned corpus. We theorize that data that has less reordering will converge
+faster to a desired result. Since the dataset is smaller, we use less batches,
+and training time trivially improves. We hope for decent results by switching.
 
 
 \subsection{GPU/CPU Training Times}
@@ -442,7 +455,8 @@ depending on computer specs. This would put our experiments total running time
 at over 2-3 days per experiment (18-27 days total). This does not give us much
 leeway to verify our
 apporach. Hence, we describe in Section ~\ref{sec:gpu} our intial resutls
-in GPU compatability and speedups.
+in GPU compatability and speedups. These timings were done on the Sparknotes
+dataset.
 
 %------------------------------------------------
 
