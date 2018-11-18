@@ -381,8 +381,8 @@ We will describe the decoder algorithm, and experiment with two different
 recurrent layers: RNN and GRU. We cannot use a Bidirectional GRU because
 we do not know the full decoded sequence (and hence why we are decoding).
 
-Decoders take in the last translated token, or SOS if we are decoding a new
-sentence. It applies an embedding layer, followed by an optional dropout.
+Decoders take in the last translated token, starting with an SOS token on a
+new batch. It applies an embedding layer, followed by an optional dropout.
 
 We then have two options:
 \begin{enumerate}
