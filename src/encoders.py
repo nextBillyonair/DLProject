@@ -28,9 +28,9 @@ def build_encoder(args, vocab):
                               dropout=args.lstm_dropout,
                               num_layers=args.encoder_layers)
         elif args.encoder_mode == 'bigru':
-            return EncoderBidirectional(input_size, args.hidden_size, device,
-                                        dropout=args.lstm_dropout,
-                                        num_layers=args.encoder_layers)
+            return EncoderBidirectionalGRU(input_size, args.hidden_size, device,
+                                           dropout=args.lstm_dropout,
+                                           num_layers=args.encoder_layers)
         else:
             raise ValueError('Invalid encoder mode: %s' % (args.encoder_mode))
 
@@ -100,7 +100,7 @@ class EncoderGRU(Module):
         return output, hidden
 
 
-class EncoderBidirectional(Module):
+class EncoderBidirectionalGRU(Module):
     """A word embedding and bi-directional GRU encoder."""
 
     def __init__(self, input_size, hidden_size, device,

@@ -566,7 +566,6 @@ to perform style-transfer for English-Shakespeare examples.
 \appendix
 \onecolumn
 \section{Model Architecture Diagrams}
-\subsection{Encoder-Decoder}
 \begin{figure}[ht]
   \centering
   \begin{tikzpicture}
@@ -575,11 +574,11 @@ to perform style-transfer for English-Shakespeare examples.
     \node[rectangle] (encoder) {Encoder};
     \node[rectangle, below=2cm of encoder] (decoder) {Decoder};
     \node[rectangle, above=0.75cm of encoder, xshift=-1cm] (s) {$source$};
-    \node[rectangle, above=0.75cm of encoder, xshift=1cm] (hidden1) {$hidden$};
-    \node[rectangle, below=0.75cm of encoder, xshift=-1cm] (out1) {$output$};
+    \node[rectangle, above=0.75cm of encoder, xshift=1cm] (hidden1) {$None$};
+    \node[rectangle, below=0.75cm of encoder, xshift=-1cm] (out1) {$encodings$};
     \node[rectangle, below=0.75cm of encoder, xshift=1cm] (hidden2) {$hidden$};
-    \node[rectangle, right=0.75cm of hidden2] (t) {$target$};
-    \node[rectangle, below=0.75cm of decoder, xshift=-1cm] (out2) {$output$};
+    \node[rectangle, left=0.75cm of decoder] (t) {$token$};
+    \node[rectangle, below=0.75cm of decoder, xshift=-1cm] (out2) {$new$ $token$};
     \node[rectangle, below=0.75cm of decoder, xshift=1cm] (hidden3) {$hidden$};
 
     % Connect the nodes
@@ -587,13 +586,13 @@ to perform style-transfer for English-Shakespeare examples.
     \edge {encoder} {out1, hidden2};
     \edge {out1, hidden2, t} {decoder};
     \edge {decoder} {out2, hidden3};
+    \edge {hidden3} {hidden2};
+    \edge {out2} {t};
 
   \end{tikzpicture}
   \caption{Model Architecture Overview for Encoder-Decoder.}
   \label{fig:encoder-decoder}
 \end{figure}
-\newpage
-\subsection{Encoder}
 \begin{figure}[ht]
   \centering
   \begin{tikzpicture}
@@ -603,7 +602,7 @@ to perform style-transfer for English-Shakespeare examples.
     \node[rectangle, below=0.75cm of rnn, xshift=-1cm] (out) {$output$};
     \node[rectangle, below=0.75cm of rnn, xshift=1cm] (hidden2) {$hidden$};
     \node[rectangle, above=0.75cm of rnn, xshift=-1cm] (embed) {Embed};
-    \node[rectangle, above=0.75cm of embed] (input) {$input$};
+    \node[rectangle, above=0.75cm of embed] (input) {$source$};
     \node[rectangle, right=0.75cm of input] (hidden1) {$hidden$};
 
     % Connect the nodes
@@ -615,19 +614,43 @@ to perform style-transfer for English-Shakespeare examples.
   \caption{Model Architecture for Encoder.}
   \label{fig:encoder}
 \end{figure}
-
-\subsection{Decoder}
 \begin{figure}[ht]
   \centering
   \begin{tikzpicture}
 
     % Define nodes
     \node[rectangle] (rnn) {RNN/GRU};
-    \node[rectangle, above=0.75cm of rnn] (attn) {Attn};
-    \node[rectangle, above=0.75cm of attn] (embed) {Embed};
+    \node[rectangle, above=0.75cm of rnn] (embed) {Embed};
     \node[rectangle, above=0.75 of embed] (input) {$input$};
     \node[rectangle, right=1cm of input] (hidden1) {$hidden$};
-    \node[rectangle, left=1cm of input] (encoder) {$encoding$};
+    \node[rectangle, below=0.75cm of rnn] (linear) {Linear};
+    \node[rectangle, below=0.75cm of linear] (logs) {Log Softmax};
+    \node[rectangle, below=0.75cm of logs] (out) {$output$};
+    \node[rectangle, right=1.25cm of out] (hidden2) {$hidden$};
+
+    % Connect the nodes
+    \edge {input} {embed};
+    \edge {embed, hidden1} {rnn};
+    \edge {rnn} {linear, hidden2};
+    \edge {linear} {logs};
+    \edge {logs} {out};
+
+  \end{tikzpicture}
+  \caption{Decoder with No Attention.}
+  \label{fig:decoder-no-attn}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (rnn) {RNN/GRU};
+    \node[rectangle, above=0.75 of rnn, xshift=-1cm] (cat) {Cat};
+    \node[rectangle, above=0.75cm of cat] (attn) {Attn};
+    \node[rectangle, left=0.75cm of attn] (embed) {Embed};
+    \node[rectangle, above=0.75 of embed] (input) {$input$};
+    \node[rectangle, above=0.75cm of attn] (encoder) {$encoding$};
+    \node[rectangle, right=1cm of encoder] (hidden1) {$hidden$};
     \node[rectangle, below=0.75cm of rnn] (linear) {Linear};
     \node[rectangle, below=0.75cm of linear] (logs) {Log Softmax};
     \node[rectangle, below=0.75cm of logs] (out) {$output$};
@@ -635,67 +658,66 @@ to perform style-transfer for English-Shakespeare examples.
 
     % Connect the nodes
     \edge {input} {embed};
-    \edge {encoder, embed, hidden1} {attn};
-    \edge {attn, hidden1} {rnn};
+    \edge {encoder, hidden1} {attn};
+    \edge {attn, embed} {cat};
+    \edge {cat, hidden1} {rnn};
     \edge {rnn} {linear, hidden2};
     \edge {linear} {logs};
     \edge {logs} {out};
 
   \end{tikzpicture}
-  \caption{Model Architecture for Decoder.}
-  \label{fig:decoder}
+  \caption{Decoder with Attention.}
+  \label{fig:decoder-attn}
 \end{figure}
-\newpage
-\subsection{Attention Mechanisms}
 \begin{figure}[ht]
   \centering
   \begin{tikzpicture}
 
     % Define nodes
-    \node[rectangle] (embed) {$embeddings$};
-    \node[rectangle, below=0.75cm of embed] (relu) {ReLU};
-    \node[rectangle, below=0.75cm of relu] (out) {$output$};
+    \node[rectangle] (out) {$output$};
+    \node[rectangle, above=0.75cm of out] (bmm) {BMM};
+    \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (soft) {Softmax};
+    \node[rectangle, above=0.75 of soft] (lin2) {Linear};
+    \node[rectangle, above=0.75 of lin2] (tanh) {$\tanh$};
+    \node[rectangle, above=0.75 of tanh] (lin1) {Linear};
+    \node[rectangle, above=0.75 of lin1] (cat) {Cat};
+    \node[rectangle, above=0.75 of cat, xshift=-1cm] (hidden) {$hidden$};
+    \node[rectangle, above=0.75 of cat, xshift=1cm] (encodings) {$encodings$};
 
     % Connect the nodes
-    \edge {embed} {relu};
-    \edge {relu} {out};
+    \edge {encodings, hidden} {cat};
+    \edge {cat} {lin1};
+    \edge {lin1} {tanh};
+    \edge {tanh} {lin2};
+    \edge {lin2} {soft};
+    \edge {soft, encodings} {bmm};
+    \edge {bmm} {out};
 
   \end{tikzpicture}
-  \caption{Model Architecture for No Attention Layer.}
-  \label{fig:no-attn}
-\end{figure}
-
-
-\begin{figure}[ht]
-  \centering
-  \begin{tikzpicture}
-
-    % Define nodes
-    \node[rectangle] (cat2) {Cat};
-    \node[rectangle, below=0.75cm of cat2] (linear2) {Linear};
-    \node[rectangle, below=0.75cm of linear2] (relu) {ReLU};
-    \node[rectangle, below=0.75cm of relu] (out) {$output$};
-    \node[rectangle, above=0.75cm of cat2, xshift=1cm] (bmm) {BMM};
-    \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (logs) {Log Softmax};
-    \node[rectangle, above=0.75cm of logs] (linear1) {Linear};
-    \node[rectangle, above=0.75cm of linear1] (cat1) {Cat};
-    \node[rectangle, above=0.75cm of cat1, xshift=-3.5cm] (embed) {$embeddings$};
-    \node[rectangle, above=0.75cm of cat1] (hidden) {$hidden$};
-    \node[rectangle, right=0.75cm of hidden] (encoding) {$encodings$};
-
-    % Connect the nodes
-    \edge {embed, hidden} {cat1};
-    \edge {cat1} {linear1};
-    \edge {linear1} {logs};
-    \edge {logs, encoding} {bmm};
-    \edge {bmm, embed} {cat2};
-    \edge {cat2} {linear2};
-    \edge {linear2} {relu};
-    \edge {relu} {out};
-
-  \end{tikzpicture}
-  \caption{Model Architecture for Concat Attention Layer.}
+  \caption{Concat (Bahdanau) Attention Layer.}
   \label{fig:concat-attn}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (out) {$output$};
+    \node[rectangle, above=0.75cm of out] (bmm) {BMM};
+    \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (soft) {Softmax};
+    \node[rectangle, above=0.75 of soft] (bilinear) {Bilinear};
+    \node[rectangle, above=0.75 of bilinear, xshift=-1cm] (hidden) {$hidden$};
+    \node[rectangle, above=0.75 of bilinear, xshift=1cm] (encodings) {$encodings$};
+
+    % Connect the nodes
+    \edge {encodings, hidden} {bilinear};
+    \edge {lin2} {soft};
+    \edge {soft, encodings} {bmm};
+    \edge {bmm} {out};
+
+  \end{tikzpicture}
+  \caption{General Attention Layer.}
+  \label{fig:general-attn}
 \end{figure}
 
 \end{document}
