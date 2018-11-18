@@ -377,31 +377,54 @@ multiple layers and dropout, and can be set through CLI args
 
 
 \subsection{Decoders}
-% fill in
-\subsubsection{Baseline RNN}
-% fill in
-\subsubsection{GRU Decoder}
-% fill in
+We will describe the decoder algorithm, and experiment with two different
+recurrent layers: RNN and GRU. We cannot use a Bidirectional GRU because
+we do not know the full decoded sequence (and hence why we are decoding).
+
+Decoders take in the last translated token, or SOS if we are decoding a new
+sentence. It applies an embedding layer, followed by an optional dropout.
+
+We then have two options:
+\begin{enumerate}
+  \item Attention (General, Concat, etc.)
+  \item No Attention
+\end{enumerate}
+In the case of attention, we apply one of the attention schemes decribed in
+Section ~\ref{sec:attention} to the encoder output, given our current decoding
+hidden state. We concatenate the attention results with our input embedding.
+
+Without attention, we just use the input embedding and ignore the encoder
+outputs.
+
+We apply a recurrent layer to the attended tensor, using the hidden state
+provided. After applying a linear layer and log_softmax, we output our result
+for evaluation.
 
 \subsection{Attention Mechanisms}
+\label{sec:attention}
 Attention mechanisms have been shown to improve sequence to sequence
 translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
 from Luong et al \cite{luong2015effective} examines global vs local approached
 to attention-based encoder-decoders. Common attention mechanisms are:
 % we will probably use dot & concat attention
 \begin{equation}
-    a(s_{i-1}, h_j) =
+    score(h_t, h_s) =
     \begin{cases}
-        W_a (s_{i-1} \| h_j) & \text{\emph{concat}} \\
-        s_{i-1}^T \cdot W_a h_j & \text{\emph{general}} \\
-        s_{i-1}^T \cdot h_j & \text{\emph{dot}} \\
-        W_a \cdot s_{i-1} & \text{\emph{location}}
+        v_a^T \cdot \tanh (W_a [h_t \| h_s]) & \text{\emph{concat}} \\
+        h_t^T W_a h_s & \text{\emph{general}} \\
+        h_t^T \cdot h_s & \text{\emph{dot}}
     \end{cases}
 \end{equation}
-However, we will focus on dot attention and concat attention in our
+where $h_t$ is the current target hidden state, and $h_s$ is the encoder output.
+To compute scores, which are used to create attention weights, we apply a
+softmax:
+\begin{equation}
+  a_t(s) = \frac{\exp(score(h_t, h_s))}{\sum_{s'}\exp(score(h_t, h_s))}
+\end{equation}
+Using these scores, we create a context vector, which is just the batch matrix
+multiplication between our attention weights and the encoder outputs.
+We will focus on general attention and concat attention in our
 experiments.
-\subsubsection{Dot Attention}
-\subsubsection{Concat Attention}
 
 \subsection{Teacher Forcing}
 In terms of training, an encoder-decoder system can either accept the target
@@ -413,7 +436,8 @@ otherwise \cite{lamb2016professor}.
 
 We hope to build in a system to decay the teacher forcing percentage over time,
 instead of our current implementation that checks a random number againist the
-hyperparameter.
+hyperparameter. However, we can bypass this effectively by reloading a model
+and changing the teacher forcing parameter provided.
 
 %------------------------------------------------
 \section{Planned Experiments}
@@ -480,7 +504,7 @@ dataset.
 
 %------------------------------------------------
 
-\section{Implementation Details}
+\section{Additional Implementation Details}
 \subsection{Batching}
 In order to faciliate faster training, and less noisy gradients, we felt it
 imperative to introduce batching of sentences. We batched similiar sentences

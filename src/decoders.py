@@ -80,20 +80,15 @@ class DecoderRNN(Module):
     def forward(self, input, hidden, encoder_output):
         """
         Runs the forward pass of the decoder.
-        Returns the log_softmax, hidden state, and attn_weights.
         """
-        # input tensor -> size (N, B, input_size)
-        # hidden -> depends on RNN, see docs
-        # use asserts to make sure correct sizes!
-        # check if attention is NONE, if not do mode, else bypass
         # Apply embedding with dropout
         embedding = self.dropout(self.word_embedding(input))
 
         # Compute attention weights and apply them
         attended = None
         if self.attention is not None:
-            attended, _ = self.attention(embedding, hidden, encoder_output)
-            attended = torch.cat((attended, embeeding), 1)
+            attended, _ = self.attention(hidden, encoder_output)
+            attended = torch.cat((attended, embedding), 2) #2?
         else:
             attended = embedding
 
@@ -123,10 +118,11 @@ class DecoderGRU(Module):
         self.lstm_dropout = lstm_dropout
         self.num_layers = num_layers
         self.attention = attention
-        # Define layers below, aka embedding + GRU
+
         self.word_embedding = Embedding(output_size, hidden_size)
         self.dropout = Dropout(embedding_dropout)
         self.attention = attention
+
         self.multiplier = 1
         if attention is not None and bidirectional_encoder:
             self.multiplier = 3
@@ -140,20 +136,14 @@ class DecoderGRU(Module):
     def forward(self, input, hidden, encoder_output):
         """
         Runs the forward pass of the decoder.
-        Returns the log_softmax, hidden state, and attn_weights.
         """
-        # input tensor -> size (N, B, input_size)
-        # hidden -> depends on RNN, see docs
-        # use asserts to make sure correct sizes!
-        # check if attention is NONE, if not do mode, else bypass
-        # NOTE: handle when input is none ot generate from itself
         # Apply embedding with dropout
         embedding = self.dropout(self.word_embedding(input))
 
         # Compute attention weights and apply them
         attended = None
         if self.attention is not None:
-            attended, _ = self.attention(embedding, hidden, encoder_output)
+            attended, _ = self.attention(hidden, encoder_output)
             attended = torch.cat((attended, embedding), 2)
         else:
             attended = embedding

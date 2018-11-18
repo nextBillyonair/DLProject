@@ -35,8 +35,8 @@ class ConcatAttention(Module):
         else:
             self.W_a = Linear(hidden_size * 2, hidden_size)
 
-    def forward(self, input, hidden, attendable):
-        # Weights are learned from input and hidden state
+    def forward(self, hidden, attendable):
+        # Weights are learned from hidden state and encoder_outputs
         batch_size = attendable.size(0)
         sentence_length = attendable.size(1)
 
@@ -61,14 +61,16 @@ class GeneralAttention(Module):
     def __init__(self, hidden_size, bidirectional_encoder):
         super().__init__()
         self.hidden_size = hidden_size
+
         self.multiplier = 1
         if bidirectional_encoder:
             self.multiplier = 2
+
         self.W_a = Bilinear(self.hidden_size,
                             self.multiplier * self.hidden_size,
                             1)
 
-    def forward(self, input, hidden, attendable):
+    def forward(self, hidden, attendable):
         batch_size = attendable.size(0)
         sentence_length = attendable.size(1)
 
