@@ -389,15 +389,15 @@ We then have two options:
   \item Attention (General, Concat, etc.)
   \item No Attention
 \end{enumerate}
-In the case of attention, we apply one of the attention schemes decribed in
-Section ~\ref{sec:attention} to the encoder output, given our current decoding
+In the case of attention, we apply one of the attention schemes (described in
+the next section) to the encoder output, given our current decoding
 hidden state. We concatenate the attention results with our input embedding.
 
 Without attention, we just use the input embedding and ignore the encoder
 outputs.
 
 We apply a recurrent layer to the attended tensor, using the hidden state
-provided. After applying a linear layer and log_softmax, we output our result
+provided. After applying a linear layer and log softmax, we output our result
 for evaluation.
 
 \subsection{Attention Mechanisms}
@@ -411,15 +411,15 @@ to attention-based encoder-decoders. Common attention mechanisms are:
     score(h_t, h_s) =
     \begin{cases}
         v_a^T \cdot \tanh (W_a [h_t \| h_s]) & \text{\emph{concat}} \\
-        h_t^T W_a h_s & \text{\emph{general}} \\
-        h_t^T \cdot h_s & \text{\emph{dot}}
+        h_t^T \cdot W_a \cdot h_s & \text{\emph{general}} \\
+        h_t^T \cdot h_s & \text{\emph{dot}} \\
     \end{cases}
 \end{equation}
 where $h_t$ is the current target hidden state, and $h_s$ is the encoder output.
 To compute scores, which are used to create attention weights, we apply a
 softmax:
 \begin{equation}
-  a_t(s) = \frac{\exp(score(h_t, h_s))}{\sum_{s'}\exp(score(h_t, h_s))}
+  a_t(s) = \frac{\exp(score(h_t, h_s))}{\sum_{s'}\exp(score(h_t, h_{s'}))}
 \end{equation}
 Using these scores, we create a context vector, which is just the batch matrix
 multiplication between our attention weights and the encoder outputs.
@@ -457,17 +457,18 @@ results to determine the best model for this problem.
         \hline
         1 & Data Procurement & DONE & All \\ \hline
         2 & Preprocessing & DONE & Riley, Bill \\ \hline
-        3 & Baseline RNN & TESTING & Riley \\ \hline
-        4 & GRU Encoder & TESTING & Morris \\ \hline
-        5 & Bidirectional GRU & TESTING & Morris \\ \hline
+        3 & RNN Encoder & DONE & Riley \\ \hline
+        4 & GRU Encoder & DONE & Morris \\ \hline
+        5 & Bidirectional GRU & DONE & Morris \\ \hline
         6 & RNN Decoder & TESTING & Morris \\ \hline
         7 & GRU Decoder & TESTING & Bill \\ \hline
-        8 & Attention Models & IN PROGRESS & Bill \\ \hline
-        9 & Teacher Forcing & TESTING & Bill \\ \hline
+        8 & Attention Models & TESTING & Bill \\ \hline
+        9 & Teacher Forcing & DONE & Bill \\ \hline
         10 & Vocabulary Building & DONE & Bill \\ \hline
         11 & Train/Eval Support Code & DONE & Bill \\ \hline
         12 & GPU Support & DONE & Riley \\ \hline
-        13 & Experiments & IN PROGRESS & Morris, Riley \\ \hline
+        13 & Batching & DONE & Bill \\ \hline
+        14 & Experiments & IN PROGRESS & Morris, Riley \\ \hline
     \end{tabular}
 
     \caption{Current Progress}
@@ -504,7 +505,7 @@ dataset.
 
 %------------------------------------------------
 
-\section{Additional Implementation Details}
+\section{Additional Implementation\\Details}
 \subsection{Batching}
 In order to faciliate faster training, and less noisy gradients, we felt it
 imperative to introduce batching of sentences. We batched similiar sentences
@@ -528,20 +529,26 @@ credits to fund more experiments.
 
 %------------------------------------------------
 
-
-%------------------------------------------------
-
 \section{Current Status and\\Expectation}
 %Where are we at now + what are we going to do.
-Notation: DONE=DONE; TESTING=Works but needs verfication that it does what we
-want it to do; IN PROGRESS=Not fully done but ground work has been laid;
-TODO=No current attempt made.
+See Figure ~\ref{fig:current-status} for our current standing on this project.
+Our notation is as follows:
+\begin{enumerate}
+  \item DONE - Fully implemented, tested, no further work needed
+  \item IN PROGRESS - Currently being implemented or worked on. Some inital results
+    but more work is required for full functionality.
+  \item TESTING - Fully functional, but currently being tested for bugs, etc.
+\end{enumerate}
 
-
+While most of the coding is done, and the last few model architectures are
+being tested, we estimate the longest task to be completed is model
+experimentation, and may take the next two-three weeks to complete.
 
 We will automate all planned experiments, examine the results, and use the best
 model as our style-transfer. We will then begin our final training session
-on both directions and provide results.
+on both directions and provide results. We hopefully expect training of our
+experiments completed by the end of Thanksgiving break, and can pick a model
+to perform style-transfer for English-Shakespeare examples.
 
 %------------------------------------------------
 
