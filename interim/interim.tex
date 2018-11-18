@@ -579,15 +579,16 @@ to perform style-transfer for English-Shakespeare examples.
     \node[rectangle, below=0.75cm of encoder, xshift=1cm] (hidden2) {$hidden$};
     \node[rectangle, left=0.75cm of decoder] (t) {$token$};
     \node[rectangle, below=0.75cm of decoder, xshift=-1cm] (out2) {$new$ $token$};
-    \node[rectangle, below=0.75cm of decoder, xshift=1cm] (hidden3) {$hidden$};
+    % \node[rectangle, below=0.75cm of decoder, xshift=1cm] (hidden3) {$hidden$};
 
     % Connect the nodes
     \edge {s, hidden1} {encoder};
     \edge {encoder} {out1, hidden2};
-    \edge {out1, hidden2, t} {decoder};
-    \edge {decoder} {out2, hidden3};
-    \edge {hidden3} {hidden2};
+    \edge {out1, t} {decoder};
+    \edge {decoder} {out2};
     \edge {out2} {t};
+    \path [->] (decoder) edge [bend right=15] node {} (hidden2);
+    \path [->] (hidden2) edge [bend right=15] node {} (decoder);
 
   \end{tikzpicture}
   \caption{Model Architecture Overview for Encoder-Decoder.}
