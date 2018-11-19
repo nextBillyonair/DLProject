@@ -28,14 +28,14 @@ def build_decoder(args, vocab):
         if args.decoder_mode == 'rnn':
             return DecoderRNN(args.hidden_size, output_size,
                               embedding_dropout=args.embedding_dropout,
-                              lstm_dropout=args.lstm_dropout,
+                              rnn_dropout=args.rnn_dropout,
                               num_layers=args.decoder_layers,
                               attention=attention,
                               bidirectional_encoder=bidirectional_encoder)
         elif args.decoder_mode == 'gru':
             return DecoderGRU(args.hidden_size, output_size,
                               embedding_dropout=args.embedding_dropout,
-                              lstm_dropout=args.lstm_dropout,
+                              rnn_dropout=args.rnn_dropout,
                               num_layers=args.decoder_layers,
                               attention=attention,
                               bidirectional_encoder=bidirectional_encoder)
@@ -48,16 +48,16 @@ class DecoderRNN(Module):
     """A simple RNN decoder."""
 
     def __init__(self, hidden_size, output_size,
-                 embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
+                 embedding_dropout=0.1, rnn_dropout=0.1, num_layers=1,
                  attention=None, bidirectional_encoder=True):
         """Initialize a word embedding and simple RNN decoder."""
         super().__init__()
         if num_layers == 1:
-            lstm_dropout = 0
+            rnn_dropout = 0
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.embedding_dropout = embedding_dropout
-        self.lstm_dropout = lstm_dropout
+        self.rnn_dropout = rnn_dropout
         self.num_layers = num_layers
         self.attention = attention
         # Define layers below, aka embedding + RNN
@@ -72,7 +72,7 @@ class DecoderRNN(Module):
 
         self.rnn = RNN(self.multiplier * hidden_size, hidden_size,
                        num_layers=num_layers,
-                       dropout=lstm_dropout, batch_first=True)
+                       dropout=rnn_dropout, batch_first=True)
         self.linear = Linear(hidden_size, output_size)
 
     def forward(self, input, hidden, encoder_output):
@@ -103,16 +103,16 @@ class DecoderGRU(Module):
     """A simple GRU decoder."""
 
     def __init__(self, hidden_size, output_size,
-                 embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
+                 embedding_dropout=0.1, rnn_dropout=0.1, num_layers=1,
                  attention=None, bidirectional_encoder=True):
         """Initialize a word embedding and simple GRU decoder."""
         super().__init__()
         if num_layers == 1:
-            lstm_dropout = 0
+            rnn_dropout = 0
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.embedding_dropout = embedding_dropout
-        self.lstm_dropout = lstm_dropout
+        self.rnn_dropout = rnn_dropout
         self.num_layers = num_layers
         self.attention = attention
 
@@ -127,7 +127,7 @@ class DecoderGRU(Module):
             self.multiplier = 2
 
         self.gru = GRU(self.multiplier*hidden_size, hidden_size, num_layers=num_layers,
-                       dropout=lstm_dropout, batch_first=True)
+                       dropout=rnn_dropout, batch_first=True)
         self.linear = Linear(hidden_size, output_size)
 
     def forward(self, input, hidden, encoder_output):

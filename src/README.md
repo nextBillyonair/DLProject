@@ -17,12 +17,12 @@ Notable CLI arguments for model building:
                         hidden size of encoder/decoder
   --embedding-dropout EMBEDDING_DROPOUT
                         training embedding dropout rate
-  --lstm-dropout LSTM_DROPOUT
-                        training LSTM dropout rate
+  --rnn-dropout RNN_DROPOUT
+                        training RNN dropout rate
   --encoder-layers ENCODER_LAYERS
-                        number of LSTM layers in the encoder
+                        number of RNN layers in the encoder
   --decoder-layers DECODER_LAYERS
-                        number of LSTM layers in the decoder
+                        number of RNN layers in the decoder
   --train-batch-size BATCH_SIZE
                         number of same length source sentences to batch
   --teacher-forcing-chance TEACHER_FORCING_CHANCE
