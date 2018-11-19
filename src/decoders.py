@@ -25,16 +25,15 @@ def build_decoder(args, vocab):
         attention = build_attention_model(args, args.hidden_size,
                                           bidirectional_encoder)
 
-        device = torch.device('cpu')
-
         if args.decoder_mode == 'rnn':
-            return DecoderRNN(args.hidden_size, output_size, device,
+            return DecoderRNN(args.hidden_size, output_size,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
                               num_layers=args.decoder_layers,
-                              attention=attention)
+                              attention=attention,
+                              bidirectional_encoder=bidirectional_encoder)
         elif args.decoder_mode == 'gru':
-            return DecoderGRU(args.hidden_size, output_size, device,
+            return DecoderGRU(args.hidden_size, output_size,
                               embedding_dropout=args.embedding_dropout,
                               lstm_dropout=args.lstm_dropout,
                               num_layers=args.decoder_layers,
@@ -48,7 +47,7 @@ def build_decoder(args, vocab):
 class DecoderRNN(Module):
     """A simple RNN decoder."""
 
-    def __init__(self, hidden_size, output_size, device,
+    def __init__(self, hidden_size, output_size,
                  embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
                  attention=None, bidirectional_encoder=True):
         """Initialize a word embedding and simple RNN decoder."""
@@ -57,7 +56,6 @@ class DecoderRNN(Module):
             lstm_dropout = 0
         self.hidden_size = hidden_size
         self.output_size = output_size
-        self.device = device
         self.embedding_dropout = embedding_dropout
         self.lstm_dropout = lstm_dropout
         self.num_layers = num_layers
@@ -104,7 +102,7 @@ class DecoderRNN(Module):
 class DecoderGRU(Module):
     """A simple GRU decoder."""
 
-    def __init__(self, hidden_size, output_size, device,
+    def __init__(self, hidden_size, output_size,
                  embedding_dropout=0.1, lstm_dropout=0.1, num_layers=1,
                  attention=None, bidirectional_encoder=True):
         """Initialize a word embedding and simple GRU decoder."""
@@ -113,7 +111,6 @@ class DecoderGRU(Module):
             lstm_dropout = 0
         self.hidden_size = hidden_size
         self.output_size = output_size
-        self.device = device
         self.embedding_dropout = embedding_dropout
         self.lstm_dropout = lstm_dropout
         self.num_layers = num_layers

@@ -14,21 +14,18 @@ bidirectional -> bidirectional GRU
 def build_encoder(args, vocab):
         """Builds the encoder to params."""
 
-        device = torch.device('cpu')
         input_size = len(vocab.source)
 
-        device = torch.device('cpu')
-
         if args.encoder_mode == 'rnn':
-            return EncoderRNN(input_size, args.hidden_size, device,
+            return EncoderRNN(input_size, args.hidden_size,
                               dropout=args.lstm_dropout,
                               num_layers=args.encoder_layers)
         elif args.encoder_mode == 'gru':
-            return EncoderGRU(input_size, args.hidden_size, device,
+            return EncoderGRU(input_size, args.hidden_size,
                               dropout=args.lstm_dropout,
                               num_layers=args.encoder_layers)
         elif args.encoder_mode == 'bigru':
-            return EncoderBidirectionalGRU(input_size, args.hidden_size, device,
+            return EncoderBidirectionalGRU(input_size, args.hidden_size,
                                            dropout=args.lstm_dropout,
                                            num_layers=args.encoder_layers)
         else:
@@ -39,7 +36,7 @@ def build_encoder(args, vocab):
 class EncoderRNN(Module):
     """A word embedding, simple RNN encoder."""
 
-    def __init__(self, input_size, hidden_size, device,
+    def __init__(self, input_size, hidden_size,
                  dropout=0.1, num_layers=1):
         """Initialize a word embedding and simple RNN encoder."""
         super().__init__()
@@ -47,7 +44,6 @@ class EncoderRNN(Module):
             dropout = 0
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.device = device
         self.dropout = dropout
         self.num_layers = num_layers
         # Define layers below, aka embedding + RNN
@@ -71,7 +67,7 @@ class EncoderRNN(Module):
 class EncoderGRU(Module):
     """A word embedding, GRU encoder."""
 
-    def __init__(self, input_size, hidden_size, device,
+    def __init__(self, input_size, hidden_size,
                  dropout=0.1, num_layers=1):
         """Initialize a word embedding and GRU encoder."""
         super().__init__()
@@ -79,7 +75,6 @@ class EncoderGRU(Module):
             dropout = 0
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.device = device
         self.dropout = dropout
         self.num_layers = num_layers
         # Define layers below, aka embedding + GRU
@@ -103,7 +98,7 @@ class EncoderGRU(Module):
 class EncoderBidirectionalGRU(Module):
     """A word embedding and bi-directional GRU encoder."""
 
-    def __init__(self, input_size, hidden_size, device,
+    def __init__(self, input_size, hidden_size,
                  dropout=0.1, num_layers=1):
         """Initialize a word embedding and bi-directional GRU encoder."""
         super().__init__()
