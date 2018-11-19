@@ -12,7 +12,6 @@ from utils import get_default_device
 class Model:
     @classmethod
     def create_from_args(cls, args, vocab, max_length):
-        # change
         device = get_default_device()
 
         encoder = build_encoder(args, vocab).to(device)
