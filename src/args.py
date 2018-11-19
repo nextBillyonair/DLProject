@@ -17,12 +17,12 @@ def get_args():
     # Hyperparams
     parser.add_argument('--embedding-dropout', default=0.1, type=float,
                         help='training embedding dropout rate')
-    parser.add_argument('--lstm-dropout', default=0.1, type=float,
-                        help='training LSTM dropout rate')
+    parser.add_argument('--rnn-dropout', default=0.1, type=float,
+                        help='training RNN/GRU dropout rate')
     parser.add_argument('--encoder-layers', default=1, type=int,
-                        help='number of LSTM layers in the encoder')
+                        help='number of RNN layers in the encoder')
     parser.add_argument('--decoder-layers', default=1, type=int,
-                        help='number of LSTM layers in the decoder')
+                        help='number of RNN layers in the decoder')
     parser.add_argument('--encoder-mode', default='bigru',
                         choices=['rnn','gru','bigru'],
                         help='type of encoder used')

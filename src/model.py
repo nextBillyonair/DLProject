@@ -12,7 +12,6 @@ from utils import get_default_device
 class Model:
     @classmethod
     def create_from_args(cls, args, vocab, max_length):
-        # change
         device = get_default_device()
 
         encoder = build_encoder(args, vocab).to(device)
@@ -52,9 +51,9 @@ class Model:
         encoder_output, hidden = self._encoder(source, None)
 
         # Run encoder output through decoder to build up target_tensor
-        last_translated_tokens = torch.zeros(len(source), 1,
-                                             dtype=torch.long, device=device)
-        last_translated_tokens[:, 0] = START_OF_SENTENCE_INDEX
+        last_translated_tokens = torch.full((len(source), 1),
+                                            START_OF_SENTENCE_INDEX,
+                                            dtype=torch.long, device=device)
 
         loss = 0.0
 

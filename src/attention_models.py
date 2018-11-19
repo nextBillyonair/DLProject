@@ -2,15 +2,8 @@ import torch
 from torch.nn import Dropout, Embedding, Linear, Module, Bilinear
 from torch.nn.functional import relu, log_softmax, softmax
 
-"""
-# Spin off to separate class, maybe don't include in this file
-Attention Modes:
-dot
-concat
-None - identity
-"""
+"""File for handiling Attention and their construction/init"""
 
-# FIX ARGS
 def build_attention_model(args, hidden_size, bidirectional_encoder):
     """Builds the attention model to params."""
 
@@ -81,7 +74,6 @@ class GeneralAttention(Module):
         attendable = attendable.contiguous()
 
         scores = self.W_a(hidden, attendable)
-        # print(scores.size())
 
         weights = softmax(scores, dim=1)
         weights = weights.view(batch_size, 1, sentence_length)

@@ -4,133 +4,48 @@ from torch.nn.functional import relu, log_softmax, softmax
 
 """File for handiling Encoders and their construction/init"""
 
-"""
-LIST MODE CONVENTIONS HERE:
-baseline -> simple RNN (or should this be RNN)
-gru -> GRU
-bidirectional -> bidirectional GRU
-"""
-# change to args
 def build_encoder(args, vocab):
-        """Builds the encoder to params."""
+    """Builds the encoder to params."""
 
-        device = torch.device('cpu')
-        input_size = len(vocab.source)
+    input_size = len(vocab.source)
+    rnn_layer = None
+    bidirectional = False if args.encoder_mode != 'bigru' else True
+    dropout = args.rnn_dropout if args.encoder_layers != 1 else 0
 
-        device = torch.device('cpu')
+    if args.encoder_mode == 'rnn':
+        rnn_layer = RNN(args.hidden_size, args.hidden_size,
+                        num_layers=args.encoder_layers, dropout=dropout,
+                        batch_first=True)
+    elif args.encoder_mode == 'gru' or args.encoder_mode == 'bigru':
+        rnn_layer = GRU(args.hidden_size, args.hidden_size,
+                        num_layers=args.encoder_layers, dropout=dropout,
+                        bidirectional=bidirectional, batch_first=True)
+    else:
+        raise ValueError('Invalid encoder mode: %s' % (args.encoder_mode))
 
-        if args.encoder_mode == 'rnn':
-            return EncoderRNN(input_size, args.hidden_size, device,
-                              dropout=args.lstm_dropout,
-                              num_layers=args.encoder_layers)
-        elif args.encoder_mode == 'gru':
-            return EncoderGRU(input_size, args.hidden_size, device,
-                              dropout=args.lstm_dropout,
-                              num_layers=args.encoder_layers)
-        elif args.encoder_mode == 'bigru':
-            return EncoderBidirectionalGRU(input_size, args.hidden_size, device,
-                                           dropout=args.lstm_dropout,
-                                           num_layers=args.encoder_layers)
-        else:
-            raise ValueError('Invalid encoder mode: %s' % (args.encoder_mode))
+    return Encoder(input_size, args.hidden_size, rnn_layer,
+                   bidirectional=bidirectional)
 
 # ENCODER TEMPLATE, FOLLOW METHODS
 # NAME CONVENTION: Encoder{ExtentionName}
-class EncoderRNN(Module):
-    """A word embedding, simple RNN encoder."""
-
-    def __init__(self, input_size, hidden_size, device,
-                 dropout=0.1, num_layers=1):
+class Encoder(Module):
+    def __init__(self, input_size, hidden_size, rnn_layer,
+                 bidirectional=False):
         """Initialize a word embedding and simple RNN encoder."""
         super().__init__()
-        if num_layers == 1:
-            dropout = 0
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.device = device
-        self.dropout = dropout
-        self.num_layers = num_layers
-        # Define layers below, aka embedding + RNN
+        self.bidirectional = bidirectional
+        self.rnn_layer = rnn_layer
         self.word_embedding = Embedding(input_size, hidden_size)
-        self.rnn = RNN(hidden_size, hidden_size, num_layers=num_layers,
-                       dropout=dropout, batch_first=True)
 
     def forward(self, input, hidden=None):
         """
-        Runs the forward pass of the encoder returning the output and the
-        hidden state.
+        Runs the forward pass of the encoder; returns (output, hidden state).
         """
-        # input tensor -> size (N, B, input_size)
-        # hidden -> depends on RNN, see docs
-        # use asserts to make sure correct sizes!
-        output, hidden = self.rnn(self.word_embedding(input), hidden)
-        # take first in bi
+        output, hidden = self.rnn_layer(self.word_embedding(input), hidden)
+        if self.bidirectional: return output, hidden[:len(hidden)//2]
         return output, hidden
-
-
-class EncoderGRU(Module):
-    """A word embedding, GRU encoder."""
-
-    def __init__(self, input_size, hidden_size, device,
-                 dropout=0.1, num_layers=1):
-        """Initialize a word embedding and GRU encoder."""
-        super().__init__()
-        if num_layers == 1:
-            dropout = 0
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.device = device
-        self.dropout = dropout
-        self.num_layers = num_layers
-        # Define layers below, aka embedding + GRU
-        self.word_embedding = Embedding(input_size, hidden_size)
-        self.gru = GRU(hidden_size, hidden_size, num_layers=num_layers,
-                       dropout=dropout, batch_first=True)
-
-    def forward(self, input, hidden=None):
-        """
-        Runs the forward pass of the encoder returning the output and the
-        hidden state.
-        """
-        # input tensor -> size (N, B, input_size)
-        # hidden -> depends on RNN, see docs
-        # use asserts to make sure correct sizes!
-        output, hidden = self.gru(self.word_embedding(input), hidden)
-        # take first in bi
-        return output, hidden
-
-
-class EncoderBidirectionalGRU(Module):
-    """A word embedding and bi-directional GRU encoder."""
-
-    def __init__(self, input_size, hidden_size, device,
-                 dropout=0.1, num_layers=1):
-        """Initialize a word embedding and bi-directional GRU encoder."""
-        super().__init__()
-        if num_layers == 1:
-            dropout = 0
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.device = device
-        self.dropout = dropout
-        self.num_layers = num_layers
-        # Define layers below, aka embedding + BiGRU
-        self.word_embedding = Embedding(input_size, hidden_size)
-        self.gru = GRU(hidden_size, hidden_size, num_layers=num_layers,
-                       dropout=dropout, bidirectional=True, batch_first=True)
-
-    def forward(self, input, hidden=None):
-        """
-        Runs the forward pass of the encoder returning the output and the
-        hidden state.
-        """
-        # input tensor -> size (N, B, input_size)
-        # hidden -> depends on RNN, see docs
-        # use asserts to make sure correct sizes!
-        output, hidden = self.gru(self.word_embedding(input), hidden)
-        # take first in bi
-        return output, hidden[:len(hidden)//2]
-
 
 
 

@@ -1,0 +1,724 @@
+%------------------------------------------------------------------------------
+%   PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%------------------------------------------------------------------------------
+
+\documentclass[twoside,twocolumn]{article}
+
+%\usepackage[sc]{mathpazo} % Use the Palatino font
+%\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\linespread{1.05} % Line spacing - Palatino needs more space between lines
+%\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+
+\usepackage[english]{babel} % Language hyphenation and typographical rules
+
+% Document margins
+\usepackage[hmarginratio=1:1,top=32mm,left=20mm,right=20mm,columnsep=20pt]{geometry}
+% Custom captions under/above floats in tables or figures
+\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption}
+\usepackage{booktabs} % Horizontal rules in tables
+
+\usepackage{enumitem} % Customized lists
+\setlist[itemize]{noitemsep} % Make itemize lists more compact
+\usepackage{textcomp}
+
+% Allows abstract customization
+\usepackage{abstract}
+% Set the "Abstract" text to bold
+\renewcommand{\abstractnamefont}{\normalfont\bfseries}
+% Set the abstract itself to small italic text
+\renewcommand{\abstracttextfont}{\normalfont\small\itshape}
+
+\usepackage{fancyhdr} % Headers and footers
+\pagestyle{fancy} % All pages have headers and footers
+\fancyhead{} % Blank out the default header
+\fancyfoot{} % Blank out the default footer
+\fancyhead[C]{\thetitle}
+\fancyfoot[RO,LE]{\thepage} % Custom footer text
+
+\usepackage{titling} % Customizing the title section
+
+\usepackage{hyperref} % For hyperlinks in the PDF
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{tikz}
+\usetikzlibrary{bayesnet, arrows, positioning, fit, arrows.meta, shapes}
+
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{graphicx}
+
+
+\captionsetup[figure]{labelfont={bf},textfont=normalfont}
+
+%------------------------------------------------------------------------------
+%   TITLE SECTION
+%------------------------------------------------------------------------------
+
+\setlength{\droptitle}{-4\baselineskip} % Move the title up
+
+\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
+\posttitle{\end{center}} % Article title closing formatting
+
+\title{DL Project Final Report:\\
+       Shakespeare - English Sequence to Sequence Modeling}
+\author{%
+\textsc{Morris Kraicer} \\[1ex]
+\normalsize Johns Hopkins University \\
+\normalsize \href{mailto:mkraice1@jhu.edu}{mkraice1@jhu.edu}
+ \and
+ \textsc{Riley Scott} \\[1ex]
+\normalsize Johns Hopkins University \\
+\normalsize \href{mailto:rscott39@jhu.edu}{rscott39@jhu.edu}
+ \and
+  \textsc{William Watson} \\[1ex]
+\normalsize Johns Hopkins University \\
+\normalsize \href{mailto:billwatson@jhu.edu}{billwatson@jhu.edu}
+}
+
+\date{}%\today} % Leave empty to omit a date
+% \renewcommand{\maketitlehookd}{%
+
+% }
+
+%------------------------------------------------------------------------------
+
+\begin{document}
+
+% Print the title
+\maketitle
+
+%------------------------------------------------------------------------------
+%   ARTICLE CONTENTS
+%------------------------------------------------------------------------------
+
+%------------------------------------------------
+
+\begin{abstract}
+% NN and NMT + attention + LSTM
+\noindent
+We present a interim report on our efforts to contruct a sequence-to-sequence
+neural translation model with attention. We present the inital work done on
+data procurement and processing, and provide statitics on our datasets.
+Additionally, we describe in detail our models that we are experimenting with.
+Finally, we describe the overall structure of our code to support sequence
+to sequence modeling.
+\end{abstract}
+
+%------------------------------------------------
+
+\section{Introduction}
+We seek to apply a suite of Encoder-Decoder models with varying attention
+mechanisms and teacher forcing rates to a corpus of Modern English - Original
+Shakespeare data. Discussion on our procurement is in Section ~\ref{sec:data}
+and our processing methods in Section ~\ref{sec:preprocess}. We wanted to
+apply a style transfer between the two forms of writing,
+and more specifically test in models currently
+used in decoding languages (Section ~\ref{sec:architecture}) can be used in this
+capcity. We will experment with several model combinations mentioned in Figure
+~\ref{fig:model-experiments} and in the final report detail our sucesses
+and failures. Our current progress in detailed in Figure
+~\ref{fig:current-status}. Diagrams for our models can be found in the appendix.
+
+%------------------------------------------------
+
+\section{Data Procurement}
+\label{sec:data}
+Most of our data was procured from \cite{xu2012paraphrasing}.
+This includes all of Shakespeares plays translated line by line into modern
+English. However, since the data was aligned, not all of the original lines
+from the plays are included (the sentences could not be aligned properly).
+\footnote{\url{https://github.com/cocoxu/Shakespeare}}
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{File}
+          & \textbf{Line Count}\\
+        \hline
+        train.snt.aligned & 18,444 \\ \hline
+        dev.snt.aligned & 2,107 \\ \hline
+        test.snt.aligned & 528 \\ \hline
+        total & 21,079 \\ \hline
+    \end{tabular}
+
+    \caption{Data Pair Counts for Shakespeare--English Corpus (Sparknotes)}
+    \label{fig:data-lines-sparknotes}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{File}
+          & \textbf{Line Count}\\
+        \hline
+        train.snt.aligned & 9,069 \\ \hline
+        dev.snt.aligned & 1,036 \\ \hline
+        test.snt.aligned & 260 \\ \hline
+        total & 10,365 \\ \hline
+    \end{tabular}
+
+    \caption{Data Pair Counts for Shakespeare--English Corpus (Enotes)}
+    \label{fig:data-lines-enotes}
+\end{figure}
+
+The training vocabulary sizes are 11,538 source (original) words and
+9,024 target (modern) words for the Sparknotes set. For enotes, there are
+9004 source words, 7497 target words.
+%------------------------------------------------
+
+\section{Preprocessing}
+\label{sec:preprocess}
+We describe our data processing algorithms to create test, development,
+and training samples in a simple and easy format.
+\subsection{SOS and EOS}
+% talk about use
+We encapsulate every sentence with two special tokens: SOS and EOS.
+The Start of Sentence token (SOS) signals the start of a sequence, and allows
+us to map our first real word to one that most likely starts a sentence.
+
+We use the End of Sentence (EOS) token to signal the end of the sequence, and
+always comes after punctuation.
+
+By incorporating these special tokens, we can signal to the model the start and
+end of a sequence, and help training overall. This is done during the run, and
+is not present in our data files (inserted at run time).
+
+\subsection{Proper Nouns}
+Proper nouns are unique in both corpus, and have direct translations. In order
+to reduce vocabulary size and aggregate the learning of all proper nouns,
+we replace all proper nouns with the following token: propn. Thus our model
+should learn to map propn to propn, and can utilize the encoding to learn the
+most likely token following its usage. We use
+SpaCy's\footnote{\url{https://spacy.io}} nlp models to identify
+proper nouns in each sentence, and replace the tokens.
+
+\subsection{Miscellaneous}
+% lower, nltk tokenizing, spliting punct etc
+Additionally, we lower case all input. We use the Natural Language ToolKit's
+(NLTK) tokenization algorithm
+to split punctation, contrations, etc for each word.
+
+\subsection{Train, Validation, Test Split}
+% look at code, provide stats (Vocab size, # sent, etc.)
+We randomly shuffle and split the combined preprocessed dataset into three sets:
+Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearance
+of unkown tokens (UNK). We provide statistics for the data.
+% TODO: Provide Data Stats
+
+\begin{figure*}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{ |c|l|l| }
+        \hline
+            $\#$
+            & \textbf{Original Sentence}
+            & \textbf{Modern Sentence}\\
+        \hline
+        1
+            & there ’ s beggary in the love that can be reckoned .
+            & it would be a pretty stingy love if it \\
+         &
+         & could be counted and calculated . \\
+        \hline
+        2
+            & poor souls , they perished .
+            & the poor people died . \\
+        \hline
+        3
+            & the propn ’ s abused by some most villainous knave ,
+            & the propn is being tricked by some crook ,  \\
+         & some base notorious knave , some scurvy fellow .
+         & some terrible villain , some rotten bastard . \\
+        \hline
+        4
+            & my best way is to creep under his gaberdine .
+            & the best thing to do is crawl under his cloak . \\
+        \hline
+        5
+            & when they do choose , they have the wisdom by their wit to lose .
+            & when they choose , they only know how to lose . \\
+        \hline
+        6
+            & her blush is guiltiness , not modesty .
+            & she blushes from guilt , not modesty . \\
+        \hline
+        7
+            & go , hang yourselves all !
+            & go hang yourselves , all of you ! \\
+        \hline
+        8
+            & then , if ever thou propn acknowledge it ,
+            & then , if you dare to acknowledge it , \\
+         & i will make it my quarrel .
+         & i ’ ll take up my quarrel with you . \\
+        \hline
+        9
+            & and lovers ' absent hours more tedious
+            & and lovers ' hours are a hundred and  \\
+         & than the dial eightscore times !
+         & sixty times longer than normal ones ! \\
+        \hline
+        10
+            & i have no great devotion to the deed and
+            & i do n ’ t really want to do this , \\
+         & yet he hath given me satisfying reasons .
+         & but he ’ s given me good reasons . \\
+        \hline
+        \end{tabular}}
+    \caption{Sample Original-Modern Sentence Pairs, Processed
+      (Without SOS/EOS Tokens)}
+    \label{fig:sample-pairs}
+\end{figure*}
+
+%------------------------------------------------
+
+\section{Architectures}
+\label{sec:architecture}
+% go more detailed? or can they not handle the math lol
+% these descriptions are good starters, but we can be mroe detailed.
+We seek to develop several models to improve our translations, incorporating
+context, attention, and novel training methods. It will
+incorporate an encoder-decoder style model \cite{cho2014learning}
+\cite{sutskever2014sequence}.
+
+% IDEA on subsectioning:
+\subsection{Encoders}
+The encoder (or \emph{inference network}) receives an input token sequence
+$\vec{x} = \left[{x_1,\hdots, x_n}\right]$ of length $n$ and processes
+this to create an output encoding. The result is a sequence
+$\vec{h} = \left[{h_1, \cdots, h_{T_x}}\right]$ that
+maps to the input sequence $\vec{x}$.
+\subsubsection{Baseline RNN Encoder}
+For the baseline encoder, we implemented a simple Embedding + RNN encoder.
+This accepts an input sequence $\vec{x}$ and encoders the sequence using the lookup
+embeddings and forward context.
+\begin{equation}
+  \label{eq:rnn}
+  h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
+\end{equation}
+Howver, this is the simplest model, prone to the vanishing gradient problem
+on large sequences. In addition, this model has the lowest capacity to learn.
+Nonetheless, we will present results for our baseline.
+
+\begin{figure*}[ht]
+    \centering
+    \begin{tabular}{ |c|c|c|c|c| }
+        \hline
+        $\#$
+          & \textbf{Encoder}
+          & \textbf{Decoder}
+          & \textbf{Attention}
+          & \textbf{Teacher Forcing (Percent)} \\
+        \hline
+        1 & RNN & RNN & None & None \\ \hline
+        2 & GRU & GRU & None & None \\ \hline
+        3 & Bidirectional GRU & GRU & None & None \\ \hline
+        4 & Bidirectional GRU & GRU & Concat & None \\ \hline
+        5 & Bidirectional GRU & GRU & General & None \\ \hline
+        6 & Bidirectional GRU & GRU & Concat & 0.5 \\ \hline
+        7 & Bidirectional GRU & GRU & General & 0.5 \\ \hline
+        8 & Bidirectional GRU & GRU & Concat & 1.0 \\ \hline
+        9 & Bidirectional GRU & GRU & General & 1.0 \\ \hline
+    \end{tabular}
+
+    \caption{Planned Model Experiments (Subject to change depending on results)}
+    \label{fig:model-experiments}
+\end{figure*}
+
+\subsubsection{GRU Encoder}
+An obvious improvement to our encoding scheme would be to replace the RNN layer
+with a GRU. A GRU encodes a forward sequence using more complex equations to
+improve capacity and learning.
+\begin{equation}
+  \label{eq:gru}
+  \begin{split}\begin{array}{ll}
+    r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
+    z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
+    n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
+    h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
+  \end{array}\end{split}
+\end{equation}
+GRUs help with vanishing gradients, increases our models capacity to learn,
+and uses less parameters than the LSTM layer. Hence, for our purposes, we
+used a GRU over the LSTM.
+
+\subsubsection{Bidirectional GRU Encoder}
+An extension to our encoding scheme will consider the full context of words
+immediately before an after it. This is done by running a GRU layer on the
+forward and backward sequence and combining each tensor. Hence we use a
+bidirectional GRU as laid forth in \cite{bahdanau2014neural}.
+\begin{equation}
+  \label{eq:bidirectional}
+  \begin{split}
+    \begin{array}{ll}
+      \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
+      \\
+      \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
+      \\
+      h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
+    \end{array}
+  \end{split}
+\end{equation}
+PyTorch concatenates the resulting tensors, doubling the hidden output size
+of a normal GRU. Other libraries allow for concatenatation, averaging,
+and summing. We use PyTorch's implementation of a bidirectional GRU.
+
+\subsubsection{Implementation}
+All encoders share the same model architecture, except for the recurrent layer.
+We use PyTorch's implementation for the RNN, GRU, and Bidirectional GRU.
+We also add embedding layers. PyTorch's recurrent layers naturally support
+multiple layers and dropout, and can be set through CLI args
+\texttt{--num-layers} and \texttt{--lstm-dropout}. The hidden size is set by
+\texttt{--hidden-size}. The defaults are 1, 0.1, and 256, respectively.
+
+
+\subsection{Decoders}
+We will describe the decoder algorithm, and experiment with two different
+recurrent layers: RNN and GRU. We cannot use a Bidirectional GRU because
+we do not know the full decoded sequence (and hence why we are decoding).
+
+Decoders take in the last translated token, starting with an SOS token on a
+new batch. It applies an embedding layer, followed by an optional dropout.
+
+We then have two options:
+\begin{enumerate}
+  \item Attention (General, Concat, etc.)
+  \item No Attention
+\end{enumerate}
+In the case of attention, we apply one of the attention schemes (described in
+the next section) to the encoder output, given our current decoding
+hidden state. We concatenate the attention results with our input embedding.
+
+Without attention, we just use the input embedding and ignore the encoder
+outputs.
+
+We apply a recurrent layer to the attended tensor, using the hidden state
+provided. After applying a linear layer and log softmax, we output our result
+for evaluation.
+
+\subsection{Attention Mechanisms}
+\label{sec:attention}
+Attention mechanisms have been shown to improve sequence to sequence
+translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
+from Luong et al \cite{luong2015effective} examines global vs local approached
+to attention-based encoder-decoders. Common attention mechanisms are:
+% we will probably use dot & concat attention
+\begin{equation}
+    score(h_t, h_s) =
+    \begin{cases}
+        v_a^T \cdot \tanh (W_a [h_t \| h_s]) & \text{\emph{concat}} \\
+        h_t^T \cdot W_a \cdot h_s & \text{\emph{general}} \\
+        h_t^T \cdot h_s & \text{\emph{dot}} \\
+    \end{cases}
+\end{equation}
+where $h_t$ is the current target hidden state, and $h_s$ is the encoder output.
+To compute scores, which are used to create attention weights, we apply a
+softmax:
+\begin{equation}
+  a_t(s) = \frac{\exp(score(h_t, h_s))}{\sum_{s'}\exp(score(h_t, h_{s'}))}
+\end{equation}
+Using these scores, we create a context vector, which is just the batch matrix
+multiplication between our attention weights and the encoder outputs.
+We will focus on general attention and concat attention in our
+experiments.
+
+\subsection{Teacher Forcing}
+In terms of training, an encoder-decoder system can either accept the target
+token or the model's prediction as input during the decoding step. When we use
+the target token, this is known as teacher forcing, and is shown to be favored
+during initial training iterations, but should be backed off to use the
+model's own predicitons, as it will exhibit instability in the translations
+otherwise \cite{lamb2016professor}.
+
+We hope to build in a system to decay the teacher forcing percentage over time,
+instead of our current implementation that checks a random number againist the
+hyperparameter. However, we can bypass this effectively by reloading a model
+and changing the teacher forcing parameter provided.
+
+%------------------------------------------------
+\section{Planned Experiments}
+We plan to experiment with several model permutations, as outlined in Figure
+~\ref{fig:model-experiments}. We do not test every permutation since that would
+take too much time, and have selected several runs that would provide us enough
+results to determine the best model for this problem.
+
+\begin{figure*}[ht]
+    \centering
+    \begin{tabular}{ |c|c|c|c| }
+        \hline
+        $\#$
+          & \textbf{Task}
+          & \textbf{Status}
+          & \textbf{Team Member}\\
+        \hline
+        1 & Data Procurement & DONE & All \\ \hline
+        2 & Preprocessing & DONE & Riley, Bill \\ \hline
+        3 & RNN Encoder & DONE & Riley \\ \hline
+        4 & GRU Encoder & DONE & Morris \\ \hline
+        5 & Bidirectional GRU & DONE & Morris \\ \hline
+        6 & RNN Decoder & TESTING & Morris \\ \hline
+        7 & GRU Decoder & TESTING & Bill \\ \hline
+        8 & Attention Models & TESTING & Bill \\ \hline
+        9 & Teacher Forcing & DONE & Bill \\ \hline
+        10 & Vocabulary Building & DONE & Bill \\ \hline
+        11 & Train/Eval Support Code & DONE & Bill \\ \hline
+        12 & GPU Support & DONE & Riley \\ \hline
+        13 & Batching & DONE & Bill \\ \hline
+        14 & Experiments & IN PROGRESS & Morris, Riley \\ \hline
+    \end{tabular}
+
+    \caption{Current Progress}
+    \label{fig:current-status}
+\end{figure*}
+
+%------------------------------------------------
+
+\section{Roadblocks and Problems}
+We have hit two major roadblocks since our proposal, and discuss our apporaches
+to mediating the issues.
+
+\subsection{Data Learnability}
+In our first tests, we used data procured from \cite{xu2012paraphrasing}.
+There were two parallel datasets, one from Sparknotes, the other from enotes. We
+originally planned to use the Sparknotes version, as the data set was larger
+(21079 sentence pairs). However, when training, the models had difficulty
+accounting for the reordering Sparknotes used in their translations. Hence, we
+decieded to switch to enotes, which is a smaller (10365 sentence pairs), but
+more aligned corpus. We theorize that data that has less reordering will converge
+faster to a desired result. Since the dataset is smaller, we use less batches,
+and training time trivially improves. We hope for decent results by switching.
+
+
+\subsection{GPU/CPU Training Times}
+Systems like these take a long time to learn the data, and one of our major
+roadblocks is training time. For a normal CPU run, 2 epochs takes 11-30 minutes,
+depending on computer specs. This would put our experiments total running time
+at over 2-3 days per experiment (18-27 days total). This does not give us much
+leeway to verify our
+apporach. Hence, we describe in Section ~\ref{sec:gpu} our intial resutls
+in GPU compatability and speedups. These timings were done on the Sparknotes
+dataset.
+
+%------------------------------------------------
+
+\section{Additional Implementation\\Details}
+\subsection{Batching}
+In order to faciliate faster training, and less noisy gradients, we felt it
+imperative to introduce batching of sentences. We batched similiar sentences
+according to source sentence length (encoder input). This allows us to reduce
+the number of batches to loop through and take advantage of torch operations.
+
+\subsection{GPU Compatability}
+\label{sec:gpu}
+Initial training is slow on a cpu, with a Bidirectional GRU Encoder
++ GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
+varying on batch size (32 and 128 tested). In order to improve training time,
+we have allowed an optional parameter to use a gpu. Inital run on batch size 128
+yielded a training speed of 111 seconds per 2 epochs. Hence our experiments will
+take only 4-6 days, and can be distributed across multiple GPUs for even less
+time.
+
+Our group has an estimated 3 GPUs (Morris:1; Riley:2). This will help us
+distribute our experiments across several computers and allow us time to adjust
+experiments based upon our initial findings. If need be, we will us Google
+credits to fund more experiments.
+
+%------------------------------------------------
+
+\section{Current Status and\\Expectation}
+%Where are we at now + what are we going to do.
+See Figure ~\ref{fig:current-status} for our current standing on this project.
+Our notation is as follows:
+\begin{enumerate}
+  \item DONE - Fully implemented, tested, no further work needed
+  \item IN PROGRESS - Currently being implemented or worked on. Some inital results
+    but more work is required for full functionality.
+  \item TESTING - Fully functional, but currently being tested for bugs, etc.
+\end{enumerate}
+
+While most of the coding is done, and the last few model architectures are
+being tested, we estimate the longest task to be completed is model
+experimentation, and may take the next two-three weeks to complete.
+
+We will automate all planned experiments, examine the results, and use the best
+model as our style-transfer. We will then begin our final training session
+on both directions and provide results. We hopefully expect training of our
+experiments completed by the end of Thanksgiving break, and can pick a model
+to perform style-transfer for English-Shakespeare examples.
+
+%------------------------------------------------
+
+
+
+%------------------------------------------------
+
+% References
+\bibliographystyle{abbrv}
+\bibliography{final_report}
+
+%------------------------------------------------
+
+\clearpage
+\appendix
+\onecolumn
+\section{Model Architecture Diagrams}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (encoder) {Encoder};
+    \node[rectangle, below=2cm of encoder] (decoder) {Decoder};
+    \node[rectangle, above=0.75cm of encoder, xshift=-1cm] (s) {$source$};
+    \node[rectangle, above=0.75cm of encoder, xshift=1cm] (hidden1) {$None$};
+    \node[rectangle, below=0.75cm of encoder, xshift=-1cm] (out1) {$encodings$};
+    \node[rectangle, below=0.75cm of encoder, xshift=1cm] (hidden2) {$hidden$};
+    \node[rectangle, left=0.75cm of decoder] (t) {$token$};
+    \node[rectangle, below=0.75cm of decoder, xshift=-1cm] (out2) {$new$ $token$};
+    % \node[rectangle, below=0.75cm of decoder, xshift=1cm] (hidden3) {$hidden$};
+
+    % Connect the nodes
+    \edge {s, hidden1} {encoder};
+    \edge {encoder} {out1, hidden2};
+    \edge {out1, t} {decoder};
+    \edge {decoder} {out2};
+    \edge {out2} {t};
+    \path [->] (decoder) edge [bend right=15] node {} (hidden2);
+    \path [->] (hidden2) edge [bend right=15] node {} (decoder);
+
+  \end{tikzpicture}
+  \caption{Model Architecture Overview for Encoder-Decoder.}
+  \label{fig:encoder-decoder}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (rnn) {RNN/GRU};
+    \node[rectangle, below=0.75cm of rnn, xshift=-1cm] (out) {$output$};
+    \node[rectangle, below=0.75cm of rnn, xshift=1cm] (hidden2) {$hidden$};
+    \node[rectangle, above=0.75cm of rnn, xshift=-1cm] (embed) {Embed};
+    \node[rectangle, above=0.75cm of embed] (input) {$source$};
+    \node[rectangle, right=0.75cm of input] (hidden1) {$hidden$};
+
+    % Connect the nodes
+    \edge {input} {embed};
+    \edge {embed, hidden1} {rnn};
+    \edge {rnn} {out, hidden2};
+
+  \end{tikzpicture}
+  \caption{Model Architecture for Encoder.}
+  \label{fig:encoder}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (rnn) {RNN/GRU};
+    \node[rectangle, above=0.75cm of rnn] (embed) {Embed};
+    \node[rectangle, above=0.75 of embed] (input) {$input$};
+    \node[rectangle, right=1cm of input] (hidden1) {$hidden$};
+    \node[rectangle, below=0.75cm of rnn] (linear) {Linear};
+    \node[rectangle, below=0.75cm of linear] (logs) {Log Softmax};
+    \node[rectangle, below=0.75cm of logs] (out) {$output$};
+    \node[rectangle, right=1.25cm of out] (hidden2) {$hidden$};
+
+    % Connect the nodes
+    \edge {input} {embed};
+    \edge {embed, hidden1} {rnn};
+    \edge {rnn} {linear, hidden2};
+    \edge {linear} {logs};
+    \edge {logs} {out};
+
+  \end{tikzpicture}
+  \caption{Decoder with No Attention.}
+  \label{fig:decoder-no-attn}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (rnn) {RNN/GRU};
+    \node[rectangle, above=0.75 of rnn, xshift=-1cm] (cat) {Cat};
+    \node[rectangle, above=0.75cm of cat] (attn) {Attn};
+    \node[rectangle, left=0.75cm of attn] (embed) {Embed};
+    \node[rectangle, above=0.75 of embed] (input) {$input$};
+    \node[rectangle, above=0.75cm of attn] (encoder) {$encoding$};
+    \node[rectangle, right=1cm of encoder] (hidden1) {$hidden$};
+    \node[rectangle, below=0.75cm of rnn] (linear) {Linear};
+    \node[rectangle, below=0.75cm of linear] (logs) {Log Softmax};
+    \node[rectangle, below=0.75cm of logs] (out) {$output$};
+    \node[rectangle, right=1cm of out] (hidden2) {$hidden$};
+
+    % Connect the nodes
+    \edge {input} {embed};
+    \edge {encoder, hidden1} {attn};
+    \edge {attn, embed} {cat};
+    \edge {cat, hidden1} {rnn};
+    \edge {rnn} {linear, hidden2};
+    \edge {linear} {logs};
+    \edge {logs} {out};
+
+  \end{tikzpicture}
+  \caption{Decoder with Attention.}
+  \label{fig:decoder-attn}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (out) {$output$};
+    \node[rectangle, above=0.75cm of out] (bmm) {BMM};
+    \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (soft) {Softmax};
+    \node[rectangle, above=0.75 of soft] (lin2) {Linear};
+    \node[rectangle, above=0.75 of lin2] (tanh) {$\tanh$};
+    \node[rectangle, above=0.75 of tanh] (lin1) {Linear};
+    \node[rectangle, above=0.75 of lin1] (cat) {Cat};
+    \node[rectangle, above=0.75 of cat, xshift=-1cm] (hidden) {$hidden$};
+    \node[rectangle, above=0.75 of cat, xshift=1cm] (encodings) {$encodings$};
+
+    % Connect the nodes
+    \edge {encodings, hidden} {cat};
+    \edge {cat} {lin1};
+    \edge {lin1} {tanh};
+    \edge {tanh} {lin2};
+    \edge {lin2} {soft};
+    \edge {soft, encodings} {bmm};
+    \edge {bmm} {out};
+
+  \end{tikzpicture}
+  \caption{Concat (Bahdanau) Attention Layer.}
+  \label{fig:concat-attn}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+
+    % Define nodes
+    \node[rectangle] (out) {$output$};
+    \node[rectangle, above=0.75cm of out] (bmm) {BMM};
+    \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (soft) {Softmax};
+    \node[rectangle, above=0.75 of soft] (bilinear) {Bilinear};
+    \node[rectangle, above=0.75 of bilinear, xshift=-1cm] (hidden) {$hidden$};
+    \node[rectangle, above=0.75 of bilinear, xshift=1cm] (encodings) {$encodings$};
+
+    % Connect the nodes
+    \edge {encodings, hidden} {bilinear};
+    \edge {lin2} {soft};
+    \edge {soft, encodings} {bmm};
+    \edge {bmm} {out};
+
+  \end{tikzpicture}
+  \caption{General Attention Layer.}
+  \label{fig:general-attn}
+\end{figure}
+
+\end{document}
