@@ -25,8 +25,7 @@ def build_rnn_layer(args):
     elif args.attention_mode != 'none' and args.encoder_mode != 'bigru':
         multiplier = 2
 
-    dropout = args.rnn_dropout
-    if args.decoder_layers == 1: dropout = 0
+    dropout = args.rnn_dropout if args.decoder_layers != 1 else 0
 
     if args.decoder_mode == 'rnn':
         return RNN(multiplier * args.hidden_size, args.hidden_size,
@@ -39,7 +38,7 @@ def build_rnn_layer(args):
     else:
         raise ValueError('Invalid decoder mode: %s' % (args.decoder_mode))
 
-        
+
 class Decoder(Module):
     def __init__(self, hidden_size, output_size, rnn_layer, attention=None,
                  embedding_dropout=0.1):

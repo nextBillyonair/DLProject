@@ -9,9 +9,8 @@ def build_encoder(args, vocab):
 
     input_size = len(vocab.source)
     rnn_layer = None
-    dropout = args.rnn_dropout
     bidirectional = False if args.encoder_mode != 'bigru' else True
-    if args.encoder_layers == 1: dropout = 0
+    dropout = args.rnn_dropout if args.encoder_layers != 1 else 0
 
     if args.encoder_mode == 'rnn':
         rnn_layer = RNN(args.hidden_size, args.hidden_size,
