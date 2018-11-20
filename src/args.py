@@ -50,8 +50,8 @@ def get_args():
                        default=TEST_PATH, help='test sentences')
     parser.add_argument('--train-batch-size', type=int, default=128,
                         help='sets the training batch size')
-    parser.add_argument('--reverse', default='False',
-                        choices=['True', 'False'],
+    parser.add_argument('--reverse', action='store_const',
+                        default='False', const='True',
                         help='if True reverses source and target reading')
 
     # MAX LEN
