@@ -26,7 +26,8 @@ class Dataset:
 
         device = get_default_device()
 
-        test_sources = (vocab.source.add_sentence(sentence.split('|||', 1)[index])
+        test_sources = (vocab.source.add_sentence(
+                        sentence.split('|||', 1)[index])
                         for sentence in args.test_file)
         test_tensors = tuple(torch.tensor(s, dtype=torch.long,
                                           device=device).unsqueeze(0)
