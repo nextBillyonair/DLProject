@@ -20,9 +20,7 @@ class Dataset:
         dev_pairs = (vocab.add_sentence_pair(pair)
                      for pair in args.dev_file)
 
-        index = 0
-        if args.reverse:
-            index = 1
+        index = 1 if args.reverse else 0
 
         device = get_default_device()
 
