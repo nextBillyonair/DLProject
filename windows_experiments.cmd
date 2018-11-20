@@ -6,5 +6,5 @@ python main.py --encoder-mode bigru --decoder-mode gru --attention-mode concat -
 python main.py --encoder-mode bigru --decoder-mode gru --attention-mode general --use-gpu > results/bigru_dot.txt
 python main.py --encoder-mode bigru --decoder-mode gru --attention-mode concat --teacher-forcing-chance 0.5 --use-gpu > results/bigru_concat_50.txt
 python main.py --encoder-mode bigru --decoder-mode gru --attention-mode general --teacher-forcing-chance 0.5 --use-gpu > results/bigru_dot_50.txt
-python main.py --encoder-mode bigru --decoder-mode gru --attention-mode concat --teacher-forcing-chance 0.5 --use-gpu > results/bigru_concat_100.txt
-python main.py --encoder-mode bigru --decoder-mode gru --attention-mode general  --teacher-forcing-chance 0.5 --use-gpu > results/bigru_dot_100.txt
+python main.py --encoder-mode bigru --decoder-mode gru --attention-mode concat --teacher-forcing-chance 1.0 --use-gpu > results/bigru_concat_100.txt
+python main.py --encoder-mode bigru --decoder-mode gru --attention-mode general  --teacher-forcing-chance 1.0 --use-gpu > results/bigru_dot_100.txt
