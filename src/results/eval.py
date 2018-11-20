@@ -28,7 +28,7 @@ def create_triples(args):
     source_sentences, expected_sentences, actual_sentences = \
                                                     ([] for _ in range(3))
     for sentence in args.test_file:
-        source, expected = tuple(sentence.rstrip().split('|||', 1))
+        source, expected = tuple(sentence.strip().split('|||', 1))
         if args.reverse:
             expected_sentences.append(source)
             source_sentences.append(expected)
