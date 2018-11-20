@@ -1,8 +1,11 @@
 from argparse import ArgumentParser, FileType
 import torch
 
-from dataset import TRAIN_PATH, DEV_PATH, TEST_PATH
 from utils import set_default_device, get_default_device
+
+TRAIN_PATH='../data/split/train.snt.aligned'
+DEV_PATH='../data/split/dev.snt.aligned'
+TEST_PATH='../data/split/test.snt.aligned'
 
 def get_args():
     """Defines All CMD Line Arguments"""

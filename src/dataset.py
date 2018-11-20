@@ -6,10 +6,6 @@ from utils import chunk, get_default_device
 
 from vocab import Bivocabulary
 
-TRAIN_PATH='../data/split/train.snt.aligned'
-DEV_PATH='../data/split/dev.snt.aligned'
-TEST_PATH='../data/split/test.snt.aligned'
-
 # TODO: test
 class Dataset:
     @classmethod
