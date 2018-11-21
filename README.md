@@ -20,16 +20,8 @@ proposal\\
 interim\\
 
   - Interim Report files
+  
+final_report\\
 
-# Data
-  Split into modern & original. A preprocess folder will exist with a processed
-  train/dev/test split (70/20/10?), merged.
+  - Final Report files
 
-# Code
-  TODO
-
-# Proposal
-Found under proposal/, along with tex src, makefile, bibtex
-
-# Final Report
-  TODO
