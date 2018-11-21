@@ -54,10 +54,7 @@ class GeneralAttention(Module):
     def __init__(self, hidden_size, bidirectional_encoder):
         super().__init__()
         self.hidden_size = hidden_size
-
-        self.multiplier = 1
-        if bidirectional_encoder:
-            self.multiplier = 2
+        self.multiplier = 2 if bidirectional_encoder else 1
 
         self.W_a = Bilinear(self.hidden_size,
                             self.multiplier * self.hidden_size,

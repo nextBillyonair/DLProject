@@ -85,6 +85,8 @@ def get_args():
     set_default_device(args.device)
     # Convert to bool
     args.reverse = True if args.reverse == 'True' else False
+    # defualt to 1 b/c sizes are difficult to match
+    args.encoder_layers = args.decoder_layers = 1
 
     return args
 

@@ -106,11 +106,4 @@ class Model:
 
             # Slice off <SOS> token
             return translation[:, 1:, 0]
-
-
-
-
-
-
-
 # EOF

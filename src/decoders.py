@@ -16,7 +16,8 @@ def build_decoder(args, vocab):
                                       bidirectional_encoder)
 
     rnn = build_rnn_layer(args)
-    return Decoder(args.hidden_size, output_size, rnn, attention)
+    return Decoder(args.hidden_size, output_size, rnn, attention,
+                   args.rnn_dropout)
 
 def build_rnn_layer(args):
     multiplier = 1
