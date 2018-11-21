@@ -57,8 +57,11 @@ def main():
 
     compare(source, expected, actual)
 
-    bleu = corpus_bleu(expected, actual)
-    print(f'Test BLEU: {bleu:.4f}\n')
+    # take tgt bleu
+    tgt_bleu = corpus_bleu(expected, actual)
+    print(f'Test TGT BLEU: {tgt_bleu:.4f}')
+    src_bleu = corpus_bleu(source, actual)
+    print(f'Test SRC BLEU: {src_bleu:.4f}\n')
 
 
 if __name__ == '__main__':
