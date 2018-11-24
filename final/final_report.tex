@@ -140,8 +140,33 @@ Diagrams for our models can be found in the appendix.
 \label{sec:models}
 \subsection{Overview}
 \subsubsection{RNN}
+\begin{equation}
+  \label{eq:rnn}
+  h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
+\end{equation}
 \subsubsection{GRU}
+\begin{equation}
+  \label{eq:gru}
+  \begin{split}\begin{array}{ll}
+    r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
+    z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
+    n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
+    h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
+  \end{array}\end{split}
+\end{equation}
 \subsubsection{Bidirectional GRU}
+\begin{equation}
+  \label{eq:bidirectional}
+  \begin{split}
+    \begin{array}{ll}
+      \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
+      \\
+      \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
+      \\
+      h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
+    \end{array}
+  \end{split}
+\end{equation}
 \subsection{Encoders}
 \subsection{Decoders}
 \subsection{Attention}
@@ -164,6 +189,12 @@ Diagrams for our models can be found in the appendix.
 \section{Conclusion \& Future Work}
 \label{sec:conclusion}
 %------------------------------------------------
+
+
+
+
+
+
 
 % OLD STUFF, SLOWLY MOVE INTO TOP IF NEEDED, CHANGE TENSE
 
@@ -689,7 +720,7 @@ to perform style-transfer for English-Shakespeare examples.
 
     % Define nodes
     \node[rectangle] (rnn) {RNN/GRU};
-    \node[rectangle, above=0.75 of rnn, xshift=-1cm] (cat) {Cat};
+    \node[rectangle, above=0.75 of rnn, xshift=-1cm] (cat) {Concat};
     \node[rectangle, above=0.75cm of cat] (attn) {Attn};
     \node[rectangle, left=0.75cm of attn] (embed) {Embed};
     \node[rectangle, above=0.75 of embed] (input) {$input$};
@@ -724,7 +755,7 @@ to perform style-transfer for English-Shakespeare examples.
     \node[rectangle, above=0.75 of soft] (lin2) {Linear};
     \node[rectangle, above=0.75 of lin2] (tanh) {$\tanh$};
     \node[rectangle, above=0.75 of tanh] (lin1) {Linear};
-    \node[rectangle, above=0.75 of lin1] (cat) {Cat};
+    \node[rectangle, above=0.75 of lin1] (cat) {Concat};
     \node[rectangle, above=0.75 of cat, xshift=-1cm] (hidden) {$hidden$};
     \node[rectangle, above=0.75 of cat, xshift=1cm] (encodings) {$encodings$};
 
