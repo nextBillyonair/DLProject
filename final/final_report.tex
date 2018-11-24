@@ -99,33 +99,76 @@
 \begin{abstract}
 % NN and NMT + attention + LSTM
 \noindent
-We present a interim report on our efforts to contruct a sequence-to-sequence
-neural translation model with attention. We present the inital work done on
-data procurement and processing, and provide statitics on our datasets.
-Additionally, we describe in detail our models that we are experimenting with.
-Finally, we describe the overall structure of our code to support sequence
-to sequence modeling.
+We present our attempt to create an English-Shakespeare Sequence to Sequence
+Model, and its application to create a pseudo supervised style transfer system
+for text. We experimented with different Encoder-Decoder Architectures with and
+without Attention Mechanisms. We discuss our data procurement and processing
+to help facilitate learning, and present our experimental results.
 \end{abstract}
 
 %------------------------------------------------
-
 \section{Introduction}
-We seek to apply a suite of Encoder-Decoder models with varying attention
-mechanisms and teacher forcing rates to a corpus of Modern English - Original
-Shakespeare data. Discussion on our procurement is in Section ~\ref{sec:data}
-and our processing methods in Section ~\ref{sec:preprocess}. We wanted to
-apply a style transfer between the two forms of writing,
-and more specifically test in models currently
-used in decoding languages (Section ~\ref{sec:architecture}) can be used in this
-capcity. We will experment with several model combinations mentioned in Figure
-~\ref{fig:model-experiments} and in the final report detail our sucesses
-and failures. Our current progress in detailed in Figure
-~\ref{fig:current-status}. Diagrams for our models can be found in the appendix.
-
+We applied a suite of Encoder-Decoder models with varying attention
+mechanisms (and lack of attention mechanisms) along with teacher forcing rates
+to a corpus of Modern English - Original Shakespeare data. Discussion of our
+data is in Section \ref{sec:data},
+our processing methods are described in Section \ref{sec:preprocess}.
+We used our neural machine translation systems to
+apply a supervised style transfer between the two forms of writing.
+More specifically, we tested models currently
+used in decoding languages (Section \ref{sec:models}) and how they can
+be used in this capacity. We provide results for several model
+combinations and discuss the successes and failures of each system
+(Section \ref{sec:results}). We also describe important implementation details
+in Section \ref{sec:implementation}. Our final results are described in
+Section \ref{sec:style-transfer} for our style transfer system.
+Diagrams for our models can be found in the appendix.
+%------------------------------------------------
+\section{Data}
+\label{sec:data}
+\subsection{Description}
+\subsection{Inital Problems}
+%------------------------------------------------
+\section{Preprocessing}
+\label{sec:preprocess}
+\subsection{Proper Nouns}
+\subsection{NLTK Tokenization}
+\subsection{EOS/SOS Tokens}
+\subsection{Data Split}
+%------------------------------------------------
+\section{Model Architecture}
+\label{sec:models}
+\subsection{Overview}
+\subsubsection{RNN}
+\subsubsection{GRU}
+\subsubsection{Bidirectional GRU}
+\subsection{Encoders}
+\subsection{Decoders}
+\subsection{Attention}
+\subsection{Teacher-Forcing}
+%------------------------------------------------
+\section{Implementation}
+\label{sec:implementation}
+\subsection{Batching}
+\subsection{GPU/CPU}
+\subsection{Metrics}
+\subsubsection{Masked NLL Loss}
+\subsubsection{BLEU Scores}
+%------------------------------------------------
+\section{Results: Shakespeare-English}
+\label{sec:results}
+%------------------------------------------------
+\section{Style-Transfer:\\English-Shakespeare}
+\label{sec:style-transfer}
+%------------------------------------------------
+\section{Conclusion \& Future Work}
+\label{sec:conclusion}
 %------------------------------------------------
 
+% OLD STUFF, SLOWLY MOVE INTO TOP IF NEEDED, CHANGE TENSE
+
 \section{Data Procurement}
-\label{sec:data}
+% \label{sec:data}
 Most of our data was procured from \cite{xu2012paraphrasing}.
 This includes all of Shakespeares plays translated line by line into modern
 English. However, since the data was aligned, not all of the original lines
@@ -171,7 +214,7 @@ The training vocabulary sizes are 11,538 source (original) words and
 %------------------------------------------------
 
 \section{Preprocessing}
-\label{sec:preprocess}
+% \label{sec:preprocess}
 We describe our data processing algorithms to create test, development,
 and training samples in a simple and easy format.
 \subsection{SOS and EOS}
@@ -277,7 +320,7 @@ of unkown tokens (UNK). We provide statistics for the data.
 %------------------------------------------------
 
 \section{Architectures}
-\label{sec:architecture}
+% \label{sec:architecture}
 % go more detailed? or can they not handle the math lol
 % these descriptions are good starters, but we can be mroe detailed.
 We seek to develop several models to improve our translations, incorporating
@@ -401,7 +444,7 @@ provided. After applying a linear layer and log softmax, we output our result
 for evaluation.
 
 \subsection{Attention Mechanisms}
-\label{sec:attention}
+% \label{sec:attention}
 Attention mechanisms have been shown to improve sequence to sequence
 translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
 from Luong et al \cite{luong2015effective} examines global vs local approached
@@ -513,7 +556,7 @@ according to source sentence length (encoder input). This allows us to reduce
 the number of batches to loop through and take advantage of torch operations.
 
 \subsection{GPU Compatability}
-\label{sec:gpu}
+% \label{sec:gpu}
 Initial training is slow on a cpu, with a Bidirectional GRU Encoder
 + GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
 varying on batch size (32 and 128 tested). In order to improve training time,
