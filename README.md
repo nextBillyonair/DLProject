@@ -21,7 +21,7 @@ interim\\
 
   - Interim Report files
   
-final_report\\
+final\\
 
   - Final Report files
 
