@@ -126,7 +126,8 @@ Diagrams for our models can be found in the appendix.
 %------------------------------------------------
 \section{Data}
 \label{sec:data}
-Most of our data came from \cite{xu2012paraphrasing}, in which
+Most of our data came from previous alignment work
+by Xu et al.\cite{xu2012paraphrasing}, in which
 two aligned corpora were procured from Sparknotes and Enotes. Both datasets,
 deriving from different websites, differed drastically. Sparknotes was more
 liberal in its translations, opting for reordering that differed drastically
@@ -154,14 +155,48 @@ from the plays are included (i.e. the sentences could not be aligned properly).
         \textbf{Total} & \textbf{10,365} \\ \hline
     \end{tabular}
 
-    \caption{Data Pair Counts for Shakespeare--English Corpus (Enotes)}
+    \caption{Line Counts for Shakespeare--English Corpus per Play (Enotes)}
     \label{fig:data-lines-enotes}
 \end{figure}
 
 The vocabulary sizes are 9,004 source (original) words and
 7,497 target (modern) words for the Sparknotes set. We had a total of 10,365
 lines of Shakespeare plays to train on. There is a total word count of 233,282
-words for the entire corpus (unprocessed).
+words for the entire corpus (unprocessed). Sample data pairs (processed) are
+provided in Figure \ref{fig:sample-pairs}.
+\begin{figure*}[ht]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{ |c|l|l| }
+      \hline
+          $\#$
+          & \textbf{Original Sentence}
+          & \textbf{Modern Sentence}\\
+      \hline
+      1 & take me with you , take me with you , wife . & catch me , catch me , wife . \\
+      \hline
+      2 & that 's fouler . & that 's even more evil . \\
+      \hline
+      3 & perchance till after propn ' wedding - day . & maybe until after propn ' wedding - day . \\
+      \hline
+      4 & propn truly knows that thou art false as hell . & propn truly knows that you are as false as hell . \\
+      \hline
+      5 & then weep no more . & so stop crying . \\
+      \hline
+      6 & of propn , a n't please your mastership . & of propn , if it pleases you , sir . \\
+      \hline
+      7 & how ill this taper burns ! & how badly this candle burns ! \\
+      \hline
+      8 & the charm 's wound up . & the charm ’ s going to bring things to a head . \\
+      \hline
+      9 & before the time be out ? & before the debt is paid ? \\
+      \hline
+      10 & but soft ! & quiet ! \\
+      \hline
+      \end{tabular}}
+  \caption{Sample Original-Modern Sentence Pairs, Processed}
+  \label{fig:sample-pairs}
+\end{figure*}
 %------------------------------------------------
 \section{Preprocessing}
 \label{sec:preprocess}
@@ -176,11 +211,61 @@ most likely token following its usage. We use
 SpaCy's\footnote{\url{https://spacy.io}} nlp models to identify
 proper nouns in each sentence, and replace the tokens.
 \subsection{NLTK Tokenization}
-\subsection{EOS/SOS Tokens}
+We use NLTK's \texttt{tokenize} module to further process our text data.
+We can use this module to split our strings into its component words,
+punctuation, contrations, etc.
+
+For instance, the modern sentence from Hamlet
+\emph{there's rue for you, and here's some for me.} will be tokenized into:
+\emph{there 's rue for you , and here 's some for me .}
+
+Additionally, contrations are split: \emph{isn't he honest?} tokenizes to
+\emph{is n \textquotesingle} \emph{t he honest ?}
+
+We can use this to easily split words and train on each token. We lower case
+all input before tokenizing.
+\subsection{SOS/EOS Tokens}
+During runtime, we encapsulate every sentence with two special tokens:
+SOS and EOS. The Start of Sentence token (SOS) signals the start of a
+sequence, and allows us to map our first real word to one that most likely
+starts a sentence, given the current hidden state from the encoder
+(and encoder outputs if attention is used).
+
+We use the End of Sentence (EOS) token to signal the end of the sequence, i.e.
+when to stop the decoding process. In the batched version, the EOS token
+signals which tokens should be counted in the loss, while everthing after EOS
+is masked (see Section \ref{sec:masked-loss}).
 \subsection{Data Split}
+We randomly shuffle and split the combined preprocessed dataset into three sets:
+Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearance
+of unkown tokens (UNK). This gives us a sizable training corpus to acutally
+learn, and a reasonable valdiation set to measure BLEU scores and loss. The
+small test set allows us to digest our results. Since the amount of Shakespeare
+data is limited, and will not increase in size, we can have small test sets and
+seek to overtrain the model.
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{File}
+          & \textbf{Line Count}\\
+        \hline
+        train.snt.aligned & 9,069 \\ \hline
+        dev.snt.aligned & 1,036 \\ \hline
+        test.snt.aligned & 260 \\ \hline
+        \textbf{Total} & \textbf{10,365} \\ \hline
+    \end{tabular}
+
+    \caption{Data Split for Shakespeare--English Corpus (Enotes)}
+    \label{fig:data-lines-enotes}
+\end{figure}
 %------------------------------------------------
 \section{Model Architecture}
 \label{sec:models}
+We developed several models to create our pseudo style transfer system,
+incorporating context, attention, and training methods. It encorporates
+an encoder-decoder style model as used in Cho et al. \cite{cho2014learning}
+and Sutskever et al. \cite{sutskever2014sequence}.
 \subsection{Overview}
 \subsubsection{RNN}
 \begin{equation}
@@ -221,7 +306,9 @@ proper nouns in each sentence, and replace the tokens.
 \subsection{GPU/CPU}
 \subsection{Metrics}
 \subsubsection{Masked NLL Loss}
+\label{sec:masked-loss}
 \subsubsection{BLEU Scores}
+\label{sec:bleu}
 We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
 for the quality of model translations. Outputs are in the range [0, 1], and a
 BLEU score of 1 indicates a perfect translation to the reference texts.
@@ -279,125 +366,7 @@ quaity of our models given the data.
 % OLD STUFF, SLOWLY MOVE INTO TOP IF NEEDED, CHANGE TENSE
 
 
-\section{Preprocessing}
-% \label{sec:preprocess}
-We describe our data processing algorithms to create test, development,
-and training samples in a simple and easy format.
-\subsection{SOS and EOS}
-% talk about use
-We encapsulate every sentence with two special tokens: SOS and EOS.
-The Start of Sentence token (SOS) signals the start of a sequence, and allows
-us to map our first real word to one that most likely starts a sentence.
 
-We use the End of Sentence (EOS) token to signal the end of the sequence, and
-always comes after punctuation.
-
-By incorporating these special tokens, we can signal to the model the start and
-end of a sequence, and help training overall. This is done during the run, and
-is not present in our data files (inserted at run time).
-
-\subsection{Proper Nouns}
-Proper nouns are unique in both corpus, and have direct translations. In order
-to reduce vocabulary size and aggregate the learning of all proper nouns,
-we replace all proper nouns with the following token: propn. Thus our model
-should learn to map propn to propn, and can utilize the encoding to learn the
-most likely token following its usage. We use
-SpaCy's\footnote{\url{https://spacy.io}} nlp models to identify
-proper nouns in each sentence, and replace the tokens.
-
-\subsection{Miscellaneous}
-% lower, nltk tokenizing, spliting punct etc
-Additionally, we lower case all input. We use the Natural Language ToolKit's
-(NLTK) tokenization algorithm
-to split punctation, contrations, etc for each word.
-
-\subsection{Train, Validation, Test Split}
-% look at code, provide stats (Vocab size, # sent, etc.)
-We randomly shuffle and split the combined preprocessed dataset into three sets:
-Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearance
-of unkown tokens (UNK). We provide statistics for the data.
-% TODO: Provide Data Stats
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{File}
-          & \textbf{Line Count}\\
-        \hline
-        train.snt.aligned & 9,069 \\ \hline
-        dev.snt.aligned & 1,036 \\ \hline
-        test.snt.aligned & 260 \\ \hline
-        total & 10,365 \\ \hline
-    \end{tabular}
-
-    \caption{Data Pair Counts for Shakespeare--English Corpus (Enotes)}
-    \label{fig:data-lines-enotes}
-\end{figure}
-
-\begin{figure*}[ht]
-    \centering
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{ |c|l|l| }
-        \hline
-            $\#$
-            & \textbf{Original Sentence}
-            & \textbf{Modern Sentence}\\
-        \hline
-        1
-            & there ’ s beggary in the love that can be reckoned .
-            & it would be a pretty stingy love if it \\
-         &
-         & could be counted and calculated . \\
-        \hline
-        2
-            & poor souls , they perished .
-            & the poor people died . \\
-        \hline
-        3
-            & the propn ’ s abused by some most villainous knave ,
-            & the propn is being tricked by some crook ,  \\
-         & some base notorious knave , some scurvy fellow .
-         & some terrible villain , some rotten bastard . \\
-        \hline
-        4
-            & my best way is to creep under his gaberdine .
-            & the best thing to do is crawl under his cloak . \\
-        \hline
-        5
-            & when they do choose , they have the wisdom by their wit to lose .
-            & when they choose , they only know how to lose . \\
-        \hline
-        6
-            & her blush is guiltiness , not modesty .
-            & she blushes from guilt , not modesty . \\
-        \hline
-        7
-            & go , hang yourselves all !
-            & go hang yourselves , all of you ! \\
-        \hline
-        8
-            & then , if ever thou propn acknowledge it ,
-            & then , if you dare to acknowledge it , \\
-         & i will make it my quarrel .
-         & i ’ ll take up my quarrel with you . \\
-        \hline
-        9
-            & and lovers ' absent hours more tedious
-            & and lovers ' hours are a hundred and  \\
-         & than the dial eightscore times !
-         & sixty times longer than normal ones ! \\
-        \hline
-        10
-            & i have no great devotion to the deed and
-            & i do n ’ t really want to do this , \\
-         & yet he hath given me satisfying reasons .
-         & but he ’ s given me good reasons . \\
-        \hline
-        \end{tabular}}
-    \caption{Sample Original-Modern Sentence Pairs, Processed
-      (Without SOS/EOS Tokens)}
-    \label{fig:sample-pairs}
-\end{figure*}
 
 %------------------------------------------------
 
@@ -405,10 +374,6 @@ of unkown tokens (UNK). We provide statistics for the data.
 % \label{sec:architecture}
 % go more detailed? or can they not handle the math lol
 % these descriptions are good starters, but we can be mroe detailed.
-We seek to develop several models to improve our translations, incorporating
-context, attention, and novel training methods. It will
-incorporate an encoder-decoder style model \cite{cho2014learning}
-\cite{sutskever2014sequence}.
 
 % IDEA on subsectioning:
 \subsection{Encoders}
@@ -475,7 +440,7 @@ used a GRU over the LSTM.
 An extension to our encoding scheme will consider the full context of words
 immediately before an after it. This is done by running a GRU layer on the
 forward and backward sequence and combining each tensor. Hence we use a
-bidirectional GRU as laid forth in \cite{bahdanau2014neural}.
+bidirectional GRU as laid forth in Bahdanau et al. \cite{bahdanau2014neural}
 \begin{equation}
   \label{eq:bidirectional}
   \begin{split}
@@ -528,8 +493,8 @@ for evaluation.
 \subsection{Attention Mechanisms}
 % \label{sec:attention}
 Attention mechanisms have been shown to improve sequence to sequence
-translations from Bahdanau et al \cite{bahdanau2014neural}, and further work
-from Luong et al \cite{luong2015effective} examines global vs local approached
+translations from Bahdanau et al. \cite{bahdanau2014neural}, and further work
+from Luong et al. \cite{luong2015effective} examines global vs local approached
 to attention-based encoder-decoders. Common attention mechanisms are:
 % we will probably use dot & concat attention
 \begin{equation}
@@ -557,7 +522,7 @@ token or the model's prediction as input during the decoding step. When we use
 the target token, this is known as teacher forcing, and is shown to be favored
 during initial training iterations, but should be backed off to use the
 model's own predicitons, as it will exhibit instability in the translations
-otherwise \cite{lamb2016professor}.
+otherwise, as written in Lamb et al. \cite{lamb2016professor}
 
 We hope to build in a system to decay the teacher forcing percentage over time,
 instead of our current implementation that checks a random number againist the
@@ -607,7 +572,8 @@ We have hit two major roadblocks since our proposal, and discuss our apporaches
 to mediating the issues.
 
 \subsection{Data Learnability}
-In our first tests, we used data procured from \cite{xu2012paraphrasing}.
+In our first tests, we used data procured from previous alignment work
+by Xu et al. \cite{xu2012paraphrasing}
 There were two parallel datasets, one from Sparknotes, the other from enotes. We
 originally planned to use the Sparknotes version, as the data set was larger
 (21079 sentence pairs). However, when training, the models had difficulty
