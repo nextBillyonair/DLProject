@@ -165,7 +165,16 @@ words for the entire corpus (unprocessed).
 %------------------------------------------------
 \section{Preprocessing}
 \label{sec:preprocess}
+We applied several techniques to improve the quality of our data and reduce the
+vocabulary size to train on.
 \subsection{Proper Nouns}
+Proper nouns are unique in both corpus, and have direct translations. In order
+to reduce vocabulary size and aggregate the learning of all proper nouns,
+we replace all proper nouns with the following token: propn. Thus our model
+should learn to map propn to propn, and can utilize the encoding to learn the
+most likely token following its usage. We use
+SpaCy's\footnote{\url{https://spacy.io}} nlp models to identify
+proper nouns in each sentence, and replace the tokens.
 \subsection{NLTK Tokenization}
 \subsection{EOS/SOS Tokens}
 \subsection{Data Split}
@@ -259,6 +268,10 @@ quaity of our models given the data.
 \section{Conclusion \& Future Work}
 \label{sec:conclusion}
 %------------------------------------------------
+
+
+
+
 
 
 
