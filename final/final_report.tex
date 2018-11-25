@@ -126,8 +126,42 @@ Diagrams for our models can be found in the appendix.
 %------------------------------------------------
 \section{Data}
 \label{sec:data}
-\subsection{Description}
-\subsection{Inital Problems}
+Most of our data came from \cite{xu2012paraphrasing}, in which
+two aligned corpora were procured from Sparknotes and Enotes. Both datasets,
+deriving from different websites, differed drastically. Sparknotes was more
+liberal in its translations, opting for reordering that differed drastically
+from the original plays, and was harder to learn. Enotes was a smaller corpus
+of 8 plays, but had less reordering, and was easier to train on.
+The data was aligned, and not all of the original lines
+from the plays are included (i.e. the sentences could not be aligned properly).
+\footnote{\url{https://github.com/cocoxu/Shakespeare}}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Play}
+          & \textbf{Line Count} \\
+        \hline
+        Hamlet & 2,010 \\ \hline
+        Julius Caesar & 1,201 \\ \hline
+        Macbeth & 1,085 \\ \hline
+        Merchant of Venice & 831 \\ \hline
+        Midsummer Nights Dream & 833 \\ \hline
+        Othello & 1,893 \\ \hline
+        Romeo and Juliet & 1,743 \\ \hline
+        Tempest & 769 \\ \hline
+        \textbf{Total} & \textbf{10,365} \\ \hline
+    \end{tabular}
+
+    \caption{Data Pair Counts for Shakespeare--English Corpus (Enotes)}
+    \label{fig:data-lines-enotes}
+\end{figure}
+
+The vocabulary sizes are 9,004 source (original) words and
+7,497 target (modern) words for the Sparknotes set. We had a total of 10,365
+lines of Shakespeare plays to train on. There is a total word count of 233,282
+words for the entire corpus (unprocessed).
 %------------------------------------------------
 \section{Preprocessing}
 \label{sec:preprocess}
@@ -180,15 +214,15 @@ Diagrams for our models can be found in the appendix.
 \subsubsection{Masked NLL Loss}
 \subsubsection{BLEU Scores}
 We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
-for the quality of model translations. Outputs are in the range [0, 1].
-A BLEU score of 1 indicates a perfect translation to the reference texts;
-this means we need not obtain a perfect
-score in order to have a good translation model.
+for the quality of model translations. Outputs are in the range [0, 1], and a
+BLEU score of 1 indicates a perfect translation to the reference texts.
+We do not need not obtain a perfect score in order to have a good
+translation model.
 
 BLEU scores are calculated for individual sentences and averaged across the
 whole corpus. Intelligibility and grammatical correctness are not taken into
 account when calculating BLEU scores. According to the original paper by
-Papineni et al. \cite{papineni2002bleu}, we compute BLEU as follows:
+Papineni et al. \cite{papineni2002bleu}, BLEU scores are computed as follows:
 
 \begin{equation}
   \operatorname{BLEU} = \operatorname{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
@@ -200,7 +234,7 @@ and $\operatorname{BP}$ is the brevity penalty, explained below.
 (\cite{papineni2002bleu} uses $N=4$, uniform weights $w_n = \frac{1}{N}$.)
 
 The brevity penalty $\operatorname{BP}$ is used for translations that are
-too short compared to the reference. We define BP as:
+too short compared to the reference. BP is defined as:
 
 \begin{equation}
   \operatorname{BP} = \begin{cases}
@@ -210,6 +244,10 @@ too short compared to the reference. We define BP as:
 \end{equation}
 \noindent
 with effective reference corpus length $r$ and candidate translation length $c$.
+
+BLEU scores are non-differentiable, and therefore we cannot directly optimize
+on this metric, but can use it to enhance our understanding regarding the
+quaity of our models given the data.
 
 %------------------------------------------------
 \section{Results: Shakespeare-English}
@@ -225,56 +263,8 @@ with effective reference corpus length $r$ and candidate translation length $c$.
 
 
 
-
-
-
 % OLD STUFF, SLOWLY MOVE INTO TOP IF NEEDED, CHANGE TENSE
 
-\section{Data Procurement}
-% \label{sec:data}
-Most of our data was procured from \cite{xu2012paraphrasing}.
-This includes all of Shakespeares plays translated line by line into modern
-English. However, since the data was aligned, not all of the original lines
-from the plays are included (the sentences could not be aligned properly).
-\footnote{\url{https://github.com/cocoxu/Shakespeare}}
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{File}
-          & \textbf{Line Count}\\
-        \hline
-        train.snt.aligned & 18,444 \\ \hline
-        dev.snt.aligned & 2,107 \\ \hline
-        test.snt.aligned & 528 \\ \hline
-        total & 21,079 \\ \hline
-    \end{tabular}
-
-    \caption{Data Pair Counts for Shakespeare--English Corpus (Sparknotes)}
-    \label{fig:data-lines-sparknotes}
-\end{figure}
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{File}
-          & \textbf{Line Count}\\
-        \hline
-        train.snt.aligned & 9,069 \\ \hline
-        dev.snt.aligned & 1,036 \\ \hline
-        test.snt.aligned & 260 \\ \hline
-        total & 10,365 \\ \hline
-    \end{tabular}
-
-    \caption{Data Pair Counts for Shakespeare--English Corpus (Enotes)}
-    \label{fig:data-lines-enotes}
-\end{figure}
-
-The training vocabulary sizes are 11,538 source (original) words and
-9,024 target (modern) words for the Sparknotes set. For enotes, there are
-9004 source words, 7497 target words.
-%------------------------------------------------
 
 \section{Preprocessing}
 % \label{sec:preprocess}
@@ -314,6 +304,22 @@ We randomly shuffle and split the combined preprocessed dataset into three sets:
 Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearance
 of unkown tokens (UNK). We provide statistics for the data.
 % TODO: Provide Data Stats
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{File}
+          & \textbf{Line Count}\\
+        \hline
+        train.snt.aligned & 9,069 \\ \hline
+        dev.snt.aligned & 1,036 \\ \hline
+        test.snt.aligned & 260 \\ \hline
+        total & 10,365 \\ \hline
+    \end{tabular}
+
+    \caption{Data Pair Counts for Shakespeare--English Corpus (Enotes)}
+    \label{fig:data-lines-enotes}
+\end{figure}
 
 \begin{figure*}[ht]
     \centering
