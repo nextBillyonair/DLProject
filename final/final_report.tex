@@ -262,17 +262,43 @@ seek to overtrain the model.
 %------------------------------------------------
 \section{Model Architecture}
 \label{sec:models}
-We developed several models to create our pseudo style transfer system,
+We developed several models to create our pseudo style-transfer system,
 incorporating context, attention, and training methods. It encorporates
 an encoder-decoder style model as used in Cho et al. \cite{cho2014learning}
 and Sutskever et al. \cite{sutskever2014sequence}.
 \subsection{Overview}
+Our idea is inspired by reducing our style-transfer system to a translation
+problem. Hence our approach to provide state of the art neural MT systems to
+provide a reasonable transfer of the target styling for a given source sequence.
+
+NMT systems are comprised of two sub models: an Encoder and Decoder. The
+encoder is know as the \emph{inference network} and encodes the input sequence
+to provide context to the decoder, or \emph{generative network}. The decoder
+then uses the encoder's output to generate tokens corresponding to words
+in the target language. Attention mechanisms have shown to improve the
+generative network, as detailed in Bahdanau et al. \cite{bahdanau2014neural},
+and further work from Luong et al. \cite{luong2015effective}.
+
+We describe the underlying components used to build these sub-networks, and
+their advantages and disadvantages.
 \subsubsection{RNN}
+The simplest way to process sequences of inputs is to use recurrent layers,
+which accept an input and previous hidden state to update its output.
+Our baseline models incorporate the \emph{Elman RNN}, the simplest recurrent
+layer.
 \begin{equation}
   \label{eq:rnn}
   h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
 \end{equation}
+However, the layer is prone to the vanishing gradient problem
+on large sequences. In addition, \emph{Elman RNNs} have the lowest capacity
+to learn.
 \subsubsection{GRU}
+Improvements have been made to the baseline RNN to increase capacity and
+improve gradient flow over long sequences. \emph{Long Short-Term Memory} (LSTM)
+and \emph{Gated Recurrent Units} (GRU) are two of the most popular improvements
+to recurrent networks. Both solve the vanishing gradient problem found in
+traditional RNN layers, and improve a model's capacity to learn.
 \begin{equation}
   \label{eq:gru}
   \begin{split}\begin{array}{ll}
@@ -282,7 +308,14 @@ and Sutskever et al. \cite{sutskever2014sequence}.
     h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
   \end{array}\end{split}
 \end{equation}
+For our models, we use GRUs, as they have been shown to perform as well as
+LSTMs but with less parameters.
 \subsubsection{Bidirectional GRU}
+GRUs, and RNNs in general, only process sequences in a forward direction.
+However, encoding both the preceding and succeeding input would be beneficial
+to learning the context of a word in its local vicinity. Bidirectional layers
+allow models to encode inputs in both the forward and reverse direction. This
+is a simple, yet poweful, extension to uni-directional recurrent layers.
 \begin{equation}
   \label{eq:bidirectional}
   \begin{split}
@@ -295,10 +328,52 @@ and Sutskever et al. \cite{sutskever2014sequence}.
     \end{array}
   \end{split}
 \end{equation}
+Bidirectional layers run two separate recurrent layers, one on the forward input
+sequence; the other on the reversed input. Thus we get two output tensors, one
+for each direction. We reverse the backward tensor, and stack the two output
+tensors together. Thus our final tensor encodes the forward and backward
+context.
 \subsection{Encoders}
+The encoder, or \emph{inference network}, receives an input token sequence
+$\vec{x} = \left[{x_1,\hdots, x_n}\right]$ of length $n$ and processes
+this to create an output encoding. The result is a sequence
+$\vec{h} = \left[{h_1, \cdots, h_{n}}\right]$ that
+maps to the input sequence $\vec{x}$. The final hidden state is $h_n$.
+
+Encoders share the same architecture except for the recurrent layer.
+For each input word $x_j$, the encoder looks up the associated word embedding,
+and runs the sequence through the recurrent layer. We define $W_e$ as the word
+embedding, with each row corresponding to an input token.
+\begin{equation}
+  \vec{h} = \begin{cases}
+    \operatorname{RNN} (W_e[\vec{x}]) \\
+    \operatorname{GRU} (W_e[\vec{x}]) \\
+    \operatorname{BiGRU} (W_e[\vec{x}]) \\
+  \end{cases}
+\end{equation}
+The output of the recurrent layer is our encodings, and we propagate
+the layer's last hidden state to the decoder. Theoretically, the hidden
+state should encode all the important information from the input sequence
+and pass it along to the decoder, but the
+encodings can be used with attention to provide better models. If the encoder
+type is bidirectional, then we return only the forward hidden state.
+
+We use three types of encoders: RNN, GRU, and the Bidirectional GRU (BiGRU).
 \subsection{Decoders}
 \subsection{Attention}
 \subsection{Teacher-Forcing}
+In terms of training, an encoder-decoder system can either accept the target
+token or the model's prediction as the next input during the decoding step.
+When we use the target token, this is known as teacher forcing, and is
+shown to be favored during initial training iterations but should be backed
+off to use the model's own predicitons. Continuous use of teacher forcing
+without backing off to the model's own decoded tokens will exhibit instability
+in the translations as shown in Lamb et al. \cite{lamb2016professor}
+
+During training, we randomly determine whether to feed in the true target
+token instead of the generated token to the decoder. This is a configurable
+parameter that deterimes the threshold to allow teacher forcing, where 0 means
+no teacher forcing and 1 is constant teacher forcing.
 %------------------------------------------------
 \section{Implementation}
 \label{sec:implementation}
@@ -376,95 +451,6 @@ quaity of our models given the data.
 % these descriptions are good starters, but we can be mroe detailed.
 
 % IDEA on subsectioning:
-\subsection{Encoders}
-The encoder (or \emph{inference network}) receives an input token sequence
-$\vec{x} = \left[{x_1,\hdots, x_n}\right]$ of length $n$ and processes
-this to create an output encoding. The result is a sequence
-$\vec{h} = \left[{h_1, \cdots, h_{T_x}}\right]$ that
-maps to the input sequence $\vec{x}$.
-\subsubsection{Baseline RNN Encoder}
-For the baseline encoder, we implemented a simple Embedding + RNN encoder.
-This accepts an input sequence $\vec{x}$ and encoders the sequence using the lookup
-embeddings and forward context.
-\begin{equation}
-  \label{eq:rnn}
-  h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
-\end{equation}
-Howver, this is the simplest model, prone to the vanishing gradient problem
-on large sequences. In addition, this model has the lowest capacity to learn.
-Nonetheless, we will present results for our baseline.
-
-\begin{figure*}[ht]
-    \centering
-    \begin{tabular}{ |c|c|c|c|c| }
-        \hline
-        $\#$
-          & \textbf{Encoder}
-          & \textbf{Decoder}
-          & \textbf{Attention}
-          & \textbf{Teacher Forcing (Percent)} \\
-        \hline
-        1 & RNN & RNN & None & None \\ \hline
-        2 & GRU & GRU & None & None \\ \hline
-        3 & Bidirectional GRU & GRU & None & None \\ \hline
-        4 & Bidirectional GRU & GRU & Concat & None \\ \hline
-        5 & Bidirectional GRU & GRU & General & None \\ \hline
-        6 & Bidirectional GRU & GRU & Concat & 0.5 \\ \hline
-        7 & Bidirectional GRU & GRU & General & 0.5 \\ \hline
-        8 & Bidirectional GRU & GRU & Concat & 1.0 \\ \hline
-        9 & Bidirectional GRU & GRU & General & 1.0 \\ \hline
-    \end{tabular}
-
-    \caption{Planned Model Experiments (Subject to change depending on results)}
-    \label{fig:model-experiments}
-\end{figure*}
-
-\subsubsection{GRU Encoder}
-An obvious improvement to our encoding scheme would be to replace the RNN layer
-with a GRU. A GRU encodes a forward sequence using more complex equations to
-improve capacity and learning.
-\begin{equation}
-  \label{eq:gru}
-  \begin{split}\begin{array}{ll}
-    r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
-    z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
-    n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
-    h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
-  \end{array}\end{split}
-\end{equation}
-GRUs help with vanishing gradients, increases our models capacity to learn,
-and uses less parameters than the LSTM layer. Hence, for our purposes, we
-used a GRU over the LSTM.
-
-\subsubsection{Bidirectional GRU Encoder}
-An extension to our encoding scheme will consider the full context of words
-immediately before an after it. This is done by running a GRU layer on the
-forward and backward sequence and combining each tensor. Hence we use a
-bidirectional GRU as laid forth in Bahdanau et al. \cite{bahdanau2014neural}
-\begin{equation}
-  \label{eq:bidirectional}
-  \begin{split}
-    \begin{array}{ll}
-      \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
-      \\
-      \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
-      \\
-      h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
-    \end{array}
-  \end{split}
-\end{equation}
-PyTorch concatenates the resulting tensors, doubling the hidden output size
-of a normal GRU. Other libraries allow for concatenatation, averaging,
-and summing. We use PyTorch's implementation of a bidirectional GRU.
-
-\subsubsection{Implementation}
-All encoders share the same model architecture, except for the recurrent layer.
-We use PyTorch's implementation for the RNN, GRU, and Bidirectional GRU.
-We also add embedding layers. PyTorch's recurrent layers naturally support
-multiple layers and dropout, and can be set through CLI args
-\texttt{--num-layers} and \texttt{--lstm-dropout}. The hidden size is set by
-\texttt{--hidden-size}. The defaults are 1, 0.1, and 256, respectively.
-
 
 \subsection{Decoders}
 We will describe the decoder algorithm, and experiment with two different
@@ -530,59 +516,9 @@ hyperparameter. However, we can bypass this effectively by reloading a model
 and changing the teacher forcing parameter provided.
 
 %------------------------------------------------
-\section{Planned Experiments}
-We plan to experiment with several model permutations, as outlined in Figure
-~\ref{fig:model-experiments}. We do not test every permutation since that would
-take too much time, and have selected several runs that would provide us enough
-results to determine the best model for this problem.
-
-\begin{figure*}[ht]
-    \centering
-    \begin{tabular}{ |c|c|c|c| }
-        \hline
-        $\#$
-          & \textbf{Task}
-          & \textbf{Status}
-          & \textbf{Team Member}\\
-        \hline
-        1 & Data Procurement & DONE & All \\ \hline
-        2 & Preprocessing & DONE & Riley, Bill \\ \hline
-        3 & RNN Encoder & DONE & Riley \\ \hline
-        4 & GRU Encoder & DONE & Morris \\ \hline
-        5 & Bidirectional GRU & DONE & Morris \\ \hline
-        6 & RNN Decoder & TESTING & Morris \\ \hline
-        7 & GRU Decoder & TESTING & Bill \\ \hline
-        8 & Attention Models & TESTING & Bill \\ \hline
-        9 & Teacher Forcing & DONE & Bill \\ \hline
-        10 & Vocabulary Building & DONE & Bill \\ \hline
-        11 & Train/Eval Support Code & DONE & Bill \\ \hline
-        12 & GPU Support & DONE & Riley \\ \hline
-        13 & Batching & DONE & Bill \\ \hline
-        14 & Experiments & IN PROGRESS & Morris, Riley \\ \hline
-    \end{tabular}
-
-    \caption{Current Progress}
-    \label{fig:current-status}
-\end{figure*}
-
-%------------------------------------------------
-
 \section{Roadblocks and Problems}
 We have hit two major roadblocks since our proposal, and discuss our apporaches
 to mediating the issues.
-
-\subsection{Data Learnability}
-In our first tests, we used data procured from previous alignment work
-by Xu et al. \cite{xu2012paraphrasing}
-There were two parallel datasets, one from Sparknotes, the other from enotes. We
-originally planned to use the Sparknotes version, as the data set was larger
-(21079 sentence pairs). However, when training, the models had difficulty
-accounting for the reordering Sparknotes used in their translations. Hence, we
-decieded to switch to enotes, which is a smaller (10365 sentence pairs), but
-more aligned corpus. We theorize that data that has less reordering will converge
-faster to a desired result. Since the dataset is smaller, we use less batches,
-and training time trivially improves. We hope for decent results by switching.
-
 
 \subsection{GPU/CPU Training Times}
 Systems like these take a long time to learn the data, and one of our major
@@ -617,32 +553,6 @@ Our group has an estimated 3 GPUs (Morris:1; Riley:2). This will help us
 distribute our experiments across several computers and allow us time to adjust
 experiments based upon our initial findings. If need be, we will us Google
 credits to fund more experiments.
-
-%------------------------------------------------
-
-\section{Current Status and\\Expectation}
-%Where are we at now + what are we going to do.
-See Figure ~\ref{fig:current-status} for our current standing on this project.
-Our notation is as follows:
-\begin{enumerate}
-  \item DONE - Fully implemented, tested, no further work needed
-  \item IN PROGRESS - Currently being implemented or worked on. Some inital results
-    but more work is required for full functionality.
-  \item TESTING - Fully functional, but currently being tested for bugs, etc.
-\end{enumerate}
-
-While most of the coding is done, and the last few model architectures are
-being tested, we estimate the longest task to be completed is model
-experimentation, and may take the next two-three weeks to complete.
-
-We will automate all planned experiments, examine the results, and use the best
-model as our style-transfer. We will then begin our final training session
-on both directions and provide results. We hopefully expect training of our
-experiments completed by the end of Thanksgiving break, and can pick a model
-to perform style-transfer for English-Shakespeare examples.
-
-%------------------------------------------------
-
 
 
 %------------------------------------------------
