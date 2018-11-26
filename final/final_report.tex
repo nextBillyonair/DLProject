@@ -391,7 +391,7 @@ outputs.
 \end{equation}
 We apply a recurrent layer to the attended tensor, using the hidden state
 provided. After applying a linear layer with weights $W_d$ and applying a log
-softmax, we output our result for evaluation, which is a log probability
+softmax, we output our result for evaluation, which is the log probability
 distribution across the target vocabulary.
 \begin{equation}
   \log \sigma(\mathbf{y}) = \log \frac{\exp(y_i)}{\sum_j \exp(y_j)}
@@ -440,10 +440,51 @@ no teacher forcing and 1 is constant teacher forcing.
 \section{Implementation}
 \label{sec:implementation}
 \subsection{Batching}
+In order to improve training speed and prevent noisy gradients, we introduced
+batching for our model. As recommended by Morishita et al.
+\cite{morishita2017empirical}, we batch by the sorting the source sequences by
+size in ascending order, and grouping sequences of equivalent sizes together.
+We have the option to limit the maximum size of the batches, which is currently
+defaulted to 128. For batching the target sequences, we pad each sequence with
+the EOS token, up to the maximum target sequence length in the set.
+
+This allows us to run multiple sequences through the model simultaneously,
+and build up decoded sequences for many sentences at a time. This also improves
+learning by averaging the gradients as they are backpropagated.
+
+For our dataset, at a maximum batch size of 128, we created 151 training
+batches and 65 dev batches.
 \subsection{GPU/CPU}
+Standard training can be done on a CPU, but neural networks have been shown to
+gain massive speedups. In order to improve training time,
+we have allowed an optional parameter to use a gpu, if system capable.
+
+Our group has 3 GPUs (Morris: 1; Riley: 2). We distributed our tests across
+multiple GPUs for faster experimentation.
 \subsection{Metrics}
+Our model uses two main metrics to describe the quality of our system.
 \subsubsection{Masked NLL Loss}
 \label{sec:masked-loss}
+While we would normally use the \emph{Negative Log Likelihood Loss} (NLL) to
+measure our error to backpropagate on, because of batching we must modify this
+loss to mask tokens that are past the target length for a decoded sequence.
+\begin{equation}
+  NLL(x_n, y_n) = -x_{n, y_n}
+\end{equation}
+Hence we define a mask $m$ such that for a target token index $t_{ni}$ for the
+$i$th decoded token of the $n$th sequence in the batch:
+\begin{equation}
+  m_{t_{ni}} = \begin{cases}
+    1 & \text{if } i < target \text{ } length \\
+    0 & \text{otherwise}
+  \end{cases}
+\end{equation}
+We describe the masked loss for an input log probability vector $x_n$ and true
+target token index $t_{ni}$ as:
+\begin{equation}
+  NLL(x_n, t_{ni}) = -x_{n, t_{ni}} \cdot m_{t_{ni}}
+\end{equation}
+We average our loss across the batch
 \subsubsection{BLEU Scores}
 \label{sec:bleu}
 We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
@@ -492,129 +533,6 @@ quaity of our models given the data.
 \section{Conclusion \& Future Work}
 \label{sec:conclusion}
 %------------------------------------------------
-
-
-
-
-
-
-
-
-% OLD STUFF, SLOWLY MOVE INTO TOP IF NEEDED, CHANGE TENSE
-
-
-
-
-%------------------------------------------------
-
-\section{Architectures}
-% \label{sec:architecture}
-% go more detailed? or can they not handle the math lol
-% these descriptions are good starters, but we can be mroe detailed.
-
-% IDEA on subsectioning:
-
-\subsection{Decoders}
-We will describe the decoder algorithm, and experiment with two different
-recurrent layers: RNN and GRU. We cannot use a Bidirectional GRU because
-we do not know the full decoded sequence (and hence why we are decoding).
-
-Decoders take in the last translated token, starting with an SOS token on a
-new batch. It applies an embedding layer, followed by an optional dropout.
-
-We then have two options:
-\begin{enumerate}
-  \item Attention (General, Concat, etc.)
-  \item No Attention
-\end{enumerate}
-In the case of attention, we apply one of the attention schemes (described in
-the next section) to the encoder output, given our current decoding
-hidden state. We concatenate the attention results with our input embedding.
-
-Without attention, we just use the input embedding and ignore the encoder
-outputs.
-
-We apply a recurrent layer to the attended tensor, using the hidden state
-provided. After applying a linear layer and log softmax, we output our result
-for evaluation.
-
-\subsection{Attention Mechanisms}
-% \label{sec:attention}
-Attention mechanisms have been shown to improve sequence to sequence
-translations from Bahdanau et al. \cite{bahdanau2014neural}, and further work
-from Luong et al. \cite{luong2015effective} examines global vs local approached
-to attention-based encoder-decoders. Common attention mechanisms are:
-% we will probably use dot & concat attention
-\begin{equation}
-    score(h_t, h_s) =
-    \begin{cases}
-        v_a^T \cdot \tanh (W_a [h_t \| h_s]) & \text{\emph{concat}} \\
-        h_t^T \cdot W_a \cdot h_s & \text{\emph{general}} \\
-        h_t^T \cdot h_s & \text{\emph{dot}} \\
-    \end{cases}
-\end{equation}
-where $h_t$ is the current target hidden state, and $h_s$ is the encoder output.
-To compute scores, which are used to create attention weights, we apply a
-softmax:
-\begin{equation}
-  a_t(s) = \frac{\exp(score(h_t, h_s))}{\sum_{s'}\exp(score(h_t, h_{s'}))}
-\end{equation}
-Using these scores, we create a context vector, which is just the batch matrix
-multiplication between our attention weights and the encoder outputs.
-We will focus on general attention and concat attention in our
-experiments.
-
-\subsection{Teacher Forcing}
-In terms of training, an encoder-decoder system can either accept the target
-token or the model's prediction as input during the decoding step. When we use
-the target token, this is known as teacher forcing, and is shown to be favored
-during initial training iterations, but should be backed off to use the
-model's own predicitons, as it will exhibit instability in the translations
-otherwise, as written in Lamb et al. \cite{lamb2016professor}
-
-We hope to build in a system to decay the teacher forcing percentage over time,
-instead of our current implementation that checks a random number againist the
-hyperparameter. However, we can bypass this effectively by reloading a model
-and changing the teacher forcing parameter provided.
-
-%------------------------------------------------
-\section{Roadblocks and Problems}
-We have hit two major roadblocks since our proposal, and discuss our apporaches
-to mediating the issues.
-
-\subsection{GPU/CPU Training Times}
-Systems like these take a long time to learn the data, and one of our major
-roadblocks is training time. For a normal CPU run, 2 epochs takes 11-30 minutes,
-depending on computer specs. This would put our experiments total running time
-at over 2-3 days per experiment (18-27 days total). This does not give us much
-leeway to verify our
-apporach. Hence, we describe in Section ~\ref{sec:gpu} our intial resutls
-in GPU compatability and speedups. These timings were done on the Sparknotes
-dataset.
-
-%------------------------------------------------
-
-\section{Additional Implementation\\Details}
-\subsection{Batching}
-In order to faciliate faster training, and less noisy gradients, we felt it
-imperative to introduce batching of sentences. We batched similiar sentences
-according to source sentence length (encoder input). This allows us to reduce
-the number of batches to loop through and take advantage of torch operations.
-
-\subsection{GPU Compatability}
-% \label{sec:gpu}
-Initial training is slow on a cpu, with a Bidirectional GRU Encoder
-+ GRU Decoder + Concat Attention estimated at 11-30 minutes per 2 epochs,
-varying on batch size (32 and 128 tested). In order to improve training time,
-we have allowed an optional parameter to use a gpu. Inital run on batch size 128
-yielded a training speed of 111 seconds per 2 epochs. Hence our experiments will
-take only 4-6 days, and can be distributed across multiple GPUs for even less
-time.
-
-Our group has an estimated 3 GPUs (Morris:1; Riley:2). This will help us
-distribute our experiments across several computers and allow us time to adjust
-experiments based upon our initial findings. If need be, we will us Google
-credits to fund more experiments.
 
 
 %------------------------------------------------
