@@ -360,7 +360,69 @@ type is bidirectional, then we return only the forward hidden state.
 
 We use three types of encoders: RNN, GRU, and the Bidirectional GRU (BiGRU).
 \subsection{Decoders}
+The decoder, or \emph{generative network}, receives the encoder outputs, the
+model's hidden state, and the last input token. On the first pass of the
+decoder, the hidden state is the encoder's final hidden state, and the
+input token is SOS.
+
+We can describe our decoders in two ways: with and without attention. For
+our recurrent layers, we use the RNN and GRU layers. We cannot use a
+Bidirectional GRU because we do not know the full decoded sequence
+(and hence why we are decoding).
+\begin{equation}
+  \tau_i = \begin{cases}
+    W_e[t_i] & \emph{No Attention} \\
+    W_e[t_i] \,\, \Vert \,\, c_i & \emph{With Attention} \\
+  \end{cases}
+\end{equation}
+
+In the case of attention, we apply one of the attention schemes (described in
+the next section) to the encoder output, given our current decoder's
+hidden state. We concatenate the attention results, known as a context vector
+$c_i$ with our input embedding for an input token $t_i$.
+
+Without attention, we just use the input embedding and ignore the encoder
+outputs.
+\begin{equation}
+  \mathbf{y} = W_d \cdot \begin{cases}
+      \operatorname{RNN} (\tau_i, \, s_{i-1}) \\
+      \operatorname{GRU} (\tau_i, \, s_{i-1}) \\
+    \end{cases}
+\end{equation}
+We apply a recurrent layer to the attended tensor, using the hidden state
+provided. After applying a linear layer with weights $W_d$ and applying a log
+softmax, we output our result for evaluation, which is a log probability
+distribution across the target vocabulary.
+\begin{equation}
+  \log \sigma(\mathbf{y}) = \log \frac{\exp(y_i)}{\sum_j \exp(y_j)}
+\end{equation}
 \subsection{Attention}
+Attention mechanisms have been shown to improve sequence to sequence
+translations from Bahdanau et al. \cite{bahdanau2014neural}, and further work
+from Luong et al. \cite{luong2015effective} examines global vs local approaches
+to attention-based encoder-decoders. Common attention mechanisms are:
+\begin{equation}
+    score(s_{i-1}, h_j) =
+    \begin{cases}
+        v_a^T \cdot \tanh (W_a [s_{i-1} \| h_j]) & \text{\emph{concat}} \\
+        s_{i-1}^T \cdot W_a \cdot h_j & \text{\emph{general}} \\
+        s_{i-1}^T \cdot h_j & \text{\emph{dot}} \\
+    \end{cases}
+\end{equation}
+where $s_{i-1}$ is the previous decoder hidden state, and $h_j$ is the $j$th
+encoder output.
+To compute scores, which are used to create attention weights, we apply a
+softmax:
+\begin{equation}
+  a(s_{i-1}, h_j) = \frac{\exp(score(s_{i-1}, h_j))}{\sum_{j'}\exp(score(s_{i-1}, h_{j'}))}
+\end{equation}
+Using these scores, we create a context vector $c_i$, which is just the batch
+matrix multiplication between our attention weights and the encoder outputs.
+\begin{equation}
+  c_i = \sum_{j'} a(s_{i-1}, h_{j'}) \cdot h_{j'}
+\end{equation}
+We will focus on general attention and concat attention in our
+experiments.
 \subsection{Teacher-Forcing}
 In terms of training, an encoder-decoder system can either accept the target
 token or the model's prediction as the next input during the decoding step.
