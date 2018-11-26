@@ -417,7 +417,8 @@ softmax:
   a(s_{i-1}, h_j) = \frac{\exp(score(s_{i-1}, h_j))}{\sum_{j'}\exp(score(s_{i-1}, h_{j'}))}
 \end{equation}
 Using these scores, we create a context vector $c_i$, which is just the batch
-matrix multiplication between our attention weights and the encoder outputs.
+matrix multiplication between our attention weights and the encoder outputs
+(i.e. a weighted sum of the encoder outputs).
 \begin{equation}
   c_i = \sum_{j'} a(s_{i-1}, h_{j'}) \cdot h_{j'}
 \end{equation}
