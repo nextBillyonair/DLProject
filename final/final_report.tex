@@ -359,6 +359,25 @@ encodings can be used with attention to provide better models. If the encoder
 type is bidirectional, then we return only the forward hidden state.
 
 We use three types of encoders: RNN, GRU, and the Bidirectional GRU (BiGRU).
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|l|l|r| }
+        \hline
+        \textbf{Encoder}
+          & \textbf{Decoder}
+          & \textbf{Attention}
+          & \textbf{Model Parameters}\\
+        \hline
+        RNN & RNN & None & 6,414,153 \\ \hline
+        GRU & GRU & None & 6,940,489 \\ \hline
+        BiGRU & GRU & None & 7,335,241 \\ \hline
+        BiGRU & GRU & General & 7,859,530 \\ \hline
+        BiGRU & GRU & Concat & 7,925,578 \\ \hline
+    \end{tabular}
+
+    \caption{Total Model Parameters (for Enote dataset)}
+    \label{fig:data-lines-enotes}
+\end{figure*}
 \subsection{Decoders}
 The decoder, or \emph{generative network}, receives the encoder outputs, the
 model's hidden state, and the last input token. On the first pass of the

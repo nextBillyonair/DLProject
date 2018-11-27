@@ -20,7 +20,7 @@ class Trainer:
             trainer._teacher_forcing_chance = args.teacher_forcing_chance
 
             return trainer
-
+        # print(sum(p.numel() for p in model.parameters()))
         optimizer = Adam(model.parameters(), lr=args.initial_learning_rate)
         criterion = MaskedNLLLoss()
 
