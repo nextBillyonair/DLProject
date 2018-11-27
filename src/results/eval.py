@@ -18,9 +18,14 @@ def get_args():
     parser.add_argument('--reverse', action='store_const',
                         default='False', const='True',
                         help='if True reverses source and target reading')
+    parser.add_argument('--stats-only', action='store_const',
+                        default='False', const='True',
+                        help='if True only outputs bleu')
+
 
     args = parser.parse_args()
     args.reverse = True if args.reverse == 'True' else False
+    args.stats_only = True if args.stats_only == 'True' else False
     return args
 
 
@@ -55,13 +60,14 @@ def main():
 
     source, expected, actual = create_triples(args)
 
-    compare(source, expected, actual)
+    if not args.stats_only:
+        compare(source, expected, actual)
 
     # take tgt bleu
     tgt_bleu = corpus_bleu(expected, actual)
     print(f'Test TGT BLEU: {tgt_bleu:.4f}')
     src_bleu = corpus_bleu(source, actual)
-    print(f'Test SRC BLEU: {src_bleu:.4f}\n')
+    print(f'Test SRC BLEU: {src_bleu:.4f}')
 
 
 if __name__ == '__main__':
