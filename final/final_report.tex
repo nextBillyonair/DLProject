@@ -164,6 +164,10 @@ The vocabulary sizes are 9,004 source (original) words and
 lines of Shakespeare plays to train on. There is a total word count of 233,282
 words for the entire corpus (unprocessed). Sample data pairs (processed) are
 provided in Figure \ref{fig:sample-pairs}.
+
+BLEU scores (disscussed in Section \ref{sec:bleu}) for Original to Modern is
+0.4455, and Modern to Original is 0.4465, indicating strong correlation between
+the two corpora.
 \begin{figure*}[ht]
   \centering
   \resizebox{\textwidth}{!}{%
@@ -546,6 +550,57 @@ quaity of our models given the data.
 %------------------------------------------------
 \section{Results: Shakespeare-English}
 \label{sec:results}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Original (Source)} & \textbf{} \\ \hline
+        RNN & RNN \\ \hline
+        GRU & GRU \\ \hline
+        BiGRU & GRU \\ \hline
+        BiGRU + General & GRU \\ \hline
+        BiGRU + General + 50\% TF & GRU \\ \hline
+        BiGRU + General + 100\% TF & GRU \\ \hline
+        BiGRU + Concat & GRU \\ \hline
+        BiGRU + Concat + 50\% TF & GRU \\ \hline
+        BiGRU + Concat + 100\% TF & GRU \\ \hline
+        \textbf{Best Model} & \textbf{GRU} \\ \hline
+        \textbf{Target} & \textbf{tgt sent} \\ \hline
+    \end{tabular}
+
+    \caption{Model Results for Selected Source-Target Pair: \#1}
+    \label{fig:model-results}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Source BLEU} & \textbf{Target BLEU} \\
+        \hline
+        RNN                             & 0.0000 & 0.0000 \\ \hline
+        GRU                             & 0.0237 & 0.0238 \\ \hline
+        BiGRU                           & 0.0297 & 0.0336 \\ \hline
+        BiGRU + General                 & 0.0291 & 0.0333 \\ \hline
+        BiGRU + General + 50\% TF       & 0.0264 & 0.0330 \\ \hline
+        BiGRU + General + 100\% TF      & 0.0348 & 0.0395 \\ \hline
+        BiGRU + Concat                  & 0.0953 & 0.0842 \\ \hline
+        BiGRU + Concat + 50\% TF        & 0.1505 & 0.1349 \\ \hline
+        BiGRU + Concat + 100\% TF       & 0.1153 & 0.1042 \\ \hline
+        \textbf{Best Model}             & \textbf{0.1647} & \textbf{0.1450} \\ \hline
+        \textbf{Original-Modern}  & \textbf{0.4465} & \textbf{0.4455} \\ \hline
+    \end{tabular}
+
+    \caption{Model BLEU Results for Experiments. Source BLEU compares results
+    to the source (original) sentences. Target BLEU compares results to
+    the target (modern) sentences. We aim for high Target BLEUs.}
+    \label{fig:model-bleu}
+\end{figure*}
 %------------------------------------------------
 \section{Style-Transfer:\\English-Shakespeare}
 \label{sec:style-transfer}
