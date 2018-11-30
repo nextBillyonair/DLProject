@@ -26,8 +26,7 @@ def build_encoder(args, vocab):
     return Encoder(input_size, args.hidden_size, rnn_layer,
                    bidirectional=bidirectional)
 
-# ENCODER TEMPLATE, FOLLOW METHODS
-# NAME CONVENTION: Encoder{ExtentionName}
+
 class Encoder(Module):
     def __init__(self, input_size, hidden_size, rnn_layer,
                  bidirectional=False):
