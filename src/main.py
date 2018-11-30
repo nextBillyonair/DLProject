@@ -13,6 +13,7 @@ def main():
     print(f'Loaded dataset: {dataset.info()}', file=sys.stderr)
 
     model = Model.create_from_args(args, dataset.vocab, args.max_length)
+    print(model.info(), file=sys.stderr)
     trainer = Trainer.create_from_args(args, model, dataset)
 
     # Train model

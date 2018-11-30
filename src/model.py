@@ -106,4 +106,8 @@ class Model:
 
             # Slice off <SOS> token
             return translation[:, 1:, 0]
+
+    def info(self):
+        model_parameters = sum(p.numel() for p in self.parameters())
+        return f'Total Model Parameters: {model_parameters}'
 # EOF
