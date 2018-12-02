@@ -550,20 +550,23 @@ quaity of our models given the data.
 %------------------------------------------------
 \section{Results: Shakespeare-English}
 Our results demonstrate how different models and teaching methods affect the 
-final translations.In Figure 6 below, we can see the final BLEU scores for our
+final translations. In Figure 6 below, we can see the final BLEU scores for our
 models. The bare bones RNN had almost no capacity to learn and suffered from
 the issues discussed in this report and in class.
 
-The best score came from our BIGRU architecture with concat attention and 100\%
-teacher forcing. We present the results for our baseline version of this model,
-but our final best results were after many iterations with random 
-initializations and keeping the trained model that worked best. This is 
-important to note as well, because it demonstratshow randomness and 
-initializations can affect the final outcome.
-
-Although our best results were form a model trained with concat attention, we
+Although our best results were from a model trained with concat attention, we
 can see that the model trained with general attention actually worked well on
 shorter sentences. 
+
+The 'best model' score came from our BIGRU architecture with concat attention 
+and 100\% teacher forcing. Looking at the scores, we can actually see that our
+model trained with 50\% teacher forcing did better than the one with 100\%, but
+our final best results were from the one with 100\% and after many iterations with
+random initializations and keeping the trained model that worked best. This is 
+important to note as well, because it demonstrats how randomness and 
+initializations can greatly affect the final outcome. If we had more time and
+resources, we would train a modle that starts with 100\% teacher forcing and
+slowly back it down as training progresses.
 
 \label{sec:results}
 
