@@ -549,6 +549,22 @@ quaity of our models given the data.
 
 %------------------------------------------------
 \section{Results: Shakespeare-English}
+Our results demonstrate how different models and teaching methods affect the 
+final translations.In Figure 6 below, we can see the final BLEU scores for our
+models. The bare bones RNN had almost no capacity to learn and suffered from
+the issues discussed in this report and in class.
+
+The best score came from our BIGRU architecture with concat attention and 100\%
+teacher forcing. We present the results for our baseline version of this model,
+but our final best results were after many iterations with random 
+initializations and keeping the trained model that worked best. This is 
+important to note as well, because it demonstratshow randomness and 
+initializations can affect the final outcome.
+
+Although our best results were form a model trained with concat attention, we
+can see that the model trained with general attention actually worked well on
+shorter sentences. 
+
 \label{sec:results}
 
 \begin{figure*}
@@ -600,6 +616,29 @@ quaity of our models given the data.
     to the source (original) sentences. Target BLEU compares results to
     the target (modern) sentences. We aim for high Target BLEUs.}
     \label{fig:model-bleu}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r|r| }
+        \hline
+        \textbf{Source Shakespeare Sentence}
+          & \textbf{General Attention Output} & \textbf{Target} \\
+        \hline
+        i am much bound to you .          & i am to you .       
+        & thank you so much .             \\ \hline
+        o propn , they fight !            & o propn , listen !  
+        & o lord , they ’ re fighting !   \\ \hline
+        do you like this haste ?          & honestly must hurry ? 
+        & do you like this speed ?        \\ \hline
+        wilt thou provoke me ?            & you wilt make me ? 
+        & will you still provoke me ?     \\ \hline
+        give me your neaf , propn propn . & let me your hand propn . 
+        & give me your hand , propn propn . \\ \hline
+    \end{tabular}
+
+    \caption{ This demonstrates that general attention can work well on shorter sentences.}
+    \label{fig:short-results}
 \end{figure*}
 %------------------------------------------------
 \section{Style-Transfer:\\English-Shakespeare}
