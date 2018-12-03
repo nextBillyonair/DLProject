@@ -120,8 +120,7 @@ used in decoding languages (Section \ref{sec:models}) and how they can
 be used in this capacity. We provide results for several model
 combinations and discuss the successes and failures of each system
 (Section \ref{sec:results}). We also describe important implementation details
-in Section \ref{sec:implementation}. Our final results are described in
-Section \ref{sec:style-transfer} for our style transfer system.
+in Section \ref{sec:implementation}.
 Diagrams for our models can be found in the appendix.
 %------------------------------------------------
 \section{Data}
@@ -547,26 +546,86 @@ BLEU scores are non-differentiable, and therefore we cannot directly optimize
 on this metric, but can use it to enhance our understanding regarding the
 quaity of our models given the data.
 
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Source BLEU} & \textbf{Target BLEU} \\
+        \hline
+        RNN                             & 0.0000 & 0.0000 \\ \hline
+        GRU                             & 0.0237 & 0.0238 \\ \hline
+        BiGRU                           & 0.0297 & 0.0336 \\ \hline
+        BiGRU + General                 & 0.0291 & 0.0333 \\ \hline
+        BiGRU + General + 50\% TF       & 0.0264 & 0.0330 \\ \hline
+        BiGRU + General + 100\% TF      & 0.0348 & 0.0395 \\ \hline
+        BiGRU + Concat                  & 0.0953 & 0.0842 \\ \hline
+        BiGRU + Concat + 50\% TF        & 0.1505 & 0.1349 \\ \hline
+        BiGRU + Concat + 100\% TF       & 0.1153 & 0.1042 \\ \hline
+        \textbf{Best Model}             & \textbf{0.1647} & \textbf{0.1450} \\ \hline
+        \textbf{Original-Modern}  & \textbf{0.4465} & \textbf{0.4455} \\ \hline
+    \end{tabular}
+
+    \caption{Model BLEU Results for Experiments. Source BLEU compares results
+    to the source (original) sentences. Target BLEU compares results to
+    the target (modern) sentences. We aim for high Target BLEUs.}
+    \label{fig:model-bleu}
+\end{figure*}
 %------------------------------------------------
 \section{Results: Shakespeare-English}
-Our results demonstrate how different models and teaching methods affect the 
-final translations. In Figure 6 below, we can see the final BLEU scores for our
-models. The bare bones RNN had almost no capacity to learn and suffered from
-the issues discussed in this report and in class.
+Our results demonstrate how different models and teaching methods affect the
+final translations. In Figure \ref{fig:model-bleu} below, we can see the
+final BLEU scores for our models.
 
+\subsection{RNN}
+The bare bones RNN had almost no capacity to learn and suffers from issues
+such as the vansihing gradient problem and long term dependencies. Since many
+of our sentences were long, this was problematic. The most distingiushing
+feature of the RNN translations is the overuse of repeated punctuation.
+
+\subsection{GRU and Bidirectional GRU}
+The GRU showed better promise in acheiveing higher bleu scores, as seen in
+Figure \ref{fig:model-bleu}, since GRUs migitgate the vanishing gradient
+problem and have a higher capacity.
+
+The Birdirectional GRU achieved slightly better results, most likely from
+incorporating both a forward and backward context to the sequence. In addition,
+the bidirectional has two sublayers, thus doubling the GRU capacity to learn.
+
+\subsection{Attention Mechanisms}
 Although our best results were from a model trained with concat attention, we
 can see that the model trained with general attention actually worked well on
-shorter sentences. 
+shorter sentences. An explanation for this is that Luong et al.
+\cite{luong2015effective} attention mechanisms work best in a local setting.
+This means that either the sentnece is short, or the model only looks at a
+small window of the full sequence. It is reasonable to assume that since we
+looked at the global context of our source encodings, the general attention
+failed whereas the Bahdanau \cite{bahdanau2014neural} concat attention
+performed better overall.
 
-The 'best model' score came from our BIGRU architecture with concat attention 
+\subsection{Teacher Forcing}
+The 'best model' score came from our BiGRU architecture with concat attention
 and 100\% teacher forcing. Looking at the scores, we can actually see that our
 model trained with 50\% teacher forcing did better than the one with 100\%, but
-our final best results were from the one with 100\% and after many iterations with
-random initializations and keeping the trained model that worked best. This is 
-important to note as well, because it demonstrats how randomness and 
+our final best results were from the one with 100\% and after many iterations
+with random initializations and keeping the trained model that worked best.
+This is important to note as well, because it demonstrates how randomness and
 initializations can greatly affect the final outcome. If we had more time and
-resources, we would train a modle that starts with 100\% teacher forcing and
+resources, we would train a model that starts with 100\% teacher forcing and
 slowly back it down as training progresses.
+
+\subsection{Best Model}
+Our best model, as selected by test BLEU score, was the BiGRU architecture
+with concat attention and 100\% teacher forcing, after training for 500
+iterations. This model acheive a target BLEU score of $0.1450$. The next best
+model was the BiGRU with concat attention and 50\% teacher forcing, with target
+BLEU score of $0.1349$.
+
+This shows that attention is necessary for good results, and that teacher
+forcing helps the model achieve better translations by feeding in the true
+target tokens. However, these models can be trained longer, and the effects
+of random initialization is not clear. In addition, more training dynamics can
+be incorporated to provide deeper insight into this problem.
 
 \label{sec:results}
 
@@ -599,44 +658,18 @@ slowly back it down as training progresses.
     \centering
     \begin{tabular}{ |l|r|r| }
         \hline
-        \textbf{Model}
-          & \textbf{Source BLEU} & \textbf{Target BLEU} \\
-        \hline
-        RNN                             & 0.0000 & 0.0000 \\ \hline
-        GRU                             & 0.0237 & 0.0238 \\ \hline
-        BiGRU                           & 0.0297 & 0.0336 \\ \hline
-        BiGRU + General                 & 0.0291 & 0.0333 \\ \hline
-        BiGRU + General + 50\% TF       & 0.0264 & 0.0330 \\ \hline
-        BiGRU + General + 100\% TF      & 0.0348 & 0.0395 \\ \hline
-        BiGRU + Concat                  & 0.0953 & 0.0842 \\ \hline
-        BiGRU + Concat + 50\% TF        & 0.1505 & 0.1349 \\ \hline
-        BiGRU + Concat + 100\% TF       & 0.1153 & 0.1042 \\ \hline
-        \textbf{Best Model}             & \textbf{0.1647} & \textbf{0.1450} \\ \hline
-        \textbf{Original-Modern}  & \textbf{0.4465} & \textbf{0.4455} \\ \hline
-    \end{tabular}
-
-    \caption{Model BLEU Results for Experiments. Source BLEU compares results
-    to the source (original) sentences. Target BLEU compares results to
-    the target (modern) sentences. We aim for high Target BLEUs.}
-    \label{fig:model-bleu}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r|r| }
-        \hline
         \textbf{Source Shakespeare Sentence}
           & \textbf{General Attention Output} & \textbf{Target} \\
         \hline
-        i am much bound to you .          & i am to you .       
+        i am much bound to you .          & i am to you .
         & thank you so much .             \\ \hline
-        o propn , they fight !            & o propn , listen !  
+        o propn , they fight !            & o propn , listen !
         & o lord , they ’ re fighting !   \\ \hline
-        do you like this haste ?          & honestly must hurry ? 
+        do you like this haste ?          & honestly must hurry ?
         & do you like this speed ?        \\ \hline
-        wilt thou provoke me ?            & you wilt make me ? 
+        wilt thou provoke me ?            & you wilt make me ?
         & will you still provoke me ?     \\ \hline
-        give me your neaf , propn propn . & let me your hand propn . 
+        give me your neaf , propn propn . & let me your hand propn .
         & give me your hand , propn propn . \\ \hline
     \end{tabular}
 
@@ -644,13 +677,26 @@ slowly back it down as training progresses.
     \label{fig:short-results}
 \end{figure*}
 %------------------------------------------------
-\section{Style-Transfer:\\English-Shakespeare}
-\label{sec:style-transfer}
+\section{Key Takeaways}
+\label{sec:key-takeaway}
+We detail several key takeways from our experiments on training a
+Shakespeare-English sequence to sequence model.
+\subsection{General vs Local Attention}
+\subsection{Teacher Forcing Impact}
+\subsection{Random Initialization}
+\subsection{GPU vs CPU Training Times}
 %------------------------------------------------
 \section{Conclusion \& Future Work}
 \label{sec:conclusion}
+If given more time, obvious extensions to our existing experiments would
+included: batch annealing, reverse training a English to Shakespeare model,
+and implementing local attention with a window.
+\subsection{Batch Annealing}
+\subsection{English to Shakespeare Modeling}
+\subsection{Local Attention with Window}
 %------------------------------------------------
-
+\section{Advice to Future Students}
+\label{sec:advice}
 
 %------------------------------------------------
 
