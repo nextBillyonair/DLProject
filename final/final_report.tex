@@ -682,9 +682,37 @@ be incorporated to provide deeper insight into this problem.
 We detail several key takeways from our experiments on training a
 Shakespeare-English sequence to sequence model.
 \subsection{General vs Local Attention}
+\label{sec:key-attention}
+Our attention models use the \emph{global} approach which attends to all the
+source embeddings at once. However, Luong et al. \cite{luong2015effective}
+showed that by using a \emph{local} approach that attends to only a subset
+of the encodings, a nerual encoder-decoder system could make effective gains in
+BLEU scores.
+
+In our experiments, both attention models used the \emph{global} approach, and
+it is clear why general failed to do well comapred to the Bahdanau concat
+attention. Luong states that global attention fails on long sequences whereas
+a local approach is more effective. The \emph{local} approach takes
+source embeddings within a window, computes the attention, and weights the
+attention probabilities by a guassian distribution.
 \subsection{Teacher Forcing Impact}
+Teacher Forcing was required to make effective gains in our attention models.
+However, our results are inconclusive on how much teacher forcing should be
+applied. According to Lamb et al. \cite{lamb2016professor}, teacher forcing
+acts as a regularizer for these systems. In addition, Bengio et al.
+\cite{DBLP:journals/corr/BengioVJS15} describes an annealing
+process, changing the task from an easy one with target tokens, to a more
+realistic approach of feeding in the model's prediction.
+
 \subsection{Random Initialization}
+As our results show, different initializations can lead to different BLEU
+scores, and different generalization performance. We saw this between our
+concat models that used teacher forcing. We believe that random initialization
+had a role to play in how these models performed.
 \subsection{GPU vs CPU Training Times}
+Training on a GPU yielded significant performance increases, allowing us to
+train multiple models quickly. Our model with the largest capacity took 11-13
+minutes on a standard CPU, but only 111 seconds on a GPU for 2 full epochs.
 %------------------------------------------------
 \section{Conclusion \& Future Work}
 \label{sec:conclusion}
@@ -692,8 +720,22 @@ If given more time, obvious extensions to our existing experiments would
 included: batch annealing, reverse training a English to Shakespeare model,
 and implementing local attention with a window.
 \subsection{Batch Annealing}
+We wanted to study the effects of adaptive batch sizes, where training would
+begin with a small batch size and progressively increase to very large sizes.
+This would allow for stochastic updates in the begining before approximating
+full gradient in later iterations. We think that this would have improved
+training and provided better results.
 \subsection{English to Shakespeare Modeling}
+We wanted to also train a reverse model for English to Shakespeare, to apply
+a translation between english sentences and turn it into Shakespeare. This
+is a weak form of style transfer masked as a translation problem. However, more
+work needs to be done improving the quality of our Shakespeare to English models
+before we find the best architecture.
 \subsection{Local Attention with Window}
+As discussed in Section \ref{sec:key-attention}, incorporating a window to allow
+for true \emph{local} attention over \emph{global} could results in better
+models. General might perform better in a \emph{local} context over a global
+approach.
 %------------------------------------------------
 \section{Advice to Future Students}
 \label{sec:advice}
