@@ -56,6 +56,13 @@
 %------------------------------------------------------------------------------
 %   TITLE SECTION
 %------------------------------------------------------------------------------
+\newlength\mystoreparindent
+\newenvironment{myparindent}[1]{%
+  \setlength{\mystoreparindent}{\the\parindent}
+  \setlength{\parindent}{#1}
+  }{%
+  \setlength{\parindent}{\mystoreparindent}
+}
 
 \setlength{\droptitle}{-4\baselineskip} % Move the title up
 
@@ -284,58 +291,60 @@ and further work from Luong et al. \cite{luong2015effective}.
 
 We describe the underlying components used to build these sub-networks, and
 their advantages and disadvantages.
-\subsubsection{RNN}
-The simplest way to process sequences of inputs is to use recurrent layers,
-which accept an input and previous hidden state to update its output.
-Our baseline models incorporate the \emph{Elman RNN}, the simplest recurrent
-layer.
-\begin{equation}
-  \label{eq:rnn}
-  h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
-\end{equation}
-However, the layer is prone to the vanishing gradient problem
-on large sequences. In addition, \emph{Elman RNNs} have the lowest capacity
-to learn.
-\subsubsection{GRU}
-Improvements have been made to the baseline RNN to increase capacity and
-improve gradient flow over long sequences. \emph{Long Short-Term Memory} (LSTM)
-and \emph{Gated Recurrent Units} (GRU) are two of the most popular improvements
-to recurrent networks. Both solve the vanishing gradient problem found in
-traditional RNN layers, and improve a model's capacity to learn.
-\begin{equation}
-  \label{eq:gru}
-  \begin{split}\begin{array}{ll}
-    r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
-    z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
-    n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
-    h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
-  \end{array}\end{split}
-\end{equation}
-For our models, we use GRUs, as they have been shown to perform as well as
-LSTMs but with less parameters.
-\subsubsection{Bidirectional GRU}
-GRUs, and RNNs in general, only process sequences in a forward direction.
-However, encoding both the preceding and succeeding input would be beneficial
-to learning the context of a word in its local vicinity. Bidirectional layers
-allow models to encode inputs in both the forward and reverse direction. This
-is a simple, yet poweful, extension to uni-directional recurrent layers.
-\begin{equation}
-  \label{eq:bidirectional}
-  \begin{split}
-    \begin{array}{ll}
-      \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
-      \\
-      \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
-      \\
-      h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
-    \end{array}
-  \end{split}
-\end{equation}
-Bidirectional layers run two separate recurrent layers, one on the forward input
-sequence; the other on the reversed input. Thus we get two output tensors, one
-for each direction. We reverse the backward tensor, and stack the two output
-tensors together. Thus our final tensor encodes the forward and backward
-context.
+
+% \subsubsection{RNN}
+% The simplest way to process sequences of inputs is to use recurrent layers,
+% which accept an input and previous hidden state to update its output.
+% Our baseline models incorporate the \emph{Elman RNN}, the simplest recurrent
+% layer.
+% \begin{equation}
+%   \label{eq:rnn}
+%   h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
+% \end{equation}
+% However, the layer is prone to the vanishing gradient problem
+% on large sequences. In addition, \emph{Elman RNNs} have the lowest capacity
+% to learn.
+% \subsubsection{GRU}
+% Improvements have been made to the baseline RNN to increase capacity and
+% improve gradient flow over long sequences. \emph{Long Short-Term Memory} (LSTM)
+% and \emph{Gated Recurrent Units} (GRU) are two of the most popular improvements
+% to recurrent networks. Both solve the vanishing gradient problem found in
+% traditional RNN layers, and improve a model's capacity to learn.
+% \begin{equation}
+%   \label{eq:gru}
+%   \begin{split}\begin{array}{ll}
+%     r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
+%     z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
+%     n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
+%     h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
+%   \end{array}\end{split}
+% \end{equation}
+% For our models, we use GRUs, as they have been shown to perform as well as
+% LSTMs but with less parameters.
+% \subsubsection{Bidirectional GRU}
+% GRUs, and RNNs in general, only process sequences in a forward direction.
+% However, encoding both the preceding and succeeding input would be beneficial
+% to learning the context of a word in its local vicinity. Bidirectional layers
+% allow models to encode inputs in both the forward and reverse direction. This
+% is a simple, yet poweful, extension to uni-directional recurrent layers.
+% \begin{equation}
+%   \label{eq:bidirectional}
+%   \begin{split}
+%     \begin{array}{ll}
+%       \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
+%       \\
+%       \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
+%       \\
+%       h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
+%     \end{array}
+%   \end{split}
+% \end{equation}
+% Bidirectional layers run two separate recurrent layers, one on the forward input
+% sequence; the other on the reversed input. Thus we get two output tensors, one
+% for each direction. We reverse the backward tensor, and stack the two output
+% tensors together. Thus our final tensor encodes the forward and backward
+% context.
+
 \subsection{Encoders}
 The encoder, or \emph{inference network}, receives an input token sequence
 $\vec{x} = \left[{x_1,\hdots, x_n}\right]$ of length $n$ and processes
@@ -518,33 +527,44 @@ translation model.
 
 BLEU scores are calculated for individual sentences and averaged across the
 whole corpus. Intelligibility and grammatical correctness are not taken into
-account when calculating BLEU scores. According to the original paper by
-Papineni et al. \cite{papineni2002bleu}, BLEU scores are computed as follows:
-
-\begin{equation}
-  \operatorname{BLEU} = \operatorname{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
-\end{equation}
-
-\noindent
-where $p_n$ is the geometric average of the modified $n$-gram precisions
-and $\operatorname{BP}$ is the brevity penalty, explained below.
-(\cite{papineni2002bleu} uses $N=4$, uniform weights $w_n = \frac{1}{N}$.)
-
-The brevity penalty $\operatorname{BP}$ is used for translations that are
-too short compared to the reference. BP is defined as:
-
-\begin{equation}
-  \operatorname{BP} = \begin{cases}
-    1 & \text{if } c > r \\
-    e^{(1-r/c)} & \text{if } c \leq r
-  \end{cases}
-\end{equation}
-\noindent
-with effective reference corpus length $r$ and candidate translation length $c$.
-
-BLEU scores are non-differentiable, and therefore we cannot directly optimize
-on this metric, but can use it to enhance our understanding regarding the
-quaity of our models given the data.
+account when calculating BLEU scores. A full description of how BLEU scores
+are calculated from Papineni et al. \cite{papineni2002bleu} can be found in
+Appendix \ref{app:bleu}
+% We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
+% for the quality of model translations. Outputs are in the range [0, 1], and a
+% BLEU score of 1 indicates a perfect translation to the reference texts.
+% We do not need not obtain a perfect score in order to have a good
+% translation model.
+%
+% BLEU scores are calculated for individual sentences and averaged across the
+% whole corpus. Intelligibility and grammatical correctness are not taken into
+% account when calculating BLEU scores. According to the original paper by
+% Papineni et al. \cite{papineni2002bleu}, BLEU scores are computed as follows:
+%
+% \begin{equation}
+%   \operatorname{BLEU} = \operatorname{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
+% \end{equation}
+%
+% \noindent
+% where $p_n$ is the geometric average of the modified $n$-gram precisions
+% and $\operatorname{BP}$ is the brevity penalty, explained below.
+% (\cite{papineni2002bleu} uses $N=4$, uniform weights $w_n = \frac{1}{N}$.)
+%
+% The brevity penalty $\operatorname{BP}$ is used for translations that are
+% too short compared to the reference. BP is defined as:
+%
+% \begin{equation}
+%   \operatorname{BP} = \begin{cases}
+%     1 & \text{if } c > r \\
+%     e^{(1-r/c)} & \text{if } c \leq r
+%   \end{cases}
+% \end{equation}
+% \noindent
+% with effective reference corpus length $r$ and candidate translation length $c$.
+%
+% BLEU scores are non-differentiable, and therefore we cannot directly optimize
+% on this metric, but can use it to enhance our understanding regarding the
+% quaity of our models given the data.
 
 \begin{figure*}
     \centering
@@ -751,7 +771,97 @@ approach.
 \clearpage
 \appendix
 \onecolumn
+\begin{myparindent}{0pt}
+
+\section{Additional Information}
+\subsection{RNN}
+The simplest way to process sequences of inputs is to use recurrent layers,
+which accept an input and previous hidden state to update its output.
+Our baseline models incorporate the \emph{Elman RNN}, the simplest recurrent
+layer.
+\begin{equation}
+  \label{eq:rnn}
+  h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
+\end{equation}
+However, the layer is prone to the vanishing gradient problem
+on large sequences. In addition, \emph{Elman RNNs} have the lowest capacity
+to learn.
+\subsection{GRU}
+Improvements have been made to the baseline RNN to increase capacity and
+improve gradient flow over long sequences. \emph{Long Short-Term Memory} (LSTM)
+and \emph{Gated Recurrent Units} (GRU) are two of the most popular improvements
+to recurrent networks. Both solve the vanishing gradient problem found in
+traditional RNN layers, and improve a model's capacity to learn.
+\begin{equation}
+  \label{eq:gru}
+  \begin{split}\begin{array}{ll}
+    r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
+    z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
+    n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
+    h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
+  \end{array}\end{split}
+\end{equation}
+For our models, we use GRUs, as they have been shown to perform as well as
+LSTMs but with less parameters.
+\subsection{Bidirectional GRU}
+GRUs, and RNNs in general, only process sequences in a forward direction.
+However, encoding both the preceding and succeeding input would be beneficial
+to learning the context of a word in its local vicinity. Bidirectional layers
+allow models to encode inputs in both the forward and reverse direction. This
+is a simple, yet poweful, extension to uni-directional recurrent layers.
+\begin{equation}
+  \label{eq:bidirectional}
+  \begin{split}
+    \begin{array}{ll}
+      \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
+      \\
+      \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
+      \\
+      h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
+    \end{array}
+  \end{split}
+\end{equation}
+Bidirectional layers run two separate recurrent layers, one on the forward input
+sequence; the other on the reversed input. Thus we get two output tensors, one
+for each direction. We reverse the backward tensor, and stack the two output
+tensors together. Thus our final tensor encodes the forward and backward
+context.
+\subsection{BLEU Scores}
+\label{app:bleu}
+We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
+for the quality of model translations. Outputs are in the range [0, 1], and a
+BLEU score of 1 indicates a perfect translation to the reference texts.
+We do not need not obtain a perfect score in order to have a good translation
+model. BLEU scores are calculated for individual sentences and averaged across
+the whole corpus. Intelligibility and grammatical correctness are not taken
+into account when calculating BLEU scores. According to the original paper by
+Papineni et al. \cite{papineni2002bleu}, BLEU scores are computed as follows:
+
+\begin{equation}
+  \operatorname{BLEU} = \operatorname{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
+\end{equation}
+
+\noindent
+where $p_n$ is the geometric average of the modified $n$-gram precisions
+and $\operatorname{BP}$ is the brevity penalty, explained below.
+(\cite{papineni2002bleu} uses $N=4$, uniform weights $w_n = \frac{1}{N}$.)
+The brevity penalty $\operatorname{BP}$ is used for translations that are
+too short compared to the reference. BP is defined as:
+
+\begin{equation}
+  \operatorname{BP} = \begin{cases}
+    1 & \text{if } c > r \\
+    e^{(1-r/c)} & \text{if } c \leq r
+  \end{cases}
+\end{equation}
+\noindent
+with effective reference corpus length $r$ and candidate translation length $c$.
+BLEU scores are non-differentiable, and therefore we cannot directly optimize
+on this metric, but can use it to enhance our understanding regarding the
+quaity of our models given the data.
+\newpage
 \section{Model Architecture Diagrams}
+
 \begin{figure}[ht]
   \centering
   \begin{tikzpicture}
@@ -907,4 +1017,5 @@ approach.
   \label{fig:general-attn}
 \end{figure}
 
+\end{myparindent}
 \end{document}
