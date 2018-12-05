@@ -7,3 +7,10 @@ report for DL
 
 where N is the number of sentences to sample. Useful for observing
 random N aligned sentences from train.
+
+# Compile:
+Use the makefile:
+```
+make
+```
+This compiles the report

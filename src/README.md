@@ -14,44 +14,44 @@ Notable CLI arguments for model building:
 
 ```
   --hidden-size HIDDEN_SIZE
-                        hidden size of encoder/decoder
+                        hidden size of encoder/decoder (default:256)
   --embedding-dropout EMBEDDING_DROPOUT
-                        training embedding dropout rate
+                        training embedding dropout rate (default:0.1)
   --rnn-dropout RNN_DROPOUT
-                        training RNN dropout rate
+                        training RNN dropout rate (default:0.1)
   --encoder-layers ENCODER_LAYERS
-                        number of RNN layers in the encoder
+                        number of RNN layers in the encoder (default:1)
   --decoder-layers DECODER_LAYERS
-                        number of RNN layers in the decoder
+                        number of RNN layers in the decoder (default:1)
   --train-batch-size BATCH_SIZE
-                        number of same length source sentences to batch
+                        number of same length source sentences to batch (default:128)
   --teacher-forcing-chance TEACHER_FORCING_CHANCE
-                        percent of batches on which to teacher force
+                        percent of batches on which to teacher force (default:0)
   --encoder-mode {rnn, gru, bigru}
-                        Encoder type
+                        Encoder type (default:'bigru')
   --decoder-mode {rnn, gru}
-                        decoder type   
+                        decoder type (default:'gru')
   --attention-mode {none, dot, concat}
-                        attention type                   
+                        attention type (default:'concat')               
 ```
 
 Notable CLI arguments for training parameters:
 
 ```
   --train-batch-size TRAIN_BATCH_SIZE
-                        number of samples in a training batch
+                        number of samples in a training batch (default:128)
   --epochs EPOCHS
-                        number of training epochs
+                        number of training epochs (default:500)
   --initial-learning-rate INITIAL_LEARNING_RATE
-                        starting learning rate
+                        starting learning rate (default:0.001)
 ```
 
 Notable CLI arguments for checkpointing/logging:
 ```
   --log-every LOG_EVERY
-                        log loss info every this many epochs
+                        log loss info every this many epochs (default:10)
   --checkpoint-every CHECKPOINT_EVERY
-                        Write out checkpoint every this many epochs
+                        Write out checkpoint every this many epochs (default:100)
   --load-checkpoint LOAD_CHECKPOINT
                         training checkpoint to load
 ```
