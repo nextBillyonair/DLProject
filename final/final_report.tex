@@ -110,7 +110,7 @@ We present our attempt to create an English-Shakespeare Sequence to Sequence
 Model, and its application to create a pseudo supervised style transfer system
 for text. We experimented with different Encoder-Decoder Architectures with and
 without Attention Mechanisms. We discuss our data procurement and processing
-to help facilitate learning, and present our experimental results.
+to help facilitate learning, and present our experimental results and analysis.
 \end{abstract}
 
 %------------------------------------------------
@@ -482,10 +482,9 @@ the EOS token, up to the maximum target sequence length in the set.
 
 This allows us to run multiple sequences through the model simultaneously,
 and build up decoded sequences for many sentences at a time. This also improves
-learning by averaging the gradients as they are backpropagated.
-
-For our dataset, at a maximum batch size of 128, we created 151 training
-batches and 65 dev batches.
+learning by averaging the gradients as they are backpropagated. For our
+dataset, at a maximum batch size of 128, we created 151 training batches and
+65 dev batches.
 \subsection{GPU/CPU}
 Standard training can be done on a CPU, but neural networks have been shown to
 gain massive speedups. In order to improve training time,
@@ -593,6 +592,7 @@ Appendix \ref{app:bleu}
 \end{figure*}
 %------------------------------------------------
 \section{Results: Shakespeare-English}
+\label{sec:results}
 Our results demonstrate how different models and teaching methods affect the
 final translations. In Figure \ref{fig:model-bleu} below, we can see the
 final BLEU scores for our models.
@@ -615,7 +615,8 @@ the bidirectional has two sublayers, thus doubling the GRU capacity to learn.
 \subsection{Attention Mechanisms}
 Although our best results were from a model trained with concat attention, we
 can see that the model trained with general attention actually worked well on
-shorter sentences. An explanation for this is that Luong et al.
+shorter sentences (but concat still outperformed general).
+An explanation for this is that Luong et al.
 \cite{luong2015effective} attention mechanisms work best in a local setting.
 This means that either the sentnece is short, or the model only looks at a
 small window of the full sequence. It is reasonable to assume that since we
@@ -647,180 +648,6 @@ target tokens. However, these models can be trained longer, and the effects
 of random initialization is not clear. In addition, more training dynamics can
 be incorporated to provide deeper insight into this problem.
 
-\label{sec:results}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{Model}
-          & \textbf{Sentence} \\
-        \hline
-        \textbf{Source} & \textbf{double , double , toil and trouble ; fire burn and cauldron bubble .} \\ \hline
-        RNN & damned as you are , you have cast the spell , the [followed by 490 commas] \\ \hline
-        GRU & double , double , toil and ; ; and burn burn burn burn caldron bubble . \\ \hline
-        BiGRU & double , double , toil and ; ; burn , , , and caldron bubble . . \\ \hline
-        BiGRU + General & double , double , toil , and ; , , burn , , bubble bubble . \\ \hline
-        BiGRU + General + 50\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
-        BiGRU + General + 100\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
-        BiGRU + Concat & double , double , toil and trouble ; , fire burn ; and caldron bubble bubble . \\ \hline
-        BiGRU + Concat + 50\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
-        BiGRU + Concat + 100\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
-        \textbf{Best Model} & \textbf{double , double , toil and trouble ; fire , burn ; and caldron , bubble .} \\ \hline
-        \textbf{Target} & \textbf{double , double , toil and trouble ; fire , burn ; and caldron , bubble .} \\ \hline
-    \end{tabular}
-
-    \caption{Model Results for Selected Source-Target Pair: \#1}
-    \label{fig:model-results}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{Model}
-          & \textbf{Sentence} \\
-        \hline
-        \textbf{Source} & \textbf{tonight , my lord ?} \\ \hline
-        RNN & what you you , \\ \hline
-        GRU & how , my lord ? \\ \hline
-        BiGRU & my , my lord ? \\ \hline
-        BiGRU + General & , my lord lord ? \\ \hline
-        BiGRU + General + 50\% TF & my lord lord ? \\ \hline
-        BiGRU + General + 100\% TF & brother , my lord ? \\ \hline
-        BiGRU + Concat & tonight , my lord ? \\ \hline
-        BiGRU + Concat + 50\% TF & three , , my lord ? \\ \hline
-        BiGRU + Concat + 100\% TF & tonight , my lord ? \\ \hline
-        \textbf{Best Model} & \textbf{tonight , my lord ?} \\ \hline
-        \textbf{Target} & \textbf{tonight , my lord ?} \\ \hline
-    \end{tabular}
-
-    \caption{Model Results for Selected Source-Target Pair: \#1}
-    \label{fig:model-results}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{Model}
-          & \textbf{Sentence} \\
-        \hline
-        \textbf{Source} & \textbf{what say you , propn ?} \\ \hline
-        RNN & what , you , \\ \hline
-        GRU & what do you , propn propn ? \\ \hline
-        BiGRU & what do you say , propn ? \\ \hline
-        BiGRU + General & what do you say , propn ? \\ \hline
-        BiGRU + General + 50\% TF & what do you say , propn ? \\ \hline
-        BiGRU + General + 100\% TF & what do you say , propn ? \\ \hline
-        BiGRU + Concat & what did you say , propn ? \\ \hline
-        BiGRU + Concat + 50\% TF & what do you say , propn ? \\ \hline
-        BiGRU + Concat + 100\% TF & what do you say , propn propn ? \\ \hline
-        \textbf{Best Model} & \textbf{what do you say , propn ?} \\ \hline
-        \textbf{Target} & \textbf{what do you say , propn ?} \\ \hline
-    \end{tabular}
-
-    \caption{Model Results for Selected Source-Target Pair: \#1}
-    \label{fig:model-results}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{Model}
-          & \textbf{Sentence} \\
-        \hline
-        \textbf{Source} & \textbf{propn thou not see her paddle with the palm of his hand ?} \\ \hline
-        RNN & do n ' t \\ \hline
-        GRU & will n ' t storms ; his his his the ? ? \\ \hline
-        BiGRU & propn ' n ' t with you like the the the the hand hand ? \\ \hline
-        BiGRU + General & does ’ ’ t you ’ t his his his his his all ? \\ \hline
-        BiGRU + General + 50\% TF & propn , remember you in the hand of night of great hand ? \\ \hline
-        BiGRU + General + 100\% TF & might do n ’ t see the his dying hand , might see about the ? \\ \hline
-        BiGRU + Concat & do you ' t that you speak with the with such of of hand hand ? \\ \hline
-        BiGRU + Concat + 50\% TF & have n ' t see her with the same of of his his hand ? \\ \hline
-        BiGRU + Concat + 100\% TF & do n ' t you see her for the scripture of his body ? \\ \hline
-        \textbf{Best Model} & \textbf{did n ' t go see her close with the same of his hand ?} \\ \hline
-        \textbf{Target} & \textbf{did n ’ t you see her play with the palm of his hand ?} \\ \hline
-    \end{tabular}
-
-    \caption{Model Results for Selected Source-Target Pair: \#1}
-    \label{fig:model-results}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{Model}
-          & \textbf{Sentence} \\
-        \hline
-        \textbf{Source} & \textbf{some wine , ho !} \\ \hline
-        RNN & what , ho ! \\ \hline
-        GRU & what , , , ! \\ \hline
-        BiGRU & and , ho ! \\ \hline
-        BiGRU + General & give , oh ! ! \\ \hline
-        BiGRU + General + 50\% TF & oh , oh , hello ! \\ \hline
-        BiGRU + General + 100\% TF & some three , a blessing in like a ! \\ \hline
-        BiGRU + Concat & some ! , ho ! \\ \hline
-        BiGRU + Concat + 50\% TF & let me fight ! \\ \hline
-        BiGRU + Concat + 100\% TF & some whiskey , hello ! \\ \hline
-        \textbf{Best Model} & \textbf{some wine , ho !} \\ \hline
-        \textbf{Target} & \textbf{some wine , ho !} \\ \hline
-    \end{tabular}
-
-    \caption{Model Results for Selected Source-Target Pair: \#1}
-    \label{fig:model-results}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r| }
-        \hline
-        \textbf{Model}
-          & \textbf{Sentence} \\
-        \hline
-        \textbf{Source} & \textbf{src sent} \\ \hline
-        RNN & RNN \\ \hline
-        GRU & GRU \\ \hline
-        BiGRU & GRU \\ \hline
-        BiGRU + General & GRU \\ \hline
-        BiGRU + General + 50\% TF & GRU \\ \hline
-        BiGRU + General + 100\% TF & GRU \\ \hline
-        BiGRU + Concat & GRU \\ \hline
-        BiGRU + Concat + 50\% TF & GRU \\ \hline
-        BiGRU + Concat + 100\% TF & GRU \\ \hline
-        \textbf{Best Model} & \textbf{GRU} \\ \hline
-        \textbf{Target} & \textbf{tgt sent} \\ \hline
-    \end{tabular}
-
-    \caption{Model Results for Selected Source-Target Pair: \#1}
-    \label{fig:model-results}
-\end{figure*}
-
-\begin{figure*}
-    \centering
-    \begin{tabular}{ |l|r|r| }
-        \hline
-        \textbf{Source Shakespeare Sentence}
-          & \textbf{General Attention Output} & \textbf{Target} \\
-        \hline
-        i am much bound to you .          & i am to you .
-        & thank you so much .             \\ \hline
-        o propn , they fight !            & o propn , listen !
-        & o lord , they ’ re fighting !   \\ \hline
-        do you like this haste ?          & honestly must hurry ?
-        & do you like this speed ?        \\ \hline
-        wilt thou provoke me ?            & you wilt make me ?
-        & will you still provoke me ?     \\ \hline
-        give me your neaf , propn propn . & let me your hand propn .
-        & give me your hand , propn propn . \\ \hline
-    \end{tabular}
-
-    \caption{ This demonstrates that general attention can work well on shorter sentences.}
-    \label{fig:short-results}
-\end{figure*}
 %------------------------------------------------
 \section{Key Takeaways}
 \label{sec:key-takeaway}
@@ -881,10 +708,40 @@ As discussed in Section \ref{sec:key-attention}, incorporating a window to allow
 for true \emph{local} attention over \emph{global} could results in better
 models. General might perform better in a \emph{local} context over a global
 approach.
+\subsection{Data Processing}
+We may want to look into other processing pipelines, such as the ones found
+in Statistical Machine Translation platforms Moses or GIZA++. In addition,
+we may want to look into BPE tokenization to see if it reduces our vocabulary
+size. BPE tokenization segments text into subword units, and has been found
+to significantly reduce vocabulary sizes in some languages. More time could be
+spent on refining our current dataset, and procuring mroe data to train on.
 %------------------------------------------------
 \section{Advice to Future Students}
 \label{sec:advice}
+It's important for students to understand that most machine learning problems
+rely on vast amounts of data. Now, deep learning systems have been shown in
+practice to handle raw data effectively, but time should still be spent
+on refining the data. We had this issue between two corpora that drastically
+differed in reordering of text, making one more difficult to learn.
 
+Additionally, strong foundations of linear algebra, multivariate calculus, and
+probability are required to understand how these models are constructed and
+trained. Multivariate calculus is fundamental to backpropagation and gradient
+descent, along with fundamentals of optimization. Probability gives us
+maximum likelihood estimation, the basis for
+most loss functions, and probability influences our model's approaches to
+predicition. Linear Alegbra is essential to expressing complex equations into
+simple statements, and understanding the fundamentals of neural networks
+and how they transform inputs.
+
+The more advanced models such as VAEs, self organizing maps, restricted
+boltzman machines, and generative models become more accessable with the
+aformentioned prerequisite knowledge. Therefore, students should be taught
+these subjects with respect to neural networks as early as possible. However,
+the instructors should attempt to teach neural networks in a non-standard way,
+as simple classification and regression results in rigid thinking oh how
+models can be designed, and discussion on how models can be trained in non
+standard ways, such as NMT models or VAEs, would be great.
 %------------------------------------------------
 
 % References
@@ -897,7 +754,6 @@ approach.
 \appendix
 \onecolumn
 \begin{myparindent}{0pt}
-
 \section{Additional Information}
 \subsection{RNN}
 The simplest way to process sequences of inputs is to use recurrent layers,
@@ -984,10 +840,202 @@ with effective reference corpus length $r$ and candidate translation length $c$.
 BLEU scores are non-differentiable, and therefore we cannot directly optimize
 on this metric, but can use it to enhance our understanding regarding the
 quaity of our models given the data.
+
+\section{Model Results}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{double , double , toil and trouble ; fire burn and cauldron bubble .} \\ \hline
+        RNN & damned as you are , you have cast the spell , the [followed by 490 commas] \\ \hline
+        GRU & double , double , toil and ; ; and burn burn burn burn caldron bubble . \\ \hline
+        BiGRU & double , double , toil and ; ; burn , , , and caldron bubble . . \\ \hline
+        BiGRU + General & double , double , toil , and ; , , burn , , bubble bubble . \\ \hline
+        BiGRU + General + 50\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        BiGRU + General + 100\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        BiGRU + Concat & double , double , toil and trouble ; , fire burn ; and caldron bubble bubble . \\ \hline
+        BiGRU + Concat + 50\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        BiGRU + Concat + 100\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        \textbf{Best Model} & \textbf{double , double , toil and trouble ; fire , burn ; and caldron , bubble .} \\ \hline
+        \textbf{Target} & \textbf{double , double , toil and trouble ; fire , burn ; and caldron , bubble .} \\ \hline
+    \end{tabular}
+    \caption{Model Results for Selected Source-Target Pair: \#1}
+    \label{fig:model-results-1}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{tonight , my lord ?} \\ \hline
+        RNN & what you you , \\ \hline
+        GRU & how , my lord ? \\ \hline
+        BiGRU & my , my lord ? \\ \hline
+        BiGRU + General & , my lord lord ? \\ \hline
+        BiGRU + General + 50\% TF & my lord lord ? \\ \hline
+        BiGRU + General + 100\% TF & brother , my lord ? \\ \hline
+        BiGRU + Concat & tonight , my lord ? \\ \hline
+        BiGRU + Concat + 50\% TF & three , , my lord ? \\ \hline
+        BiGRU + Concat + 100\% TF & tonight , my lord ? \\ \hline
+        \textbf{Best Model} & \textbf{tonight , my lord ?} \\ \hline
+        \textbf{Target} & \textbf{tonight , my lord ?} \\ \hline
+    \end{tabular}
+    \caption{Model Results for Selected Source-Target Pair: \#2}
+    \label{fig:model-results-2}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{what say you , propn ?} \\ \hline
+        RNN & what , you , \\ \hline
+        GRU & what do you , propn propn ? \\ \hline
+        BiGRU & what do you say , propn ? \\ \hline
+        BiGRU + General & what do you say , propn ? \\ \hline
+        BiGRU + General + 50\% TF & what do you say , propn ? \\ \hline
+        BiGRU + General + 100\% TF & what do you say , propn ? \\ \hline
+        BiGRU + Concat & what did you say , propn ? \\ \hline
+        BiGRU + Concat + 50\% TF & what do you say , propn ? \\ \hline
+        BiGRU + Concat + 100\% TF & what do you say , propn propn ? \\ \hline
+        \textbf{Best Model} & \textbf{what do you say , propn ?} \\ \hline
+        \textbf{Target} & \textbf{what do you say , propn ?} \\ \hline
+    \end{tabular}
+    \caption{Model Results for Selected Source-Target Pair: \#3}
+    \label{fig:model-results-3}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{propn thou not see her paddle with the palm of his hand ?} \\ \hline
+        RNN & do n ' t \\ \hline
+        GRU & will n ' t storms ; his his his the ? ? \\ \hline
+        BiGRU & propn ' n ' t with you like the the the the hand hand ? \\ \hline
+        BiGRU + General & does ’ ’ t you ’ t his his his his his all ? \\ \hline
+        BiGRU + General + 50\% TF & propn , remember you in the hand of night of great hand ? \\ \hline
+        BiGRU + General + 100\% TF & might do n ’ t see the his dying hand , might see about the ? \\ \hline
+        BiGRU + Concat & do you ' t that you speak with the with such of of hand hand ? \\ \hline
+        BiGRU + Concat + 50\% TF & have n ' t see her with the same of of his his hand ? \\ \hline
+        BiGRU + Concat + 100\% TF & do n ' t you see her for the scripture of his body ? \\ \hline
+        \textbf{Best Model} & \textbf{did n ' t go see her close with the same of his hand ?} \\ \hline
+        \textbf{Target} & \textbf{did n ’ t you see her play with the palm of his hand ?} \\ \hline
+    \end{tabular}
+    \caption{Model Results for Selected Source-Target Pair: \#4}
+    \label{fig:model-results-4}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{some wine , ho !} \\ \hline
+        RNN & what , ho ! \\ \hline
+        GRU & what , , , ! \\ \hline
+        BiGRU & and , ho ! \\ \hline
+        BiGRU + General & give , oh ! ! \\ \hline
+        BiGRU + General + 50\% TF & oh , oh , hello ! \\ \hline
+        BiGRU + General + 100\% TF & some three , a blessing in like a ! \\ \hline
+        BiGRU + Concat & some ! , ho ! \\ \hline
+        BiGRU + Concat + 50\% TF & let me fight ! \\ \hline
+        BiGRU + Concat + 100\% TF & some whiskey , hello ! \\ \hline
+        \textbf{Best Model} & \textbf{some wine , ho !} \\ \hline
+        \textbf{Target} & \textbf{some wine , ho !} \\ \hline
+    \end{tabular}
+    \caption{Model Results for Selected Source-Target Pair: \#5}
+    \label{fig:model-results-5}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{down , strumpet !} \\ \hline
+        RNN & oh , \\ \hline
+        GRU & hey , hey prostitute \\ \hline
+        BiGRU & prostitute , ! ! \\ \hline
+        BiGRU + General & no , ! \\ \hline
+        BiGRU + General + 50\% TF & propn , ! \\ \hline
+        BiGRU + General + 100\% TF & prostitute ! \\ \hline
+        BiGRU + Concat & down , , prostitute ! \\ \hline
+        BiGRU + Concat + 50\% TF & peace , prostitute ! \\ \hline
+        BiGRU + Concat + 100\% TF & down , prostitute ! \\ \hline
+        \textbf{Best Model} & \textbf{down , prostitute !} \\ \hline
+        \textbf{Target} & \textbf{down , prostitute !} \\ \hline
+    \end{tabular}
+    \caption{Model Results for Selected Source-Target Pair: \#6}
+    \label{fig:model-results-6}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{let each man render me his bloody hand .} \\ \hline
+        RNN & and , , the , , , , , \\ \hline
+        GRU & his me his him him a , him revenge . . \\ \hline
+        BiGRU & then , let his ; me ' m me me . \\ \hline
+        BiGRU + General & let me , where where to his ’ . . \\ \hline
+        BiGRU + General + 50\% TF & let me leave his hand away . \\ \hline
+        BiGRU + General + 100\% TF & let me me me , good hand hand , but hand hand hand me . \\ \hline
+        BiGRU + Concat & let give they give me me his hand hand . \\ \hline
+        BiGRU + Concat + 50\% TF & let the man from give me his honorable . \\ \hline
+        BiGRU + Concat + 100\% TF & let go get saying any man . \\ \hline
+        \textbf{Best Model} & \textbf{let me shake his beard hand .} \\ \hline
+        \textbf{Target} & \textbf{let each man give me his bloody hand .} \\ \hline
+    \end{tabular}
+    \caption{Model Results for Selected Source-Target Pair: \#7}
+    \label{fig:model-results-7}
+\end{figure}
+
+% \begin{figure}[ht!]
+%     \centering
+%     \begin{tabular}{ |l|r|r| }
+%         \hline
+%         \textbf{Source Shakespeare Sentence}
+%           & \textbf{General Attention Output} & \textbf{Target} \\
+%         \hline
+%         i am much bound to you .          & i am to you .
+%         & thank you so much .             \\ \hline
+%         o propn , they fight !            & o propn , listen !
+%         & o lord , they ’ re fighting !   \\ \hline
+%         do you like this haste ?          & honestly must hurry ?
+%         & do you like this speed ?        \\ \hline
+%         wilt thou provoke me ?            & you wilt make me ?
+%         & will you still provoke me ?     \\ \hline
+%         give me your neaf , propn propn . & let me your hand propn .
+%         & give me your hand , propn propn . \\ \hline
+%     \end{tabular}
+%     \caption{ This demonstrates that general attention can work well on shorter sentences.}
+%     \label{fig:short-results}
+% \end{figure}
 \newpage
 \section{Model Architecture Diagrams}
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
   \centering
   \begin{tikzpicture}
 
@@ -1015,7 +1063,8 @@ quaity of our models given the data.
   \caption{Model Architecture Overview for Encoder-Decoder.}
   \label{fig:encoder-decoder}
 \end{figure}
-\begin{figure}[ht]
+
+\begin{figure}[ht!]
   \centering
   \begin{tikzpicture}
 
@@ -1036,7 +1085,8 @@ quaity of our models given the data.
   \caption{Model Architecture for Encoder.}
   \label{fig:encoder}
 \end{figure}
-\begin{figure}[ht]
+
+\begin{figure}[ht!]
   \centering
   \begin{tikzpicture}
 
@@ -1061,7 +1111,8 @@ quaity of our models given the data.
   \caption{Decoder with No Attention.}
   \label{fig:decoder-no-attn}
 \end{figure}
-\begin{figure}[ht]
+
+\begin{figure}[ht!]
   \centering
   \begin{tikzpicture}
 
@@ -1091,7 +1142,8 @@ quaity of our models given the data.
   \caption{Decoder with Attention.}
   \label{fig:decoder-attn}
 \end{figure}
-\begin{figure}[ht]
+
+\begin{figure}[ht!]
   \centering
   \begin{tikzpicture}
 
@@ -1119,7 +1171,8 @@ quaity of our models given the data.
   \caption{Concat (Bahdanau) Attention Layer.}
   \label{fig:concat-attn}
 \end{figure}
-\begin{figure}[ht]
+
+\begin{figure}[ht!]
   \centering
   \begin{tikzpicture}
 
@@ -1144,3 +1197,29 @@ quaity of our models given the data.
 
 \end{myparindent}
 \end{document}
+
+% template for results
+% \begin{figure*}
+%     \centering
+%     \begin{tabular}{ |l|r| }
+%         \hline
+%         \textbf{Model}
+%           & \textbf{Sentence} \\
+%         \hline
+%         \textbf{Source} & \textbf{src sent} \\ \hline
+%         RNN & RNN \\ \hline
+%         GRU & GRU \\ \hline
+%         BiGRU & GRU \\ \hline
+%         BiGRU + General & GRU \\ \hline
+%         BiGRU + General + 50\% TF & GRU \\ \hline
+%         BiGRU + General + 100\% TF & GRU \\ \hline
+%         BiGRU + Concat & GRU \\ \hline
+%         BiGRU + Concat + 50\% TF & GRU \\ \hline
+%         BiGRU + Concat + 100\% TF & GRU \\ \hline
+%         \textbf{Best Model} & \textbf{GRU} \\ \hline
+%         \textbf{Target} & \textbf{tgt sent} \\ \hline
+%     \end{tabular}
+%
+%     \caption{Model Results for Selected Source-Target Pair: \#1}
+%     \label{fig:model-results}
+% \end{figure*}
