@@ -656,6 +656,131 @@ be incorporated to provide deeper insight into this problem.
         \textbf{Model}
           & \textbf{Sentence} \\
         \hline
+        \textbf{Source} & \textbf{double , double , toil and trouble ; fire burn and cauldron bubble .} \\ \hline
+        RNN & damned as you are , you have cast the spell , the [followed by 490 commas] \\ \hline
+        GRU & double , double , toil and ; ; and burn burn burn burn caldron bubble . \\ \hline
+        BiGRU & double , double , toil and ; ; burn , , , and caldron bubble . . \\ \hline
+        BiGRU + General & double , double , toil , and ; , , burn , , bubble bubble . \\ \hline
+        BiGRU + General + 50\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        BiGRU + General + 100\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        BiGRU + Concat & double , double , toil and trouble ; , fire burn ; and caldron bubble bubble . \\ \hline
+        BiGRU + Concat + 50\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        BiGRU + Concat + 100\% TF & double , double , toil and trouble ; fire , burn ; and caldron , bubble . \\ \hline
+        \textbf{Best Model} & \textbf{double , double , toil and trouble ; fire , burn ; and caldron , bubble .} \\ \hline
+        \textbf{Target} & \textbf{double , double , toil and trouble ; fire , burn ; and caldron , bubble .} \\ \hline
+    \end{tabular}
+
+    \caption{Model Results for Selected Source-Target Pair: \#1}
+    \label{fig:model-results}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{tonight , my lord ?} \\ \hline
+        RNN & what you you , \\ \hline
+        GRU & how , my lord ? \\ \hline
+        BiGRU & my , my lord ? \\ \hline
+        BiGRU + General & , my lord lord ? \\ \hline
+        BiGRU + General + 50\% TF & my lord lord ? \\ \hline
+        BiGRU + General + 100\% TF & brother , my lord ? \\ \hline
+        BiGRU + Concat & tonight , my lord ? \\ \hline
+        BiGRU + Concat + 50\% TF & three , , my lord ? \\ \hline
+        BiGRU + Concat + 100\% TF & tonight , my lord ? \\ \hline
+        \textbf{Best Model} & \textbf{tonight , my lord ?} \\ \hline
+        \textbf{Target} & \textbf{tonight , my lord ?} \\ \hline
+    \end{tabular}
+
+    \caption{Model Results for Selected Source-Target Pair: \#1}
+    \label{fig:model-results}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{what say you , propn ?} \\ \hline
+        RNN & what , you , \\ \hline
+        GRU & what do you , propn propn ? \\ \hline
+        BiGRU & what do you say , propn ? \\ \hline
+        BiGRU + General & what do you say , propn ? \\ \hline
+        BiGRU + General + 50\% TF & what do you say , propn ? \\ \hline
+        BiGRU + General + 100\% TF & what do you say , propn ? \\ \hline
+        BiGRU + Concat & what did you say , propn ? \\ \hline
+        BiGRU + Concat + 50\% TF & what do you say , propn ? \\ \hline
+        BiGRU + Concat + 100\% TF & what do you say , propn propn ? \\ \hline
+        \textbf{Best Model} & \textbf{what do you say , propn ?} \\ \hline
+        \textbf{Target} & \textbf{what do you say , propn ?} \\ \hline
+    \end{tabular}
+
+    \caption{Model Results for Selected Source-Target Pair: \#1}
+    \label{fig:model-results}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{propn thou not see her paddle with the palm of his hand ?} \\ \hline
+        RNN & do n ' t \\ \hline
+        GRU & will n ' t storms ; his his his the ? ? \\ \hline
+        BiGRU & propn ' n ' t with you like the the the the hand hand ? \\ \hline
+        BiGRU + General & does ’ ’ t you ’ t his his his his his all ? \\ \hline
+        BiGRU + General + 50\% TF & propn , remember you in the hand of night of great hand ? \\ \hline
+        BiGRU + General + 100\% TF & might do n ’ t see the his dying hand , might see about the ? \\ \hline
+        BiGRU + Concat & do you ' t that you speak with the with such of of hand hand ? \\ \hline
+        BiGRU + Concat + 50\% TF & have n ' t see her with the same of of his his hand ? \\ \hline
+        BiGRU + Concat + 100\% TF & do n ' t you see her for the scripture of his body ? \\ \hline
+        \textbf{Best Model} & \textbf{did n ' t go see her close with the same of his hand ?} \\ \hline
+        \textbf{Target} & \textbf{did n ’ t you see her play with the palm of his hand ?} \\ \hline
+    \end{tabular}
+
+    \caption{Model Results for Selected Source-Target Pair: \#1}
+    \label{fig:model-results}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
+        \textbf{Source} & \textbf{some wine , ho !} \\ \hline
+        RNN & what , ho ! \\ \hline
+        GRU & what , , , ! \\ \hline
+        BiGRU & and , ho ! \\ \hline
+        BiGRU + General & give , oh ! ! \\ \hline
+        BiGRU + General + 50\% TF & oh , oh , hello ! \\ \hline
+        BiGRU + General + 100\% TF & some three , a blessing in like a ! \\ \hline
+        BiGRU + Concat & some ! , ho ! \\ \hline
+        BiGRU + Concat + 50\% TF & let me fight ! \\ \hline
+        BiGRU + Concat + 100\% TF & some whiskey , hello ! \\ \hline
+        \textbf{Best Model} & \textbf{some wine , ho !} \\ \hline
+        \textbf{Target} & \textbf{some wine , ho !} \\ \hline
+    \end{tabular}
+
+    \caption{Model Results for Selected Source-Target Pair: \#1}
+    \label{fig:model-results}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \begin{tabular}{ |l|r| }
+        \hline
+        \textbf{Model}
+          & \textbf{Sentence} \\
+        \hline
         \textbf{Source} & \textbf{src sent} \\ \hline
         RNN & RNN \\ \hline
         GRU & GRU \\ \hline
