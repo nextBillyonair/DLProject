@@ -160,7 +160,6 @@ from the plays are included (i.e. the sentences could not be aligned properly).
         Tempest & 769 \\ \hline
         \textbf{Total} & \textbf{10,365} \\ \hline
     \end{tabular}
-
     \caption{Line Counts for Shakespeare--English Corpus per Play (Enotes)}
     \label{fig:data-lines-enotes}
 \end{figure}
@@ -212,7 +211,7 @@ the two corpora.
 \label{sec:preprocess}
 We applied several techniques to improve the quality of our data and reduce the
 vocabulary size to train on.
-\subsection{Proper Nouns}
+\paragraph{Proper Nouns:}
 Proper nouns are unique in both corpus, and have direct translations. In order
 to reduce vocabulary size and aggregate the learning of all proper nouns,
 we replace all proper nouns with the following token: propn. Thus our model
@@ -220,32 +219,23 @@ should learn to map propn to propn, and can utilize the encoding to learn the
 most likely token following its usage. We use
 SpaCy's\footnote{\url{https://spacy.io}} nlp models to identify
 proper nouns in each sentence, and replace the tokens.
-\subsection{NLTK Tokenization}
+\paragraph{NLTK Tokenization:}
 We use NLTK's \texttt{tokenize} module to further process our text data.
 We can use this module to split our strings into its component words,
-punctuation, contrations, etc.
-
-For instance, the modern sentence from Hamlet
-\emph{there's rue for you, and here's some for me.} will be tokenized into:
-\emph{there 's rue for you , and here 's some for me .}
-
-Additionally, contrations are split: \emph{isn't he honest?} tokenizes to
-\emph{is n \textquotesingle} \emph{t he honest ?}
-
-We can use this to easily split words and train on each token. We lower case
-all input before tokenizing.
-\subsection{SOS/EOS Tokens}
+punctuation, contrations, etc. We can use this to easily split words and train
+on each token. We lower case all input before tokenizing.
+\paragraph{SOS Tokens:}
 During runtime, we encapsulate every sentence with two special tokens:
 SOS and EOS. The Start of Sentence token (SOS) signals the start of a
 sequence, and allows us to map our first real word to one that most likely
 starts a sentence, given the current hidden state from the encoder
 (and encoder outputs if attention is used).
-
+\paragraph{EOS Tokens:}
 We use the End of Sentence (EOS) token to signal the end of the sequence, i.e.
 when to stop the decoding process. In the batched version, the EOS token
 signals which tokens should be counted in the loss, while everthing after EOS
 is masked (see Section \ref{sec:masked-loss}).
-\subsection{Data Split}
+\paragraph{Data Split:}
 We randomly shuffle and split the combined preprocessed dataset into three sets:
 Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearance
 of unkown tokens (UNK). This gives us a sizable training corpus to acutally
@@ -272,14 +262,12 @@ seek to overtrain the model.
 %------------------------------------------------
 \section{Model Architecture}
 \label{sec:models}
-We developed several models to create our pseudo style-transfer system,
-incorporating context, attention, and training methods. It encorporates
-an encoder-decoder style model as used in Cho et al. \cite{cho2014learning}
+We developed several encoder-decoder style models with attention
+as used in Cho et al. \cite{cho2014learning}
 and Sutskever et al. \cite{sutskever2014sequence}.
 \subsection{Overview}
-Our idea is inspired by reducing our style-transfer system to a translation
-problem. Hence our approach to provide state of the art neural MT systems to
-provide a reasonable transfer of the target styling for a given source sequence.
+Our approach is to use a state of the art neural MT system to
+provide a reasonable translation of the source sequence to a target language.
 
 NMT systems are comprised of two sub models: an Encoder and Decoder. The
 encoder is know as the \emph{inference network} and encodes the input sequence
@@ -288,62 +276,6 @@ then uses the encoder's output to generate tokens corresponding to words
 in the target language. Attention mechanisms have shown to improve the
 generative network, as detailed in Bahdanau et al. \cite{bahdanau2014neural},
 and further work from Luong et al. \cite{luong2015effective}.
-
-We describe the underlying components used to build these sub-networks, and
-their advantages and disadvantages.
-
-% \subsubsection{RNN}
-% The simplest way to process sequences of inputs is to use recurrent layers,
-% which accept an input and previous hidden state to update its output.
-% Our baseline models incorporate the \emph{Elman RNN}, the simplest recurrent
-% layer.
-% \begin{equation}
-%   \label{eq:rnn}
-%   h_t = \tanh(W_{ih} x_t + b_{ih}  +  W_{hh} h_{t-1} + b_{hh})
-% \end{equation}
-% However, the layer is prone to the vanishing gradient problem
-% on large sequences. In addition, \emph{Elman RNNs} have the lowest capacity
-% to learn.
-% \subsubsection{GRU}
-% Improvements have been made to the baseline RNN to increase capacity and
-% improve gradient flow over long sequences. \emph{Long Short-Term Memory} (LSTM)
-% and \emph{Gated Recurrent Units} (GRU) are two of the most popular improvements
-% to recurrent networks. Both solve the vanishing gradient problem found in
-% traditional RNN layers, and improve a model's capacity to learn.
-% \begin{equation}
-%   \label{eq:gru}
-%   \begin{split}\begin{array}{ll}
-%     r_t = \sigma(W_{ir} x_t + b_{ir} + W_{hr} h_{t-1} + b_{hr}) \\
-%     z_t = \sigma(W_{iz} x_t + b_{iz} + W_{hz} h_{t-1} + b_{hz}) \\
-%     n_t = \tanh(W_{in} x_t + b_{in} + r_t \circ (W_{hn} h_{t-1}+ b_{hn})) \\
-%     h_t = (1 - z_t) \circ n_t + z_t \circ h_{t-1} \\
-%   \end{array}\end{split}
-% \end{equation}
-% For our models, we use GRUs, as they have been shown to perform as well as
-% LSTMs but with less parameters.
-% \subsubsection{Bidirectional GRU}
-% GRUs, and RNNs in general, only process sequences in a forward direction.
-% However, encoding both the preceding and succeeding input would be beneficial
-% to learning the context of a word in its local vicinity. Bidirectional layers
-% allow models to encode inputs in both the forward and reverse direction. This
-% is a simple, yet poweful, extension to uni-directional recurrent layers.
-% \begin{equation}
-%   \label{eq:bidirectional}
-%   \begin{split}
-%     \begin{array}{ll}
-%       \overrightarrow{h_f} = \operatorname{GRU}(\overrightarrow{input})\\
-%       \\
-%       \overleftarrow{h_b} = \operatorname{GRU}(\overleftarrow{input})\\
-%       \\
-%       h_o = \overrightarrow{h_f} \,\,\Vert \,\, \overrightarrow{h_b}\\
-%     \end{array}
-%   \end{split}
-% \end{equation}
-% Bidirectional layers run two separate recurrent layers, one on the forward input
-% sequence; the other on the reversed input. Thus we get two output tensors, one
-% for each direction. We reverse the backward tensor, and stack the two output
-% tensors together. Thus our final tensor encodes the forward and backward
-% context.
 
 \subsection{Encoders}
 The encoder, or \emph{inference network}, receives an input token sequence
@@ -369,8 +301,6 @@ state should encode all the important information from the input sequence
 and pass it along to the decoder, but the
 encodings can be used with attention to provide better models. If the encoder
 type is bidirectional, then we return only the forward hidden state.
-
-We use three types of encoders: RNN, GRU, and the Bidirectional GRU (BiGRU).
 \begin{figure*}
     \centering
     \begin{tabular}{ |l|l|l|r| }
@@ -407,11 +337,10 @@ Bidirectional GRU because we do not know the full decoded sequence
   \end{cases}
 \end{equation}
 
-In the case of attention, we apply one of the attention schemes (described in
-the next section) to the encoder output, given our current decoder's
+In the case of attention, we apply one of the attention schemes
+to the encoder output, given our current decoder's
 hidden state. We concatenate the attention results, known as a context vector
 $c_i$ with our input embedding for an input token $t_i$.
-
 Without attention, we just use the input embedding and ignore the encoder
 outputs.
 \begin{equation}
@@ -430,7 +359,8 @@ distribution across the target vocabulary.
 \subsection{Attention}
 Attention mechanisms have been shown to improve sequence to sequence
 translations from Bahdanau et al. \cite{bahdanau2014neural}, and further work
-from Luong et al. \cite{luong2015effective} examines global vs local approaches
+from Luong et al. \cite{luong2015effective} examines \emph{global} vs
+\emph{local} approaches
 to attention-based encoder-decoders. Common attention mechanisms are:
 \begin{equation}
     score(s_{i-1}, h_j) =
@@ -458,50 +388,38 @@ experiments.
 \subsection{Teacher-Forcing}
 In terms of training, an encoder-decoder system can either accept the target
 token or the model's prediction as the next input during the decoding step.
-When we use the target token, this is known as teacher forcing, and is
-shown to be favored during initial training iterations but should be backed
+Teacher forcing is when we use the target token instead of the model's
+prediction and is
+shown to be favored during initial training iterations but should be tapered
 off to use the model's own predicitons. Continuous use of teacher forcing
-without backing off to the model's own decoded tokens will exhibit instability
+without backing off to the model's own tokens will exhibit instability
 in the translations as shown in Lamb et al. \cite{lamb2016professor}
 
 During training, we randomly determine whether to feed in the true target
-token instead of the generated token to the decoder. This is a configurable
-parameter that deterimes the threshold to allow teacher forcing, where 0 means
-no teacher forcing and 1 is constant teacher forcing.
+token or the model's decoded token to the decoder, and is configurable.
 %------------------------------------------------
 \section{Implementation}
 \label{sec:implementation}
-\subsection{Batching}
+\paragraph{Batching:}
 In order to improve training speed and prevent noisy gradients, we introduced
-batching for our model. As recommended by Morishita et al.
-\cite{morishita2017empirical}, we batch by the sorting the source sequences by
+batching as recommended by Morishita et al.
+\cite{morishita2017empirical}. We batch by the sorting the source sequences by
 size in ascending order, and grouping sequences of equivalent sizes together.
-We have the option to limit the maximum size of the batches, which is currently
-defaulted to 128. For batching the target sequences, we pad each sequence with
-the EOS token, up to the maximum target sequence length in the set.
-
-This allows us to run multiple sequences through the model simultaneously,
-and build up decoded sequences for many sentences at a time. This also improves
-learning by averaging the gradients as they are backpropagated. For our
+We pad each target sequence with
+the EOS token, up to the maximum target sequence length in the set. For our
 dataset, at a maximum batch size of 128, we created 151 training batches and
-65 dev batches.
-\subsection{GPU/CPU}
+65 dev batches. We do not batch test samplesm.
+\paragraph{GPU/CPU:}
 Standard training can be done on a CPU, but neural networks have been shown to
 gain massive speedups. In order to improve training time,
-we have allowed an optional parameter to use a gpu, if system capable.
-
+we have allowed an optional parameter to use a gpu.
 Our group has 3 GPUs (Morris: 1; Riley: 2). We distributed our tests across
 multiple GPUs for faster experimentation.
-\subsection{Metrics}
-Our model uses two main metrics to describe the quality of our system.
-\subsubsection{Masked NLL Loss}
+\paragraph{Masked NLL Loss:}
 \label{sec:masked-loss}
 While we would normally use the \emph{Negative Log Likelihood Loss} (NLL) to
 measure our error to backpropagate on, because of batching we must modify this
 loss to mask tokens that are past the target length for a decoded sequence.
-\begin{equation}
-  NLL(x_n, y_n) = -x_{n, y_n}
-\end{equation}
 Hence we define a mask $m$ such that for a target token index $t_{ni}$ for the
 $i$th decoded token of the $n$th sequence in the batch:
 \begin{equation}
@@ -515,18 +433,14 @@ target token index $t_{ni}$ as:
 \begin{equation}
   NLL(x_n, t_{ni}) = -x_{n, t_{ni}} \cdot m_{t_{ni}}
 \end{equation}
-We average our loss across the batch
-\subsubsection{BLEU Scores}
+We average our loss across the batch.
+\paragraph{BLEU Scores:}
 \label{sec:bleu}
 We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
 for the quality of model translations. Outputs are in the range [0, 1], and a
 BLEU score of 1 indicates a perfect translation to the reference texts.
-We do not need not obtain a perfect score in order to have a good
-translation model.
-
-BLEU scores are calculated for individual sentences and averaged across the
-whole corpus. Intelligibility and grammatical correctness are not taken into
-account when calculating BLEU scores. A full description of how BLEU scores
+However, we do not need not obtain a perfect score in order to have a good
+translation model. A full description of how BLEU scores
 are calculated from Papineni et al. \cite{papineni2002bleu} can be found in
 Appendix \ref{app:bleu}
 % We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
@@ -584,7 +498,6 @@ Appendix \ref{app:bleu}
         \textbf{Best Model}             & \textbf{0.1647} & \textbf{0.1450} \\ \hline
         \textbf{Original-Modern}  & \textbf{0.4465} & \textbf{0.4455} \\ \hline
     \end{tabular}
-
     \caption{Model BLEU Results for Experiments. Source BLEU compares results
     to the source (original) sentences. Target BLEU compares results to
     the target (modern) sentences. We aim for high Target BLEUs.}
@@ -595,24 +508,20 @@ Appendix \ref{app:bleu}
 \label{sec:results}
 Our results demonstrate how different models and teaching methods affect the
 final translations. In Figure \ref{fig:model-bleu} below, we can see the
-final BLEU scores for our models.
-
-\subsection{RNN}
+final BLEU scores for ourm models.
+\paragraph{RNN:}
 The bare bones RNN had almost no capacity to learn and suffers from issues
 such as the vansihing gradient problem and long term dependencies. Since many
 of our sentences were long, this was problematic. The most distingiushing
 feature of the RNN translations is the overuse of repeated punctuation.
-
-\subsection{GRU and Bidirectional GRU}
+\paragraph{GRU and Bidirectional GRU:}
 The GRU showed better promise in acheiveing higher bleu scores, as seen in
 Figure \ref{fig:model-bleu}, since GRUs migitgate the vanishing gradient
 problem and have a higher capacity.
-
 The Birdirectional GRU achieved slightly better results, most likely from
 incorporating both a forward and backward context to the sequence. In addition,
 the bidirectional has two sublayers, thus doubling the GRU capacity to learn.
-
-\subsection{Attention Mechanisms}
+\paragraph{Attention Mechanisms:}
 Although our best results were from a model trained with concat attention, we
 can see that the model trained with general attention actually worked well on
 shorter sentences (but concat still outperformed general).
@@ -623,51 +532,45 @@ small window of the full sequence. It is reasonable to assume that since we
 looked at the global context of our source encodings, the general attention
 failed whereas the Bahdanau \cite{bahdanau2014neural} concat attention
 performed better overall.
-
-\subsection{Teacher Forcing}
+\paragraph{Teacher Forcing:}
 The 'best model' score came from our BiGRU architecture with concat attention
 and 100\% teacher forcing. Looking at the scores, we can actually see that our
 model trained with 50\% teacher forcing did better than the one with 100\%, but
 our final best results were from the one with 100\% and after many iterations
 with random initializations and keeping the trained model that worked best.
-This is important to note as well, because it demonstrates how randomness and
+This is important to note since it demonstrates how randomness in
 initializations can greatly affect the final outcome. If we had more time and
 resources, we would train a model that starts with 100\% teacher forcing and
-slowly back it down as training progresses.
-
-\subsection{Best Model}
+slowly taper down as training progresses.
+\paragraph{Best Model:}
 Our best model, as selected by test BLEU score, was the BiGRU architecture
 with concat attention and 100\% teacher forcing, after training for 500
 iterations. This model acheive a target BLEU score of $0.1450$. The next best
 model was the BiGRU with concat attention and 50\% teacher forcing, with target
 BLEU score of $0.1349$.
-
+\paragraph{Final Analysis:}
 This shows that attention is necessary for good results, and that teacher
 forcing helps the model achieve better translations by feeding in the true
 target tokens. However, these models can be trained longer, and the effects
 of random initialization is not clear. In addition, more training dynamics can
-be incorporated to provide deeper insight into this problem.
-
+be incorporated to provide deeper insight into this problem. See Appendix
+\ref{app:model-results} for sample translations.
 %------------------------------------------------
 \section{Key Takeaways}
 \label{sec:key-takeaway}
-We detail several key takeways from our experiments on training a
-Shakespeare-English sequence to sequence model.
-\subsection{General vs Local Attention}
+\paragraph{General vs Local Attention:}
 \label{sec:key-attention}
 Our attention models use the \emph{global} approach which attends to all the
 source embeddings at once. However, Luong et al. \cite{luong2015effective}
 showed that by using a \emph{local} approach that attends to only a subset
 of the encodings, a nerual encoder-decoder system could make effective gains in
-BLEU scores.
-
-In our experiments, both attention models used the \emph{global} approach, and
+BLEU scores. In our experiments, both attention models used the \emph{global} approach, and
 it is clear why general failed to do well comapred to the Bahdanau concat
 attention. Luong states that global attention fails on long sequences whereas
 a local approach is more effective. The \emph{local} approach takes
 source embeddings within a window, computes the attention, and weights the
 attention probabilities by a guassian distribution.
-\subsection{Teacher Forcing Impact}
+\paragraph{Teacher Forcing Impact:}
 Teacher Forcing was required to make effective gains in our attention models.
 However, our results are inconclusive on how much teacher forcing should be
 applied. According to Lamb et al. \cite{lamb2016professor}, teacher forcing
@@ -675,13 +578,11 @@ acts as a regularizer for these systems. In addition, Bengio et al.
 \cite{DBLP:journals/corr/BengioVJS15} describes an annealing
 process, changing the task from an easy one with target tokens, to a more
 realistic approach of feeding in the model's prediction.
-
-\subsection{Random Initialization}
+\paragraph{Random Initialization:}
 As our results show, different initializations can lead to different BLEU
 scores, and different generalization performance. We saw this between our
-concat models that used teacher forcing. We believe that random initialization
-had a role to play in how these models performed.
-\subsection{GPU vs CPU Training Times}
+concat models that used teacher forcing.
+\paragraph{GPU vs CPU Training Times:}
 Training on a GPU yielded significant performance increases, allowing us to
 train multiple models quickly. Our model with the largest capacity took 11-13
 minutes on a standard CPU, but only 111 seconds on a GPU for 2 full epochs.
@@ -689,28 +590,26 @@ minutes on a standard CPU, but only 111 seconds on a GPU for 2 full epochs.
 \section{Conclusion \& Future Work}
 \label{sec:conclusion}
 If given more time, obvious extensions to our existing experiments would
-included: batch annealing, reverse training a English to Shakespeare model,
-and implementing local attention with a window.
-\subsection{Batch Annealing}
-We wanted to study the effects of adaptive batch sizes, where training would
+included:
+\paragraph{Batch Annealing:}
+We wanted to study the effects of adaptive batch sizes,
+where training would
 begin with a small batch size and progressively increase to very large sizes.
 This would allow for stochastic updates in the begining before approximating
-full gradient in later iterations. We think that this would have improved
+full gradients in later iterations. We think this would have improved
 training and provided better results.
-\subsection{English to Shakespeare Modeling}
-We wanted to also train a reverse model for English to Shakespeare that applies
-a translation between English sentences and turns them into Shakespeare sentences. This
-is a weak form of style transfer masked as a translation problem. However, more
-work needs to be done improving the quality of our Shakespeare to English models
-before we find the best architecture.
-\subsection{Local Attention with Window}
-As discussed in Section \ref{sec:key-attention}, incorporating a window to allow
-for true \emph{local} attention over \emph{global} could results in better
-models. General might perform better in a \emph{local} context over a global
-approach.
-\subsection{Data Processing}
-We may want to look into other processing pipelines, such as the ones found
-in Statistical Machine Translation platforms Moses or GIZA++. In addition,
+\paragraph{English to Shakespeare Modeling:} We wanted to also train a reverse
+model for English to Shakespeare that applies
+a translation between English sentences and turns them into Shakespeare sentences.
+This is a weak form of style transfer masked as a translation problem.
+However, more work needs to be done before we find the best architecture.
+\paragraph{Local Attention with Window:} As discussed in Section
+\ref{sec:key-attention}, incorporating a window to allow
+for \emph{local} attention over \emph{global} could results in better
+models. General might perform better in a \emph{local} context over a
+\emph{global} approach.
+\paragraph{Data Processing:} We may want to look into other processing pipelines,
+such as the ones found in SMT platforms Moses or GIZA++. In addition,
 we may want to look into BPE tokenization to see if it reduces our vocabulary
 size. BPE tokenization segments text into subword units, and has been found
 to significantly reduce vocabulary sizes in some languages. More time could be
@@ -720,30 +619,30 @@ improving test results.
 %------------------------------------------------
 \section{Advice to Future Students}
 \label{sec:advice}
-It's important for students to understand that most machine learning problems
+It's important for students to understand that most ML problems
 rely on vast amounts of data. Now, deep learning systems have been shown in
 practice to handle raw data effectively, but time should still be spent
 on refining the data. We had this issue between two corpora that drastically
 differed in reordering of text, making one more difficult to learn.
 
-Additionally, strong foundations of linear algebra, multivariate calculus, and
-probability are required to understand how these models are constructed and
-trained. Multivariate calculus is fundamental to backpropagation and gradient
-descent, along with fundamentals of optimization. Probability gives us
-maximum likelihood estimation, the basis for
-most loss functions, and probability influences our model's approaches to
+Additionally, strong foundations of linear algebra, multivariate calculus,
+optimization and probability are required to understand how these models
+are constructed and trained. Multivariate calculus and optimization is
+fundamental to backpropagation and gradient descent.
+Probability gives us maximum likelihood estimation, the basis for
+most loss functions, and influences our model's approaches to
 predicition. Linear Alegbra is essential to expressing complex equations into
 simple statements, and understanding the fundamentals of neural networks
 and how they transform inputs.
 
-The more advanced models such as VAEs, self organizing maps, restricted
-boltzman machines, and generative models become more accessable with the
-aformentioned prerequisite knowledge. Therefore, students should be taught
+The more advanced models such as VAEs, RBMs, and
+generative models become accessable with the prerequisite knowledge.
+Therefore, students should be taught
 these subjects with respect to neural networks as early as possible. However,
 the instructors should attempt to teach neural networks in a non-standard way,
 as simple classification and regression results in rigid thinking oh how
-models can be designed, and discussion on how models can be trained in non
-standard ways, such as NMT models or VAEs, would be great.
+models can be designed, and discussion on how models can be trained in
+non-standard ways, such as NMT models or VAEs, would be great.
 %------------------------------------------------
 
 % References
@@ -844,7 +743,7 @@ on this metric, but can use it to enhance our understanding regarding the
 quaity of our models given the data.
 
 \section{Model Results}
-
+\label{app:model-results}
 \begin{figure}[ht!]
     \centering
     \begin{tabular}{ |l|r| }
