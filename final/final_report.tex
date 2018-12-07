@@ -170,7 +170,7 @@ lines of Shakespeare plays to train on. There is a total word count of 233,282
 words for the entire corpus (unprocessed). Sample data pairs (processed) are
 provided in Figure \ref{fig:sample-pairs}.
 
-BLEU scores (disscussed in Section \ref{sec:bleu}) for Original to Modern is
+BLEU scores (discussed in Section \ref{sec:bleu}) for Original to Modern is
 0.4455, and Modern to Original is 0.4465, indicating strong correlation between
 the two corpora.
 \begin{figure*}[ht]
@@ -222,7 +222,7 @@ proper nouns in each sentence, and replace the tokens.
 \paragraph{NLTK Tokenization:}
 We use NLTK's \texttt{tokenize} module to further process our text data.
 We can use this module to split our strings into its component words,
-punctuation, contrations, etc. We can use this to easily split words and train
+punctuation, contractions, etc. We can use this to easily split words and train
 on each token. We lower case all input before tokenizing.
 \paragraph{SOS Tokens:}
 During runtime, we encapsulate every sentence with two special tokens:
@@ -233,13 +233,13 @@ starts a sentence, given the current hidden state from the encoder
 \paragraph{EOS Tokens:}
 We use the End of Sentence (EOS) token to signal the end of the sequence, i.e.
 when to stop the decoding process. In the batched version, the EOS token
-signals which tokens should be counted in the loss, while everthing after EOS
+signals which tokens should be counted in the loss, while everything after EOS
 is masked (see Section \ref{sec:masked-loss}).
 \paragraph{Data Split:}
 We randomly shuffle and split the combined preprocessed dataset into three sets:
 Train, Dev, and Test. We opted for a 87.5/10/2.5 split to reduce the appearance
-of unkown tokens (UNK). This gives us a sizable training corpus to acutally
-learn, and a reasonable valdiation set to measure BLEU scores and loss. The
+of unknown tokens (UNK). This gives us a sizable training corpus to actually
+learn, and a reasonable validation set to measure BLEU scores and loss. The
 small test set allows us to digest our results. Since the amount of Shakespeare
 data is limited, and will not increase in size, we can have small test sets and
 seek to overtrain the model.
@@ -391,7 +391,7 @@ token or the model's prediction as the next input during the decoding step.
 Teacher forcing is when we use the target token instead of the model's
 prediction and is
 shown to be favored during initial training iterations but should be tapered
-off to use the model's own predicitons. Continuous use of teacher forcing
+off to use the model's own predictions. Continuous use of teacher forcing
 without backing off to the model's own tokens will exhibit instability
 in the translations as shown in Lamb et al. \cite{lamb2016professor}
 
@@ -408,11 +408,11 @@ size in ascending order, and grouping sequences of equivalent sizes together.
 We pad each target sequence with
 the EOS token, up to the maximum target sequence length in the set. For our
 dataset, at a maximum batch size of 128, we created 151 training batches and
-65 dev batches. We do not batch test samplesm.
+65 dev batches. We do not batch test samples.
 \paragraph{GPU/CPU:}
 Standard training can be done on a CPU, but neural networks have been shown to
 gain massive speedups. In order to improve training time,
-we have allowed an optional parameter to use a gpu.
+we have allowed an optional parameter to use a GPU.
 Our group has 3 GPUs (Morris: 1; Riley: 2). We distributed our tests across
 multiple GPUs for faster experimentation.
 \paragraph{Masked NLL Loss:}
@@ -476,14 +476,14 @@ final translations. In Figure \ref{fig:model-bleu} below, we can see the
 final BLEU scores for our models.
 \paragraph{RNN:}
 The bare bones RNN had almost no capacity to learn and suffers from issues
-such as the vansihing gradient problem and long term dependencies. Since many
-of our sentences were long, this was problematic. The most distingiushing
+such as the vanishing gradient problem and long term dependencies. Since many
+of our sentences were long, this was problematic. The most distinguishing
 feature of the RNN translations is the overuse of repeated punctuation.
 \paragraph{GRU and Bidirectional GRU:}
-The GRU showed better promise in acheiveing higher bleu scores, as seen in
-Figure \ref{fig:model-bleu}, since GRUs migitgate the vanishing gradient
+The GRU showed better promise in achieving higher bleu scores, as seen in
+Figure \ref{fig:model-bleu}, since GRUs mitigate the vanishing gradient
 problem and have a higher capacity.
-The Birdirectional GRU achieved slightly better results, most likely from
+The Bidirectional GRU achieved slightly better results, most likely from
 incorporating both a forward and backward context to the sequence. In addition,
 the bidirectional has two sublayers, thus doubling the GRU capacity to learn.
 \paragraph{Attention Mechanisms:}
@@ -492,7 +492,7 @@ can see that the model trained with general attention actually worked well on
 shorter sentences (but concat still outperformed general).
 An explanation for this is that Luong et al.
 \cite{luong2015effective} attention mechanisms work best in a local setting.
-This means that either the sentnece is short, or the model only looks at a
+This means that either the sentence is short, or the model only looks at a
 small window of the full sequence. It is reasonable to assume that since we
 looked at the global context of our source encodings, the general attention
 failed whereas the Bahdanau \cite{bahdanau2014neural} concat attention
@@ -510,7 +510,7 @@ slowly taper down as training progresses.
 \paragraph{Best Model:}
 Our best model, as selected by test BLEU score, was the BiGRU architecture
 with concat attention and 100\% teacher forcing, after training for 500
-iterations. This model acheive a target BLEU score of $0.1450$. The next best
+iterations. This model achieve a target BLEU score of $0.1450$. The next best
 model was the BiGRU with concat attention and 50\% teacher forcing, with target
 BLEU score of $0.1349$.
 \paragraph{Final Analysis:}
@@ -528,14 +528,14 @@ be incorporated to provide deeper insight into this problem. See Appendix
 Our attention models use the \emph{global} approach which attends to all the
 source embeddings at once. However, Luong et al. \cite{luong2015effective}
 showed that by using a \emph{local} approach that attends to only a subset
-of the encodings, a nerual encoder-decoder system could make effective gains in
+of the encodings, a neural encoder-decoder system could make effective gains in
 BLEU scores. In our experiments, both attention models used the \emph{global}
 approach, and it is clear why general failed to do well comapred to the
 Bahdanau concat attention. Luong states that \emph{global}
 attention fails on long sequences whereas a local approach is more effective.
 The \emph{local} approach takes
 source embeddings within a window, computes the attention, and weights the
-attention probabilities by a guassian distribution.
+attention probabilities by a gaussian distribution.
 \paragraph{Teacher Forcing Impact:}
 Teacher Forcing was required to make effective gains in our attention models.
 However, our results are inconclusive on how much teacher forcing should be
@@ -561,7 +561,7 @@ extensions to our existing experiments would included:
 We wanted to study the effects of adaptive batch sizes,
 where training would
 begin with a small batch size and progressively increase to very large sizes.
-This would allow for stochastic updates in the begining before approximating
+This would allow for stochastic updates in the beginning before approximating
 full gradients in later iterations. We think this would have improved
 training and provided better results.
 \paragraph{English to Shakespeare Modeling:} We wanted to also train a reverse
@@ -580,7 +580,7 @@ we may want to look into BPE tokenization to see if it reduces our vocabulary
 size. BPE tokenization segments text into subword units, and has been found
 to significantly reduce vocabulary sizes in some languages. More time could be
 spent on refining our current dataset, and procuring more data to train on.
-Finally, we should sample test sentences such that no unkown words are in it,
+Finally, we should sample test sentences such that no unknown words are in it,
 improving test results.
 \paragraph{Implementation:} Our codebase for this project can be found
 \href{https://github.com/nextBillyonair/DLProject}{here}.
@@ -600,12 +600,12 @@ are constructed and trained. Multivariate calculus and optimization is
 fundamental to backpropagation and gradient descent.
 Probability gives us maximum likelihood estimation, the basis for
 most loss functions, and influences our model's approaches to
-predicition. Linear Alegbra is essential to expressing complex equations into
+prediction. Linear Alegbra is essential to expressing complex equations into
 simple statements, and understanding the fundamentals of neural networks
 and how they transform inputs.
 
 The more advanced models such as VAEs, RBMs, and
-generative models become accessable with the prerequisite knowledge.
+generative models become accessible with the prerequisite knowledge.
 Therefore, students should be taught
 these subjects with respect to neural networks as early as possible. However,
 the instructors should attempt to teach neural networks in a non-standard way,
@@ -659,7 +659,7 @@ GRUs, and RNNs in general, only process sequences in a forward direction.
 However, encoding both the preceding and succeeding input would be beneficial
 to learning the context of a word in its local vicinity. Bidirectional layers
 allow models to encode inputs in both the forward and reverse direction. This
-is a simple, yet poweful, extension to uni-directional recurrent layers.
+is a simple, yet powerful, extension to uni-directional recurrent layers.
 \begin{equation}
   \label{eq:bidirectional}
   \begin{split}
@@ -709,7 +709,7 @@ too short compared to the reference. BP is defined as:
 with effective reference corpus length $r$ and candidate translation length $c$.
 BLEU scores are non-differentiable, and therefore we cannot directly optimize
 on this metric, but can use it to enhance our understanding regarding the
-quaity of our models given the data.
+quality of our models given the data.
 
 \section{Model Results}
 \label{app:model-results}
