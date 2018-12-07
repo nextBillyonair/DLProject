@@ -7,12 +7,10 @@ Repo for ML: Deep Learning Final Project,
   - python3.7 -> python standard used to run
 
 # Points of Interest:
-data\\
+final\\
 
- - modern, orginal, processed, split data
- - format: original|||modern
- - old stuff is sparknotes, non old stuff is enotes
- - split\\ -> train/dev/test split files (randomized per whole corpus)
+  - final report files
+  - use make file to recompile pdf
 
 src\\
 
@@ -22,6 +20,13 @@ src\\
  - results\\results_verbose\\ -> pretty translation files
  - results\\results_verbose\\linked_results.txt -> Easy read file (check it out!)
  - has a separate readme on CLI args and how to run
+
+data\\
+
+ - modern, orginal, processed, split data
+ - format: original|||modern
+ - old stuff is sparknotes, non old stuff is enotes
+ - split\\ -> train/dev/test split files (randomized per whole corpus)
 
 proposal\\
 
@@ -33,7 +38,4 @@ interim\\
   - interim report files
   - use make file to recompile pdf
 
-final\\
 
-  - final report files
-  - use make file to recompile pdf
