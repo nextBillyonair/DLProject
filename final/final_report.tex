@@ -529,10 +529,11 @@ Our attention models use the \emph{global} approach which attends to all the
 source embeddings at once. However, Luong et al. \cite{luong2015effective}
 showed that by using a \emph{local} approach that attends to only a subset
 of the encodings, a nerual encoder-decoder system could make effective gains in
-BLEU scores. In our experiments, both attention models used the \emph{global} approach, and
-it is clear why general failed to do well comapred to the Bahdanau concat
-attention. Luong states that global attention fails on long sequences whereas
-a local approach is more effective. The \emph{local} approach takes
+BLEU scores. In our experiments, both attention models used the \emph{global}
+approach, and it is clear why general failed to do well comapred to the
+Bahdanau concat attention. Luong states that \emph{global}
+attention fails on long sequences whereas a local approach is more effective.
+The \emph{local} approach takes
 source embeddings within a window, computes the attention, and weights the
 attention probabilities by a guassian distribution.
 \paragraph{Teacher Forcing Impact:}
