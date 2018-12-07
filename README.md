@@ -1,4 +1,4 @@
-# DLProject
+# Shakespeare-English Sequence to Sequence Modeling
 Repo for ML: Deep Learning Final Project,
 
 # Requirements
