@@ -104,7 +104,7 @@
 %------------------------------------------------
 
 \begin{abstract}
-% NN and NMT + attention + LSTM
+% high level
 \noindent
 We present our attempt to create an English-Shakespeare Sequence to Sequence
 Model, and its application to create a pseudo supervised style transfer system
@@ -443,41 +443,6 @@ However, we do not need not obtain a perfect score in order to have a good
 translation model. A full description of how BLEU scores
 are calculated from Papineni et al. \cite{papineni2002bleu} can be found in
 Appendix \ref{app:bleu}
-% We use the Bilingual Evaluation Understudy (BLEU) score as one of our criteria
-% for the quality of model translations. Outputs are in the range [0, 1], and a
-% BLEU score of 1 indicates a perfect translation to the reference texts.
-% We do not need not obtain a perfect score in order to have a good
-% translation model.
-%
-% BLEU scores are calculated for individual sentences and averaged across the
-% whole corpus. Intelligibility and grammatical correctness are not taken into
-% account when calculating BLEU scores. According to the original paper by
-% Papineni et al. \cite{papineni2002bleu}, BLEU scores are computed as follows:
-%
-% \begin{equation}
-%   \operatorname{BLEU} = \operatorname{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
-% \end{equation}
-%
-% \noindent
-% where $p_n$ is the geometric average of the modified $n$-gram precisions
-% and $\operatorname{BP}$ is the brevity penalty, explained below.
-% (\cite{papineni2002bleu} uses $N=4$, uniform weights $w_n = \frac{1}{N}$.)
-%
-% The brevity penalty $\operatorname{BP}$ is used for translations that are
-% too short compared to the reference. BP is defined as:
-%
-% \begin{equation}
-%   \operatorname{BP} = \begin{cases}
-%     1 & \text{if } c > r \\
-%     e^{(1-r/c)} & \text{if } c \leq r
-%   \end{cases}
-% \end{equation}
-% \noindent
-% with effective reference corpus length $r$ and candidate translation length $c$.
-%
-% BLEU scores are non-differentiable, and therefore we cannot directly optimize
-% on this metric, but can use it to enhance our understanding regarding the
-% quaity of our models given the data.
 
 \begin{figure*}
     \centering
@@ -1098,29 +1063,3 @@ quaity of our models given the data.
 
 \end{myparindent}
 \end{document}
-
-% template for results
-% \begin{figure*}
-%     \centering
-%     \begin{tabular}{ |l|r| }
-%         \hline
-%         \textbf{Model}
-%           & \textbf{Sentence} \\
-%         \hline
-%         \textbf{Source} & \textbf{src sent} \\ \hline
-%         RNN & RNN \\ \hline
-%         GRU & GRU \\ \hline
-%         BiGRU & GRU \\ \hline
-%         BiGRU + General & GRU \\ \hline
-%         BiGRU + General + 50\% TF & GRU \\ \hline
-%         BiGRU + General + 100\% TF & GRU \\ \hline
-%         BiGRU + Concat & GRU \\ \hline
-%         BiGRU + Concat + 50\% TF & GRU \\ \hline
-%         BiGRU + Concat + 100\% TF & GRU \\ \hline
-%         \textbf{Best Model} & \textbf{GRU} \\ \hline
-%         \textbf{Target} & \textbf{tgt sent} \\ \hline
-%     \end{tabular}
-%
-%     \caption{Model Results for Selected Source-Target Pair: \#1}
-%     \label{fig:model-results}
-% \end{figure*}
