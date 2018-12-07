@@ -4,12 +4,13 @@ Repo for ML: Deep Learning Final Project,
 # Requirements
   - pytorch -> for modeling
   - nltk -> for bleu scores
+  - python3.7 -> python standard used to run
 
 # Points of Interest:
 data\\
 
  - modern, orginal, processed, split data
- - original|||modern
+ - format: original|||modern
  - old stuff is sparknotes, non old stuff is enotes
  - split\\ -> train/dev/test split files (randomized per whole corpus)
 
@@ -24,12 +25,15 @@ src\\
 
 proposal\\
 
- - Proposal files, including bibtex, tex, & pdf
+ - proposal files, including bibtex, tex, & pdf
+ - use make file to recompile pdf
 
 interim\\
 
-  - Interim Report files
+  - interim report files
+  - use make file to recompile pdf
 
 final\\
 
-  - Final Report files
+  - final report files
+  - use make file to recompile pdf

@@ -41,7 +41,6 @@ def read_data(args):
             sentences = [sentence
                          for sentence in input_file.read().split('\n')]
             pairings[key] = sentences
-            # print(sentences[1])
 
     return pairings
 

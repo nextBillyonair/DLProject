@@ -108,8 +108,6 @@ if __name__ == '__main__':
                 outfile.write("%s\n" % sentence)
 
     #Train/Dev/Test
-    # 21079 21079
-    # 18444 2107 528
     original = read_file(PROCESSED_PATH + 'original.snt.aligned')
     modern = read_file(PROCESSED_PATH + 'modern.snt.aligned')
     pairs = zip(original, modern)

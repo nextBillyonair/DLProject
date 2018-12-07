@@ -143,5 +143,4 @@ optional arguments:
   --load-checkpoint LOAD_CHECKPOINT
                         training checkpoint to load
   --use-gpu             use CPU/CUDA for training/evaluation
-
 ```
