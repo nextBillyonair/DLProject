@@ -370,6 +370,7 @@ to attention-based encoder-decoders. Common attention mechanisms are:
         s_{i-1}^T \cdot h_j & \text{\emph{dot}} \\
     \end{cases}
 \end{equation}
+
 where $s_{i-1}$ is the previous decoder hidden state, and $h_j$ is the $j$th
 encoder output.
 To compute scores, which are used to create attention weights, we apply a
@@ -1020,21 +1021,17 @@ quality of our models given the data.
     % Define nodes
     \node[rectangle] (out) {$output$};
     \node[rectangle, above=0.75cm of out] (bmm) {BMM};
-    \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (soft) {Softmax};
-    \node[rectangle, above=0.75 of soft] (lin2) {Linear};
-    \node[rectangle, above=0.75 of lin2] (tanh) {$\tanh$};
-    \node[rectangle, above=0.75 of tanh] (lin1) {Linear};
-    \node[rectangle, above=0.75 of lin1] (cat) {Concat};
-    \node[rectangle, above=0.75 of cat, xshift=-1cm] (hidden) {$hidden$};
-    \node[rectangle, above=0.75 of cat, xshift=1cm] (encodings) {$encodings$};
+    \node[rectangle, above=0.75cm of bmm, xshift=-1.5cm] (soft) {Softmax};
+    \node[rectangle, above=0.75cm of soft] (cat) {$v_a^T \cdot \tanh \left( W_a \cdot \left[ s_{i-1} || h_j \right] \right)$};
+    \node[rectangle, above=0.75cm of cat, xshift=-1.25cm] (hidden) {$s_{i-1}$};
+    \node[rectangle, above=0.75cm of cat, xshift=1.25cm] (encodings) {$h_j$};
+    \path [->] (encodings) edge [bend left=45] node {} (bmm);
+
 
     % Connect the nodes
     \edge {encodings, hidden} {cat};
-    \edge {cat} {lin1};
-    \edge {lin1} {tanh};
-    \edge {tanh} {lin2};
-    \edge {lin2} {soft};
-    \edge {soft, encodings} {bmm};
+    \edge {cat} {soft};
+    \edge {soft} {bmm};
     \edge {bmm} {out};
 
   \end{tikzpicture}
@@ -1050,14 +1047,15 @@ quality of our models given the data.
     \node[rectangle] (out) {$output$};
     \node[rectangle, above=0.75cm of out] (bmm) {BMM};
     \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (soft) {Softmax};
-    \node[rectangle, above=0.75 of soft] (bilinear) {Bilinear};
-    \node[rectangle, above=0.75 of bilinear, xshift=-1cm] (hidden) {$hidden$};
-    \node[rectangle, above=0.75 of bilinear, xshift=1cm] (encodings) {$encodings$};
+    \node[rectangle, above=0.75 of soft] (bilinear) {$s^T_{i-1} \cdot W_a \cdot h_j$};
+    \node[rectangle, above=0.75 of bilinear, xshift=-1cm] (hidden) {$s_{i-1}$};
+    \node[rectangle, above=0.75 of bilinear, xshift=1cm] (encodings) {$h_j$};
+    \path [->] (encodings) edge [bend left=20] node {} (bmm);
 
     % Connect the nodes
     \edge {encodings, hidden} {bilinear};
-    \edge {lin2} {soft};
-    \edge {soft, encodings} {bmm};
+    \edge {bilinear} {soft};
+    \edge {soft} {bmm};
     \edge {bmm} {out};
 
   \end{tikzpicture}
