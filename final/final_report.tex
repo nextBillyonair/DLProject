@@ -1019,7 +1019,7 @@ quality of our models given the data.
   \begin{tikzpicture}
 
     % Define nodes
-    \node[rectangle] (out) {$output$};
+    \node[rectangle] (out) {$c_i$};
     \node[rectangle, above=0.75cm of out] (bmm) {BMM};
     \node[rectangle, above=0.75cm of bmm, xshift=-1.5cm] (soft) {Softmax};
     \node[rectangle, above=0.75cm of soft] (cat) {$v_a^T \cdot \tanh \left( W_a \cdot \left[ s_{i-1} || h_j \right] \right)$};
@@ -1044,7 +1044,7 @@ quality of our models given the data.
   \begin{tikzpicture}
 
     % Define nodes
-    \node[rectangle] (out) {$output$};
+    \node[rectangle] (out) {$c_i$};
     \node[rectangle, above=0.75cm of out] (bmm) {BMM};
     \node[rectangle, above=0.75cm of bmm, xshift=-1cm] (soft) {Softmax};
     \node[rectangle, above=0.75 of soft] (bilinear) {$s^T_{i-1} \cdot W_a \cdot h_j$};
